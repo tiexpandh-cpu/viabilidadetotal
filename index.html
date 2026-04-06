@@ -1,0 +1,2431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LoteVia">
+<meta name="theme-color" content="#e8c547">
+<meta name="description" content="Viabilidade financeira para loteamentos">
+<title>LoteVia PRO</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:    #09090f;
+  --bg2:   #0f1018;
+  --bg3:   #14151f;
+  --card:  #191b27;
+  --card2: #1f2133;
+  --acc:   #e8c547;
+  --acc2:  #c49e1a;
+  --grn:   #2dd4a0;
+  --red:   #f0524f;
+  --blu:   #5b85f5;
+  --pur:   #a78bfa;
+  --tex:   #dde0ee;
+  --mut:   #6b7099;
+  --brd:   #23263a;
+  --ff:    'Syne', sans-serif;
+  --fb:    'DM Sans', sans-serif;
+  --fm:    'JetBrains Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tex);font-family:var(--fb);overflow-x:hidden}
+
+/* GRID NOISE */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(91,133,245,0.015) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(91,133,245,0.015) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+
+/* ── HEADER ── */
+header{
+  position:sticky;top:0;z-index:200;
+  background:rgba(9,9,15,0.92);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--brd);
+  padding:0 28px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{
+  width:32px;height:32px;border-radius:7px;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:800;color:#09090f;font-family:var(--ff);
+}
+.logo-name{font-family:var(--ff);font-size:18px;font-weight:800;letter-spacing:-0.3px}
+.logo-name em{color:var(--acc);font-style:normal}
+.logo-tag{
+  font-size:9px;color:var(--mut);font-family:var(--fm);
+  background:var(--card);border:1px solid var(--brd);
+  padding:2px 7px;border-radius:4px;letter-spacing:0.5px;
+}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.scen-btns{display:flex;gap:6px}
+.scen-btn{
+  padding:5px 14px;border-radius:16px;border:1px solid var(--brd);
+  background:transparent;color:var(--mut);font-family:var(--fb);
+  font-size:11px;font-weight:500;cursor:pointer;transition:all .18s;
+}
+.scen-btn:hover{border-color:var(--acc);color:var(--acc)}
+.scen-btn.pess.on{background:rgba(240,82,79,.12);border-color:var(--red);color:var(--red)}
+.scen-btn.real.on{background:rgba(232,197,71,.12);border-color:var(--acc);color:var(--acc)}
+.scen-btn.otim.on{background:rgba(45,212,160,.12);border-color:var(--grn);color:var(--grn)}
+.calc-hdr{
+  padding:7px 20px;background:var(--acc);color:#09090f;border:none;
+  border-radius:8px;font-family:var(--ff);font-size:12px;font-weight:800;
+  letter-spacing:.5px;cursor:pointer;transition:all .18s;text-transform:uppercase;
+}
+.calc-hdr:hover{background:var(--acc2);box-shadow:0 4px 18px rgba(232,197,71,.3)}
+
+/* ── TABS ── */
+.tabs-bar{
+  display:flex;gap:0;border-bottom:1px solid var(--brd);
+  background:var(--bg2);position:sticky;top:56px;z-index:150;
+  padding:0 28px;
+}
+.tab-btn{
+  padding:12px 22px;background:transparent;border:none;
+  color:var(--mut);font-family:var(--fb);font-size:12px;font-weight:500;
+  cursor:pointer;position:relative;transition:color .18s;letter-spacing:.3px;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.tab-btn:hover{color:var(--tex)}
+.tab-btn.on{color:var(--acc);border-bottom-color:var(--acc)}
+.tab-pane{display:none;padding:24px 28px;position:relative;z-index:1}
+.tab-pane.on{display:block}
+
+/* ── GRID HELPERS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.gcol{display:flex;flex-direction:column;gap:16px}
+
+/* ── CARD ── */
+.card{
+  background:var(--card);border:1px solid var(--brd);
+  border-radius:14px;padding:20px;
+}
+.card-title{
+  font-family:var(--ff);font-size:13px;font-weight:700;
+  color:var(--tex);margin-bottom:4px;
+}
+.card-sub{font-size:11px;color:var(--mut);margin-bottom:16px}
+.sect-label{
+  font-family:var(--ff);font-size:10px;font-weight:700;
+  letter-spacing:1.4px;text-transform:uppercase;color:var(--mut);
+  margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.sect-label::after{content:'';flex:1;height:1px;background:var(--brd)}
+
+/* ── FORM ELEMENTS ── */
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;color:var(--mut);font-weight:500;letter-spacing:.3px}
+.field input,.field select{
+  background:var(--bg3);border:1px solid var(--brd);border-radius:8px;
+  color:var(--tex);font-family:var(--fm);font-size:13px;
+  padding:8px 11px;outline:none;transition:border-color .18s;width:100%;
+}
+.field input:focus,.field select:focus{border-color:var(--acc)}
+.field select option{background:var(--bg3)}
+
+/* Slider */
+.sl-wrap{display:flex;flex-direction:column;gap:6px}
+.sl-top{display:flex;justify-content:space-between;align-items:center}
+.sl-top label{font-size:11px;color:var(--mut);font-weight:500}
+.sl-val{font-family:var(--fm);font-size:12px;color:var(--acc)}
+input[type=range]{
+  -webkit-appearance:none;width:100%;height:3px;
+  background:var(--brd);border-radius:3px;outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:var(--acc);cursor:pointer;border:2px solid var(--bg);
+  box-shadow:0 0 8px rgba(232,197,71,.45);
+}
+
+/* Toggle */
+.tog-row{display:flex;align-items:center;justify-content:space-between}
+.tog-row label:first-child{font-size:11px;color:var(--mut)}
+.tog{position:relative;width:34px;height:18px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.tog-tr{
+  position:absolute;inset:0;background:var(--brd);
+  border-radius:9px;cursor:pointer;transition:background .2s;
+}
+.tog input:checked+.tog-tr{background:var(--acc)}
+.tog-tr::after{
+  content:'';position:absolute;left:2px;top:2px;
+  width:14px;height:14px;background:#fff;border-radius:50%;transition:.2s;
+}
+.tog input:checked+.tog-tr::after{transform:translateX(16px)}
+
+/* ── KPI CARDS ── */
+.kpi{
+  background:var(--card);border:1px solid var(--brd);border-radius:14px;
+  padding:18px 20px;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;gap:7px;
+}
+.kpi::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--stripe,var(--acc));
+}
+.kpi-l{font-size:10px;color:var(--mut);letter-spacing:1px;text-transform:uppercase;font-weight:600}
+.kpi-v{font-family:var(--ff);font-size:24px;font-weight:800;line-height:1;letter-spacing:-0.3px;color:var(--kc,var(--tex))}
+.kpi-s{font-size:11px;color:var(--mut)}
+
+/* ── PHASE TABLE ── */
+.phase-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.phase-tbl th{
+  padding:8px 10px;text-align:left;color:var(--mut);
+  font-size:10px;letter-spacing:.8px;text-transform:uppercase;
+  background:var(--bg3);font-weight:600;
+}
+.phase-tbl td{
+  padding:6px 10px;border-bottom:1px solid rgba(35,38,58,.6);
+  font-family:var(--fm);
+}
+.phase-tbl tr:hover td{background:rgba(255,255,255,.02)}
+.phase-tbl input[type=number]{
+  background:var(--bg3);border:1px solid var(--brd);border-radius:6px;
+  color:var(--tex);font-family:var(--fm);font-size:12px;
+  padding:5px 8px;width:80px;outline:none;
+}
+.phase-tbl input:focus{border-color:var(--acc)}
+.phase-tag{
+  display:inline-block;padding:2px 8px;border-radius:4px;
+  font-size:10px;font-weight:600;letter-spacing:.4px;
+}
+
+/* ── OBRA TABLE ── */
+.obra-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.obra-tbl th{
+  padding:8px 10px;text-align:left;color:var(--mut);
+  font-size:10px;letter-spacing:.8px;text-transform:uppercase;
+  background:var(--bg3);font-weight:600;
+}
+.obra-tbl td{
+  padding:7px 10px;border-bottom:1px solid rgba(35,38,58,.6);
+  font-family:var(--fm);vertical-align:middle;
+}
+.obra-tbl input[type=number]{
+  background:var(--bg);border:1px solid var(--brd);border-radius:6px;
+  color:var(--tex);font-family:var(--fm);font-size:12px;
+  padding:5px 8px;width:72px;outline:none;
+}
+.obra-tbl select{
+  background:var(--bg);border:1px solid var(--brd);border-radius:6px;
+  color:var(--tex);font-family:var(--fm);font-size:11px;
+  padding:5px 7px;outline:none;
+}
+.obra-tbl input:focus,.obra-tbl select:focus{border-color:var(--acc)}
+.pct-bar{
+  width:100%;height:4px;background:var(--brd);border-radius:2px;margin-top:4px;
+}
+.pct-bar-f{height:100%;border-radius:2px;background:var(--blu);transition:width .3s}
+.pct-warn{font-size:10px;color:var(--red);margin-top:4px;display:none}
+
+/* ── MULTI-TABELA ── */
+.balde-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.balde{
+  background:var(--bg3);border:1px solid var(--brd);border-radius:12px;
+  padding:16px;display:flex;flex-direction:column;gap:10px;
+  position:relative;overflow:hidden;
+}
+.balde::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--bclr,var(--acc));
+}
+.balde-title{font-family:var(--ff);font-size:12px;font-weight:700}
+.balde-pct-disp{
+  font-family:var(--fm);font-size:28px;font-weight:700;
+  color:var(--bclr,var(--acc));line-height:1;
+}
+
+/* ── SENSITIVITY ── */
+.sens-wrap{
+  background:var(--bg3);border:1px solid var(--brd);border-radius:12px;padding:20px;
+}
+.sens-title{font-family:var(--ff);font-size:13px;font-weight:700;margin-bottom:4px}
+.sens-desc{font-size:11px;color:var(--mut);margin-bottom:18px}
+.sens-slider-wrap{
+  display:flex;align-items:center;gap:16px;margin-bottom:20px;
+}
+.sens-label{font-size:12px;color:var(--mut);white-space:nowrap;min-width:140px}
+.sens-val-disp{
+  font-family:var(--fm);font-size:18px;font-weight:700;color:var(--acc);
+  min-width:60px;text-align:right;
+}
+.sens-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.sens-m{
+  background:var(--card);border:1px solid var(--brd);border-radius:10px;
+  padding:12px;display:flex;flex-direction:column;gap:4px;
+}
+.sens-ml{font-size:10px;color:var(--mut);letter-spacing:.8px;text-transform:uppercase}
+.sens-mv{font-family:var(--fm);font-size:14px;font-weight:600}
+
+/* ── CHART ── */
+.ch-wrap{position:relative;height:300px}
+.ch-wrap-sm{position:relative;height:220px}
+.ch-wrap-md{position:relative;height:260px}
+
+/* ── FLUXO TABLE ── */
+.ftbl-wrap{overflow-x:auto;max-height:320px;overflow-y:auto}
+.ftbl-wrap::-webkit-scrollbar{width:4px;height:4px}
+.ftbl-wrap::-webkit-scrollbar-thumb{background:var(--brd);border-radius:4px}
+.ftbl{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--fm)}
+.ftbl thead tr{background:var(--bg3);position:sticky;top:0;z-index:2}
+.ftbl th{
+  padding:9px 12px;text-align:right;color:var(--mut);
+  font-size:10px;letter-spacing:.6px;font-weight:600;text-transform:uppercase;
+  white-space:nowrap;
+}
+.ftbl th:first-child{text-align:left}
+.ftbl td{
+  padding:8px 12px;text-align:right;border-bottom:1px solid rgba(35,38,58,.4);
+  white-space:nowrap;
+}
+.ftbl td:first-child{text-align:left;color:var(--mut)}
+.ftbl tr:hover td{background:rgba(255,255,255,.015)}
+.ftbl .pos{color:var(--grn)}
+.ftbl .neg{color:var(--red)}
+.ftbl .be-row td{
+  background:rgba(232,197,71,.06)!important;
+  border-top:1px solid rgba(232,197,71,.3);
+  border-bottom:1px solid rgba(232,197,71,.3);
+}
+.ftbl .phase-indicator{
+  display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;
+}
+
+/* ── BADGES ── */
+.badge{
+  display:inline-flex;align-items:center;padding:3px 10px;
+  border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+}
+.b-grn{background:rgba(45,212,160,.12);color:var(--grn)}
+.b-yel{background:rgba(232,197,71,.12);color:var(--acc)}
+.b-red{background:rgba(240,82,79,.12);color:var(--red)}
+.b-blu{background:rgba(91,133,245,.12);color:var(--blu)}
+
+/* ── SUMMARY STRIP ── */
+.strip{
+  display:flex;align-items:center;gap:32px;padding:14px 20px;
+  background:var(--bg3);border:1px solid var(--brd);border-radius:10px;
+  flex-wrap:wrap;
+}
+.strip-item{display:flex;flex-direction:column;gap:2px}
+.strip-l{font-size:10px;color:var(--mut);letter-spacing:.6px;text-transform:uppercase}
+.strip-v{font-family:var(--fm);font-size:14px;font-weight:600}
+
+/* ── OBRA TIMELINE ── */
+.timeline-wrap{position:relative;overflow-x:auto;padding-bottom:8px}
+.timeline-canvas{height:130px;min-width:600px;width:100%}
+
+/* ── ANIMATE ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.kpi{animation:fadeUp .35s ease both}
+.kpi:nth-child(1){animation-delay:.05s}
+.kpi:nth-child(2){animation-delay:.1s}
+.kpi:nth-child(3){animation-delay:.15s}
+.kpi:nth-child(4){animation-delay:.2s}
+
+/* ── DIVIDER ── */
+hr.d{border:none;border-top:1px solid var(--brd);margin:6px 0}
+
+/* Scrollbar global */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--brd);border-radius:4px}
+
+/* ── PWA INSTALL BANNER ── */
+.pwa-banner{
+  display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:var(--card);border:1px solid var(--acc);border-radius:14px;
+  padding:14px 20px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.5);
+  display:flex;align-items:center;gap:14px;max-width:420px;width:calc(100% - 40px);
+  animation:fadeUp .3s ease;
+}
+.pwa-banner.hidden{display:none!important}
+.pwa-banner-text{flex:1;font-size:13px;line-height:1.4}
+.pwa-banner-text strong{color:var(--acc);font-family:var(--ff)}
+.pwa-install-btn{
+  padding:8px 16px;background:var(--acc);color:#09090f;border:none;
+  border-radius:8px;font-family:var(--ff);font-size:12px;font-weight:800;
+  cursor:pointer;white-space:nowrap;
+}
+.pwa-dismiss{
+  background:transparent;border:none;color:var(--mut);cursor:pointer;
+  font-size:18px;line-height:1;padding:2px;
+}
+
+/* ── PROJECTS MODAL ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
+  backdrop-filter:blur(8px);z-index:5000;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--bg2);border:1px solid var(--brd);border-radius:18px;
+  width:min(680px, 95vw);max-height:85vh;display:flex;flex-direction:column;
+  overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.6);
+  animation:fadeUp .2s ease;
+}
+.modal-header{
+  padding:20px 24px;border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.modal-title{font-family:var(--ff);font-size:18px;font-weight:800}
+.modal-close{
+  background:var(--bg3);border:1px solid var(--brd);color:var(--mut);
+  width:32px;height:32px;border-radius:8px;cursor:pointer;
+  font-size:16px;display:flex;align-items:center;justify-content:center;
+}
+.modal-close:hover{color:var(--tex)}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1}
+.modal-footer{
+  padding:16px 24px;border-top:1px solid var(--brd);
+  display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;
+}
+
+/* Save form */
+.save-form{display:flex;flex-direction:column;gap:14px;margin-bottom:24px;
+  padding:16px;background:var(--bg3);border-radius:12px;border:1px solid var(--brd)}
+.save-form-title{font-family:var(--ff);font-size:12px;font-weight:700;
+  color:var(--acc);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px}
+.save-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.save-field{display:flex;flex-direction:column;gap:5px}
+.save-field label{font-size:11px;color:var(--mut)}
+.save-field input,.save-field select{
+  background:var(--bg);border:1px solid var(--brd);border-radius:8px;
+  color:var(--tex);font-family:var(--fm);font-size:13px;padding:8px 11px;outline:none;
+}
+.save-field input:focus{border-color:var(--acc)}
+.btn-save{
+  padding:10px 22px;background:var(--acc);color:#09090f;border:none;
+  border-radius:8px;font-family:var(--ff);font-size:13px;font-weight:800;
+  cursor:pointer;transition:all .18s;
+}
+.btn-save:hover{background:var(--acc2)}
+.btn-cancel{
+  padding:10px 22px;background:transparent;color:var(--mut);
+  border:1px solid var(--brd);border-radius:8px;font-family:var(--fb);
+  font-size:13px;cursor:pointer;
+}
+
+/* Projects list */
+.proj-list{display:flex;flex-direction:column;gap:10px}
+.proj-item{
+  background:var(--card);border:1px solid var(--brd);border-radius:12px;
+  padding:16px;display:flex;align-items:center;gap:14px;
+  transition:border-color .18s;cursor:pointer;
+}
+.proj-item:hover{border-color:var(--acc)}
+.proj-icon{
+  width:42px;height:42px;border-radius:10px;background:rgba(232,197,71,.12);
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
+}
+.proj-info{flex:1;min-width:0}
+.proj-name{font-family:var(--ff);font-size:14px;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj-meta{font-size:11px;color:var(--mut);margin-top:3px}
+.proj-kpis{display:flex;gap:14px;margin-top:6px;flex-wrap:wrap}
+.proj-kpi{display:flex;flex-direction:column;gap:1px}
+.proj-kpi-l{font-size:9px;color:var(--mut);letter-spacing:.6px;text-transform:uppercase}
+.proj-kpi-v{font-family:var(--fm);font-size:12px;font-weight:600}
+.proj-actions{display:flex;gap:6px;flex-shrink:0}
+.proj-btn{
+  padding:5px 12px;border-radius:7px;border:1px solid var(--brd);
+  background:transparent;font-size:11px;cursor:pointer;font-family:var(--fb);
+  transition:all .15s;
+}
+.proj-btn.load{color:var(--grn);border-color:rgba(45,212,160,.3)}
+.proj-btn.load:hover{background:rgba(45,212,160,.12)}
+.proj-btn.del{color:var(--red);border-color:rgba(240,82,79,.3)}
+.proj-btn.del:hover{background:rgba(240,82,79,.12)}
+.proj-empty{
+  text-align:center;padding:40px 20px;color:var(--mut);
+}
+.proj-empty-icon{font-size:40px;margin-bottom:12px}
+.proj-empty-text{font-size:13px;line-height:1.6}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:9998;
+  background:var(--card);border:1px solid var(--brd);border-radius:10px;
+  padding:12px 18px;font-size:13px;display:flex;align-items:center;gap:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);transform:translateY(80px);opacity:0;
+  transition:all .25s ease;pointer-events:none;max-width:300px;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-color:rgba(45,212,160,.4);color:var(--grn)}
+.toast.err{border-color:rgba(240,82,79,.4);color:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-mark">L</div>
+    <div class="logo-name">Lote<em>Via</em> <span class="logo-tag">PRO</span></div>
+  </div>
+  <div class="hdr-right">
+    <div class="scen-btns">
+      <button class="scen-btn pess" onclick="applyScenario('pess')">▾ Pessimista</button>
+      <button class="scen-btn real on" onclick="applyScenario('real')">◈ Realista</button>
+      <button class="scen-btn otim" onclick="applyScenario('otim')">▴ Otimista</button>
+    </div>
+    <button onclick="openProjects()" style="padding:7px 14px;background:var(--bg3);color:var(--tex);border:1px solid var(--brd);border-radius:8px;font-family:var(--fb);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;">
+      <span>📁</span><span id="hdr-proj-name" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Meus Projetos</span>
+    </button>
+    <button class="calc-hdr" onclick="updateUI()">⟳ Recalcular</button>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <button class="tab-btn on" onclick="showTab('dash')">Dashboard</button>
+  <button class="tab-btn" onclick="showTab('vendas')">Fases de Vendas</button>
+  <button class="tab-btn" onclick="showTab('obra')">Cronograma de Obras</button>
+  <button class="tab-btn" onclick="showTab('financ')">Recebimento & Multi-Tabela</button>
+  <button class="tab-btn" onclick="showTab('sensib')">Sensibilidade</button>
+  <button class="tab-btn" onclick="showTab('fluxo')">Fluxo Completo</button>
+</div>
+
+<!-- ══════════════ TAB: DASHBOARD ══════════════ -->
+<div class="tab-pane on" id="tab-dash">
+
+  <!-- KPIs -->
+  <div class="g4" style="margin-bottom:18px">
+    <div class="kpi" style="--stripe:var(--blu);--kc:var(--blu)">
+      <div class="kpi-l">VGV Bruto</div>
+      <div class="kpi-v" id="k-vgv">—</div>
+      <div class="kpi-s" id="k-lotes">— lotes</div>
+    </div>
+    <div class="kpi" style="--stripe:var(--grn);--kc:var(--grn)">
+      <div class="kpi-l">TIR (a.a.)</div>
+      <div class="kpi-v" id="k-tir">—</div>
+      <div class="kpi-s" id="k-tirsub">—% a.m.</div>
+    </div>
+    <div class="kpi" style="--stripe:var(--red);--kc:var(--red)">
+      <div class="kpi-l">Exposição Máx.</div>
+      <div class="kpi-v" id="k-exp">—</div>
+      <div class="kpi-s" id="k-expsub">Mês —</div>
+    </div>
+    <div class="kpi" style="--stripe:var(--acc);--kc:var(--acc)">
+      <div class="kpi-l">Lucro Líquido</div>
+      <div class="kpi-v" id="k-luc">—</div>
+      <div class="kpi-s" id="k-mar">Margem —%</div>
+    </div>
+  </div>
+
+  <!-- STRIP -->
+  <div class="strip" id="dash-strip" style="margin-bottom:18px">
+    <div class="strip-item"><div class="strip-l">VPL</div><div class="strip-v" id="s-vpl">—</div></div>
+    <div class="strip-item"><div class="strip-l">Break-even</div><div class="strip-v" id="s-be">—</div></div>
+    <div class="strip-item"><div class="strip-l">ROI</div><div class="strip-v" id="s-roi">—</div></div>
+    <div class="strip-item"><div class="strip-l">Custo Total</div><div class="strip-v" id="s-custo">—</div></div>
+    <div class="strip-item"><div class="strip-l">Impostos</div><div class="strip-v" id="s-imp" style="color:var(--red)">—</div></div>
+    <div class="strip-item"><div class="strip-l">Receita Líq.</div><div class="strip-v" id="s-recliq">—</div></div>
+    <div class="strip-item"><div class="strip-l">Qtd. Lotes</div><div class="strip-v" id="s-qtdl">—</div></div>
+    <div class="strip-item"><div class="strip-l">Avaliação</div><div class="strip-v"><span class="badge" id="s-aval">—</span></div></div>
+  </div>
+
+  <!-- CHARTS ROW 1 -->
+  <div class="g2" style="margin-bottom:18px">
+    <div class="card">
+      <div class="card-title">Fluxo de Caixa Acumulado</div>
+      <div class="card-sub" id="sub-fluxo">Evolução mensal — "vale" de investimento e retorno</div>
+      <div class="ch-wrap"><canvas id="c-fluxo"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Receita Mensal por Fase de Venda</div>
+      <div class="card-sub" id="sub-fases">Entradas de caixa diferenciadas por fase</div>
+      <div class="ch-wrap"><canvas id="c-fases"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 2 -->
+  <div class="g3">
+    <div class="card">
+      <div class="card-title">Composição do VGV</div>
+      <div class="card-sub">Distribuição dos destinos da receita</div>
+      <div class="ch-wrap-sm"><canvas id="c-pie"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Curva S — Desembolso de Obra</div>
+      <div class="card-sub">Gasto acumulado por rubrica</div>
+      <div class="ch-wrap-sm"><canvas id="c-curvas"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Recebimento Multi-Tabela</div>
+      <div class="card-sub">Entradas por modalidade de pagamento</div>
+      <div class="ch-wrap-sm"><canvas id="c-multitab"></canvas></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════ TAB: FASES DE VENDAS ══════════════ -->
+<div class="tab-pane" id="tab-vendas">
+  <div class="g2">
+    <!-- Left: config -->
+    <div class="gcol">
+      <div class="card">
+        <div class="card-title">Premissas do Produto</div>
+        <div class="card-sub">Engenharia & Urbanismo</div>
+        <div class="gcol">
+          <div class="g2">
+            <div class="field"><label>Área Total (m²)</label><input type="number" id="areaTotal" value="200000"></div>
+            <div class="field"><label>Tamanho médio do lote (m²)</label><input type="number" id="tamLote" value="250"></div>
+          </div>
+          <div class="sl-wrap">
+            <div class="sl-top"><label>Eficiência — % Área Vendável</label><span class="sl-val" id="efVal">50%</span></div>
+            <input type="range" id="efSlider" min="30" max="70" value="50" oninput="document.getElementById('efVal').textContent=this.value+'%'">
+          </div>
+          <div class="g2">
+            <div class="field"><label>Preço médio por m² do lote (R$)</label><input type="number" id="precoM2" value="420"></div>
+            <div class="field"><label>Regime Tributário</label>
+              <select id="regime">
+                <option value="ret">RET — 4% sobre receita</option>
+                <option value="lp">Lucro Presumido — 6,73%</option>
+                <option value="lu">Lucro Real — 34% lucro</option>
+              </select>
+            </div>
+          </div>
+          <div class="g2">
+            <div class="field"><label>Comissão Corretores (%)</label><input type="number" id="comissao" value="5" step="0.5"></div>
+            <div class="field"><label>Marketing (%)</label><input type="number" id="marketing" value="1.5" step="0.5"></div>
+          </div>
+          <div class="g2">
+            <div class="field"><label>Outras Despesas (R$)</label><input type="number" id="outrasDespesas" value="500000"></div>
+            <div class="field"><label>TMA — Taxa Mínima de Atratividade (% a.m.)</label><input type="number" id="tma" value="1.0" step="0.1"></div>
+          </div>
+          <div class="tog-row">
+            <label>Terreno em Permuta</label>
+            <label class="tog"><input type="checkbox" id="permTog" onchange="togglePerm()"><span class="tog-tr"></span></label>
+          </div>
+          <div id="permSec" style="display:none">
+            <div class="field"><label>% do VGV destinado ao proprietário</label><input type="number" id="permPct" value="25" min="0" max="80"></div>
+          </div>
+          <div id="terrenoSec">
+            <div class="field"><label>Custo de Aquisição do Terreno (R$)</label><input type="number" id="custoTerreno" value="8000000"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: fases -->
+    <div class="gcol">
+      <div class="card">
+        <div class="card-title">Fases de Venda — Gatilhos de Velocidade</div>
+        <div class="card-sub">Distribua 100% do VGV entre as fases. Início em meses após o lançamento.</div>
+        <table class="phase-tbl">
+          <thead>
+            <tr>
+              <th>Fase</th>
+              <th>Nome</th>
+              <th>% VGV</th>
+              <th>Início (mês)</th>
+              <th>Duração (meses)</th>
+              <th>Lotes</th>
+              <th>VSO/mês</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="phasesTbody"></tbody>
+        </table>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:8px;">
+          <button onclick="addPhase()" style="padding:7px 16px;background:rgba(232,197,71,.12);border:1px solid var(--acc);color:var(--acc);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff)">+ Adicionar Fase</button>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:11px;color:var(--mut)">Total alocado:</span>
+            <span id="phaseTotalPct" class="sl-val" style="font-size:16px">100%</span>
+            <span class="badge b-grn" id="phaseTotalBadge">✓ OK</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Preview — Lotes Vendidos por Mês</div>
+        <div class="card-sub">Curva de absorção do estoque por fase</div>
+        <div class="ch-wrap-md"><canvas id="c-absorc"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB: OBRA ══════════════ -->
+<div class="tab-pane" id="tab-obra">
+  <div class="gcol">
+    <div class="card">
+      <div class="card-title">Cronograma de Obras — Rubricas de Infraestrutura</div>
+      <div class="card-sub">Defina mês de início, duração e distribuição de cada etapa. Total deve somar 100%.</div>
+      <div style="overflow-x:auto">
+        <table class="obra-tbl">
+          <thead>
+            <tr>
+              <th>Rubrica</th>
+              <th>% do Custo Total</th>
+              <th>Início (mês)</th>
+              <th>Duração (meses)</th>
+              <th>Distribuição</th>
+              <th>Custo R$ (estimado)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="obraTbody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:8px;">
+        <button onclick="addObra()" style="padding:7px 16px;background:rgba(91,133,245,.12);border:1px solid var(--blu);color:var(--blu);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff)">+ Adicionar Etapa</button>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:11px;color:var(--mut)">Total rubricas:</span>
+          <span id="obraTotalPct" class="sl-val" style="font-size:16px">100%</span>
+          <span class="badge b-grn" id="obraTotalBadge">✓ OK</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inputs custo e timeline -->
+    <div class="g2">
+      <div class="card">
+        <div class="card-title">Custo de Infraestrutura</div>
+        <div class="card-sub">Base de cálculo para as rubricas</div>
+        <div class="gcol">
+          <div class="field"><label>Custo por m² do terreno total (R$/m²)</label><input type="number" id="custoInfraM2" value="85"></div>
+          <div class="strip" style="margin-top:4px">
+            <div class="strip-item"><div class="strip-l">Custo Infra Total</div><div class="strip-v" id="infra-total-disp">—</div></div>
+            <div class="strip-item"><div class="strip-l">Custo por Lote</div><div class="strip-v" id="infra-por-lote">—</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Timeline de Obras — Gantt Simplificado</div>
+        <div class="card-sub">Visualização das rubricas no tempo</div>
+        <div class="timeline-wrap"><canvas id="c-gantt" class="timeline-canvas"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB: RECEBIMENTO ══════════════ -->
+<div class="tab-pane" id="tab-financ">
+  <div class="gcol">
+    <div class="card">
+      <div class="card-title">Multi-Tabela de Recebimento — 3 Baldes</div>
+      <div class="card-sub">Distribua 100% das vendas entre as 3 modalidades. Cada balde gera uma curva de recebimento diferente.</div>
+      <div class="balde-grid">
+        <!-- BALDE 1: À VISTA -->
+        <div class="balde" style="--bclr:var(--grn)">
+          <div class="balde-title">💰 À Vista</div>
+          <div class="sl-wrap">
+            <div class="sl-top"><label style="color:var(--mut);font-size:11px">% das vendas</label><span class="sl-val" id="b1pct-disp" style="color:var(--grn)">20%</span></div>
+            <input type="range" id="b1pct" min="0" max="100" value="20" oninput="updateBaldes()" style="accent-color:var(--grn)">
+          </div>
+          <div class="balde-pct-disp" id="b1pct-big" style="color:var(--grn)">20%</div>
+          <div style="font-size:11px;color:var(--mut)">Entrada = 100% no mês da venda</div>
+          <div class="field"><label>Desconto à vista (%)</label><input type="number" id="b1desc" value="5" min="0" step="1"></div>
+        </div>
+
+        <!-- BALDE 2: CURTO PRAZO -->
+        <div class="balde" style="--bclr:var(--blu)">
+          <div class="balde-title">📅 Curto Prazo</div>
+          <div class="sl-wrap">
+            <div class="sl-top"><label style="color:var(--mut);font-size:11px">% das vendas</label><span class="sl-val" id="b2pct-disp" style="color:var(--blu)">30%</span></div>
+            <input type="range" id="b2pct" min="0" max="100" value="30" oninput="updateBaldes()" style="accent-color:var(--blu)">
+          </div>
+          <div class="balde-pct-disp" id="b2pct-big" style="color:var(--blu)">30%</div>
+          <div class="g2">
+            <div class="field"><label>Entrada (%)</label><input type="number" id="b2ent" value="20" min="0"></div>
+            <div class="field"><label>Parcelas</label><input type="number" id="b2parc" value="24" min="1"></div>
+          </div>
+          <div class="field"><label>Juros (% a.m.)</label><input type="number" id="b2jur" value="0" step="0.1" min="0"></div>
+          <div style="font-size:11px;color:var(--mut)">Sem juros — apenas correção</div>
+        </div>
+
+        <!-- BALDE 3: LONGO PRAZO -->
+        <div class="balde" style="--bclr:var(--pur)">
+          <div class="balde-title">🏦 Longo Prazo</div>
+          <div class="sl-wrap">
+            <div class="sl-top"><label style="color:var(--mut);font-size:11px">% das vendas</label><span class="sl-val" id="b3pct-disp" style="color:var(--pur)">50%</span></div>
+            <input type="range" id="b3pct" min="0" max="100" value="50" oninput="updateBaldes()" style="accent-color:var(--pur)">
+          </div>
+          <div class="balde-pct-disp" id="b3pct-big" style="color:var(--pur)">50%</div>
+          <div class="g2">
+            <div class="field"><label>Entrada (%)</label><input type="number" id="b3ent" value="20" min="0"></div>
+            <div class="field"><label>Parcelas</label><input type="number" id="b3parc" value="120" min="1"></div>
+          </div>
+          <div class="field"><label>Juros (% a.m.)</label><input type="number" id="b3jur" value="0.8" step="0.1" min="0"></div>
+          <div class="field">
+            <label>Índice de Correção</label>
+            <select id="b3corr"><option value="ipca">IPCA (estimado 0.4% a.m.)</option><option value="igpm">IGP-M (estimado 0.5% a.m.)</option><option value="sem">Sem correção</option></select>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding:10px 14px;background:var(--bg3);border-radius:8px;">
+        <span style="font-size:11px;color:var(--mut)">Total baldes:</span>
+        <span id="baldesTotalPct" class="sl-val" style="font-size:16px">100%</span>
+        <span class="badge b-grn" id="baldesTotalBadge">✓ OK</span>
+        <span style="font-size:11px;color:var(--mut);margin-left:auto;margin-right:8px">Valor presente das parcelas (longo prazo):</span>
+        <span id="vpParc" class="sl-val">—</span>
+      </div>
+    </div>
+
+    <!-- Preview recebimento -->
+    <div class="card">
+      <div class="card-title">Escada de Recebimento — Projeção 60 Meses</div>
+      <div class="card-sub">Para cada lote vendido, quando o caixa recebe. Venda hipotética no Mês 1.</div>
+      <div class="ch-wrap-md"><canvas id="c-escada"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB: SENSIBILIDADE ══════════════ -->
+<div class="tab-pane" id="tab-sensib">
+  <div class="gcol">
+    <!-- SENSIB VSO -->
+    <div class="sens-wrap">
+      <div class="sens-title">🎛 Análise de Sensibilidade — Velocidade de Vendas (VSO)</div>
+      <div class="sens-desc">Mova o slider e veja o impacto imediato na exposição de caixa, TIR e break-even. Esta é a análise mais crítica para o loteador: "Se as vendas atrasarem, quanto dinheiro a mais preciso ter no banco?"</div>
+      <div class="sens-slider-wrap">
+        <span class="sens-label">Multiplicador de VSO:</span>
+        <input type="range" id="sensVSO" min="20" max="200" value="100" step="5" oninput="updateSensibilidade()">
+        <span class="sens-val-disp" id="sensVSOval">100%</span>
+      </div>
+      <div class="sens-metrics">
+        <div class="sens-m">
+          <div class="sens-ml">Exposição Máx.</div>
+          <div class="sens-mv" id="sm-exp" style="color:var(--red)">—</div>
+        </div>
+        <div class="sens-m">
+          <div class="sens-ml">Break-even</div>
+          <div class="sens-mv" id="sm-be">—</div>
+        </div>
+        <div class="sens-m">
+          <div class="sens-ml">TIR a.a.</div>
+          <div class="sens-mv" id="sm-tir" style="color:var(--grn)">—</div>
+        </div>
+        <div class="sens-m">
+          <div class="sens-ml">VPL</div>
+          <div class="sens-mv" id="sm-vpl" style="color:var(--grn)">—</div>
+        </div>
+      </div>
+      <div class="ch-wrap-md"><canvas id="c-sens"></canvas></div>
+    </div>
+
+    <!-- SENSIB PRECO -->
+    <div class="sens-wrap">
+      <div class="sens-title">💲 Sensibilidade — Preço de Venda</div>
+      <div class="sens-desc">Impacto da variação do preço/m² no lucro líquido e na TIR.</div>
+      <div class="sens-slider-wrap">
+        <span class="sens-label">Variação do Preço:</span>
+        <input type="range" id="sensPreco" min="60" max="160" value="100" step="5" oninput="updateSensPreco()">
+        <span class="sens-val-disp" id="sensPrecoVal">100%</span>
+      </div>
+      <div class="sens-metrics">
+        <div class="sens-m"><div class="sens-ml">Preço/m²</div><div class="sens-mv" id="smp-preco">—</div></div>
+        <div class="sens-m"><div class="sens-ml">VGV</div><div class="sens-mv" id="smp-vgv">—</div></div>
+        <div class="sens-m"><div class="sens-ml">Lucro Líq.</div><div class="sens-mv" id="smp-luc" style="color:var(--grn)">—</div></div>
+        <div class="sens-m"><div class="sens-ml">TIR a.a.</div><div class="sens-mv" id="smp-tir" style="color:var(--grn)">—</div></div>
+      </div>
+    </div>
+
+    <!-- TABELA DE CURVA -->
+    <div class="card">
+      <div class="card-title">Curva de Exposição × Velocidade de Vendas</div>
+      <div class="card-sub">Como o atraso nas vendas aumenta o capital necessário — simulação automática</div>
+      <div class="ch-wrap-md"><canvas id="c-curvexp"></canvas></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ TAB: FLUXO COMPLETO ══════════════ -->
+<div class="tab-pane" id="tab-fluxo">
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div>
+        <div class="card-title">Matriz de Fluxo de Caixa Mensal</div>
+        <div class="card-sub">★ = break-even · Cores: verde = positivo / vermelho = negativo · <span id="sub-tabela">— meses</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:11px;color:var(--mut)">Fase:</span>
+        <span class="phase-tag" style="background:rgba(232,197,71,.15);color:var(--acc)">🚀 Lançamento</span>
+        <span class="phase-tag" style="background:rgba(91,133,245,.15);color:var(--blu)">📈 Pós</span>
+        <span class="phase-tag" style="background:rgba(45,212,160,.15);color:var(--grn)">🌱 Mat.</span>
+        <span class="phase-tag" style="background:rgba(167,139,250,.15);color:var(--pur)">🏷 Rem.</span>
+      </div>
+    </div>
+    <div class="ftbl-wrap">
+      <table class="ftbl">
+        <thead>
+          <tr>
+            <th>Mês</th>
+            <th>Fase</th>
+            <th>Lotes Vend.</th>
+            <th>Rec. Bruta</th>
+            <th>À Vista</th>
+            <th>C. Prazo</th>
+            <th>L. Prazo</th>
+            <th>Custo Obra</th>
+            <th>Impostos</th>
+            <th>Comissões</th>
+            <th>Fluxo Mês</th>
+            <th>Fluxo Acum.</th>
+          </tr>
+        </thead>
+        <tbody id="fluxoTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════
+const $ = id => document.getElementById(id)
+
+// ═══════════════════════════════════════════════════════
+// DYNAMIC DATA ARRAYS — source of truth for phases & obra
+// ═══════════════════════════════════════════════════════
+const PHASE_PRESETS = [
+  {nome:'🚀 Lançamento',    pct:40, ini:1,  dur:2, color:'var(--acc)'},
+  {nome:'📈 Pós-Lançamento', pct:30, ini:3,  dur:3, color:'var(--blu)'},
+  {nome:'🌱 Maturação',      pct:20, ini:6,  dur:6, color:'var(--grn)'},
+  {nome:'🏷 Remanescentes',  pct:10, ini:12, dur:6, color:'var(--pur)'},
+];
+
+const OBRA_PRESETS = [
+  {nome:'Terraplenagem',      pct:15, ini:1,  dur:4, dist:'cs'},
+  {nome:'Drenagem / Galerias',pct:20, ini:3,  dur:5, dist:'lin'},
+  {nome:'Rede Esgoto / Água', pct:25, ini:5,  dur:6, dist:'lin'},
+  {nome:'Asfalto / Guias',    pct:30, ini:10, dur:4, dist:'fin'},
+  {nome:'Elétrica / Ilum.',   pct:10, ini:8,  dur:5, dist:'lin'},
+];
+
+let phasesData = PHASE_PRESETS.map(p=>({...p}));
+let obraData   = OBRA_PRESETS.map(o=>({...o}));
+
+// ── RENDER PHASES TABLE ──────────────────────────────────
+function renderPhases() {
+  const tbody = $('phasesTbody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  phasesData.forEach((ph, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="phase-tag" style="background:${ph.color}22;color:${ph.color};font-size:11px">${i+1}</span></td>
+      <td><input type="text" value="${ph.nome}" style="background:var(--bg3);border:1px solid var(--brd);border-radius:6px;color:var(--tex);font-family:var(--fb);font-size:12px;padding:5px 8px;width:148px;outline:none;"
+          oninput="phasesData[${i}].nome=this.value;updatePhaseVSO()"></td>
+      <td><input type="number" value="${ph.pct}" min="0" max="100"
+          oninput="phasesData[${i}].pct=+this.value||0;updatePhaseVSO();updateUI()"></td>
+      <td><input type="number" value="${ph.ini}" min="1"
+          oninput="phasesData[${i}].ini=+this.value||1;updatePhaseVSO();updateUI()"></td>
+      <td><input type="number" value="${ph.dur}" min="1"
+          oninput="phasesData[${i}].dur=+this.value||1;updatePhaseVSO();updateUI()"></td>
+      <td id="ph-vso-${i}" style="min-width:90px">—</td>
+      <td style="min-width:80px">—</td>
+      <td><button onclick="removePhase(${i})" ${phasesData.length<=1?'disabled':''} title="Remover"
+          style="background:rgba(240,82,79,.12);border:1px solid var(--red);color:var(--red);border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  updatePhaseVSO();
+}
+
+function addPhase() {
+  const lastIni = phasesData.length ? phasesData[phasesData.length-1].ini + phasesData[phasesData.length-1].dur : 1;
+  phasesData.push({nome:'Nova Fase', pct:0, ini:lastIni, dur:3, color:'var(--mut)'});
+  renderPhases();
+  updateUI();
+}
+
+function removePhase(i) {
+  if(phasesData.length <= 1) return;
+  phasesData.splice(i, 1);
+  renderPhases();
+  updateUI();
+}
+
+// ── RENDER OBRA TABLE ────────────────────────────────────
+const DIST_OPTIONS = [{v:'cs',l:'Curva S'},{v:'lin',l:'Linear'},{v:'fin',l:'Final'}];
+
+function renderObra() {
+  const tbody = $('obraTbody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  obraData.forEach((ob, i) => {
+    const distOpts = DIST_OPTIONS.map(d=>`<option value="${d.v}"${ob.dist===d.v?' selected':''}>${d.l}</option>`).join('');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" value="${ob.nome}" style="background:var(--bg3);border:1px solid var(--brd);border-radius:6px;color:var(--tex);font-family:var(--fb);font-size:12px;padding:5px 8px;width:160px;outline:none;"
+          oninput="obraData[${i}].nome=this.value;updateObraTotal();drawGantt()"></td>
+      <td><input type="number" value="${ob.pct}" min="0"
+          oninput="obraData[${i}].pct=+this.value||0;updateObraTotal();updateUI()"></td>
+      <td><input type="number" value="${ob.ini}" min="0"
+          oninput="obraData[${i}].ini=+this.value||0;updateObraTotal();updateUI()"></td>
+      <td><input type="number" value="${ob.dur}" min="1"
+          oninput="obraData[${i}].dur=+this.value||1;updateObraTotal();updateUI()"></td>
+      <td><select oninput="obraData[${i}].dist=this.value;updateUI()"
+          style="background:var(--bg);border:1px solid var(--brd);border-radius:6px;color:var(--tex);font-family:var(--fm);font-size:11px;padding:5px 7px;outline:none;">
+          ${distOpts}</select></td>
+      <td id="ov-${i}" style="color:var(--blu)">—</td>
+      <td><button onclick="removeObra(${i})" ${obraData.length<=1?'disabled':''} title="Remover"
+          style="background:rgba(240,82,79,.12);border:1px solid var(--red);color:var(--red);border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  updateObraTotal();
+}
+
+function addObra() {
+  const lastEnd = obraData.length ? Math.max(...obraData.map(o=>o.ini+o.dur)) : 1;
+  obraData.push({nome:'Nova Etapa', pct:0, ini:lastEnd, dur:3, dist:'lin'});
+  renderObra();
+  updateUI();
+}
+
+function removeObra(i) {
+  if(obraData.length <= 1) return;
+  obraData.splice(i, 1);
+  renderObra();
+  updateUI();
+};
+let charts = {};
+
+function fmt(v, suf='') {
+  const sign = v < 0 ? '-' : '';
+  const a = Math.abs(v);
+  if (a >= 1e6) return sign + 'R$' + (a/1e6).toFixed(2) + 'M' + suf;
+  if (a >= 1e3) return sign + 'R$' + (a/1e3).toFixed(1) + 'K' + suf;
+  return sign + 'R$' + a.toFixed(0) + suf;
+}
+function fmtN(v) { return v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function pct(v) { return (v*100).toFixed(1)+'%'; }
+
+function destroyChart(id) { if(charts[id]){charts[id].destroy();delete charts[id];} }
+
+function mkChart(id, config) {
+  destroyChart(id);
+  const ctx = $(id).getContext('2d');
+  charts[id] = new Chart(ctx, config);
+  return charts[id];
+}
+
+// ═══════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════
+function showTab(t) {
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  $('tab-'+t).classList.add('on');
+  event.target.classList.add('on');
+  // Redraw charts in newly visible tab
+  setTimeout(()=>{ Object.values(charts).forEach(c=>c.resize&&c.resize()); }, 50);
+}
+
+// ═══════════════════════════════════════════════════════
+// SCENARIOS
+// Cada cenário salva os valores base na primeira vez (realista)
+// e aplica multiplicadores consistentes sobre eles
+// ═══════════════════════════════════════════════════════
+
+// Valores base do cenário Realista — capturados uma vez
+let baseValues = null;
+
+function captureBase() {
+  baseValues = {
+    precoM2:      +$('precoM2').value,
+    custoInfraM2: +$('custoInfraM2').value,
+    custoTerreno: +$('custoTerreno').value,
+    b1pct: +$('b1pct').value, b2pct: +$('b2pct').value, b3pct: +$('b3pct').value,
+    // Deep-copy dynamic arrays
+    phasesData: JSON.parse(JSON.stringify(phasesData)),
+    obraData:   JSON.parse(JSON.stringify(obraData)),
+  };
+}
+
+function applyScenario(s) {
+  document.querySelectorAll('.scen-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelector('.scen-btn.'+s).classList.add('on');
+
+  // Captura base apenas se ainda não foi capturado (ou se voltando para realista)
+  if(!baseValues || s==='real') captureBase();
+
+  if(s === 'real') {
+    $('precoM2').value      = baseValues.precoM2;
+    $('custoInfraM2').value = baseValues.custoInfraM2;
+    phasesData = JSON.parse(JSON.stringify(baseValues.phasesData));
+    obraData   = JSON.parse(JSON.stringify(baseValues.obraData));
+    renderPhases(); renderObra();
+
+  } else if(s === 'otim') {
+    $('precoM2').value      = Math.round(baseValues.precoM2 * 1.10);
+    $('custoInfraM2').value = Math.round(baseValues.custoInfraM2 * 0.95);
+    phasesData = JSON.parse(JSON.stringify(baseValues.phasesData)).map((ph,i)=>({
+      ...ph,
+      dur: Math.max(1, Math.round(ph.dur * 0.7)),
+      pct: i===0 ? Math.min(60, Math.round(ph.pct*1.3)) : Math.round(ph.pct*0.9),
+    }));
+    // Rebalance to 100%
+    const tot = phasesData.reduce((s,p)=>s+p.pct,0);
+    if(tot!==100 && phasesData.length) phasesData[phasesData.length-1].pct = Math.max(0, phasesData[phasesData.length-1].pct+(100-tot));
+    obraData = JSON.parse(JSON.stringify(baseValues.obraData));
+    renderPhases(); renderObra();
+
+  } else if(s === 'pess') {
+    $('precoM2').value      = Math.round(baseValues.precoM2 * 0.90);
+    $('custoInfraM2').value = Math.round(baseValues.custoInfraM2 * 1.15);
+    phasesData = JSON.parse(JSON.stringify(baseValues.phasesData)).map((ph,i)=>({
+      ...ph,
+      dur: Math.max(1, Math.round(ph.dur * 1.5)),
+      pct: i===0 ? Math.max(10, Math.round(ph.pct*0.7)) : Math.round(ph.pct*1.1),
+    }));
+    const tot = phasesData.reduce((s,p)=>s+p.pct,0);
+    if(tot!==100 && phasesData.length) phasesData[phasesData.length-1].pct = Math.max(0, phasesData[phasesData.length-1].pct+(100-tot));
+    obraData = JSON.parse(JSON.stringify(baseValues.obraData));
+    renderPhases(); renderObra();
+  }
+
+  updatePhaseVSO();
+  updateObraTotal();
+  updateUI();
+}
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+function togglePerm() {
+  const on = $('permTog').checked;
+  $('permSec').style.display = on ? '' : 'none';
+  $('terrenoSec').style.display = on ? 'none' : '';
+  if(on) $('custoTerreno').value = 0;
+}
+
+function updatePhaseVSO() {
+  const qtdLotes = calcLotes();
+  const lotesVendaTotal = qtdLotes - ($('permTog')?.checked ? Math.round(qtdLotes*(+$('permPct')?.value||25)/100) : 0);
+  let total = 0;
+  phasesData.forEach((ph, i) => {
+    const p = ph.pct, d = ph.dur||1;
+    total += p;
+    const lotes = Math.round(lotesVendaTotal * p/100);
+    const vso   = (p/d).toFixed(2);
+    // VSO cell (6th td = index 5)
+    const vsoEl = $('ph-vso-'+i);
+    if(vsoEl) vsoEl.innerHTML = '<span style="color:var(--acc);font-family:var(--fm)">'
+      +vso+'%</span><span style="color:var(--mut);font-size:10px">/mês</span>';
+    // Lotes cell (7th td = index 6) — target by row
+    const tbody = $('phasesTbody');
+    if(tbody && tbody.rows[i] && tbody.rows[i].cells[6]) {
+      tbody.rows[i].cells[6].innerHTML =
+        '<span style="font-family:var(--fm);color:var(--grn)">'+lotes.toLocaleString('pt-BR')+'</span>'
+        +'<span style="color:var(--mut);font-size:10px"> lotes</span>';
+    }
+  });
+  $('phaseTotalPct').textContent = Math.round(total)+'%';
+  const ok = Math.abs(total-100)<1;
+  $('phaseTotalBadge').textContent = ok ? '✓ OK' : '⚠ '+Math.round(total)+'%';
+  $('phaseTotalBadge').className = 'badge '+(ok?'b-grn':'b-red');
+  drawAbsorcaoPreview();
+}
+
+// updateObraTotal: ONLY updates display labels — never triggers recalc
+function updateObraTotal() {
+  const total = obraData.reduce((s,o)=>s+o.pct,0);
+  $('obraTotalPct').textContent = Math.round(total)+'%';
+  const ok = Math.abs(total-100)<1;
+  $('obraTotalBadge').textContent = ok?'✓ OK':'⚠ '+Math.round(total)+'%';
+  $('obraTotalBadge').className = 'badge '+(ok?'b-grn':'b-red');
+  const infra = (+$('custoInfraM2').value||0)*(+$('areaTotal').value||0);
+  obraData.forEach((_,i)=>{
+    const el = $('ov-'+i);
+    if(el) el.textContent = fmt(infra*obraData[i].pct/100);
+  });
+  $('infra-total-disp').textContent = fmt(infra);
+  const lotes = calcLotes();
+  $('infra-por-lote').textContent = lotes>0 ? fmt(infra/lotes) : '—';
+}
+
+function updateBaldes() {
+  [1,2,3].forEach(i=>{
+    const v = +$('b'+i+'pct').value;
+    $('b'+i+'pct-disp').textContent = v+'%';
+    $('b'+i+'pct-big').textContent = v+'%';
+  });
+  const total = [1,2,3].reduce((s,i)=>s+(+$('b'+i+'pct').value||0),0);
+  $('baldesTotalPct').textContent = total+'%';
+  const ok = Math.abs(total-100)<1;
+  $('baldesTotalBadge').textContent = ok?'✓ OK':'⚠ '+total+'%';
+  $('baldesTotalBadge').className = 'badge '+(ok?'b-grn':'b-red');
+  drawEscadaPreview();
+}
+
+// ═══════════════════════════════════════════════════════
+// CURVA S / LINEAR / FINAL distribution
+// ═══════════════════════════════════════════════════════
+function distPesos(n, tipo) {
+  if (n<=0) return [];
+  if (tipo==='lin') return Array(n).fill(1/n);
+  if (tipo==='fin') {
+    const arr = Array(n).fill(0.02/(n-1||1));
+    arr[n-1] = 0.98;
+    return arr;
+  }
+  // Curva S
+  const raw = [];
+  for(let i=0;i<n;i++){
+    const x=(i+0.5)/n;
+    raw.push(1/(1+Math.exp(-10*(x-0.5))));
+  }
+  const diffs=[];
+  for(let i=0;i<n;i++) diffs.push(raw[i]-(i>0?raw[i-1]:0));
+  const s=diffs.reduce((a,b)=>a+b,0);
+  return diffs.map(d=>d/s);
+}
+
+// ═══════════════════════════════════════════════════════
+// CALC LOTES
+// ═══════════════════════════════════════════════════════
+function calcLotes() {
+  const area = +$('areaTotal').value||0;
+  const ef = (+$('efSlider').value||50)/100;
+  const tam = +$('tamLote').value||250;
+  return Math.floor(area*ef/tam);
+}
+
+// ═══════════════════════════════════════════════════════
+// CALC TIR
+// ═══════════════════════════════════════════════════════
+function calcTIR(f) {
+  let r=0.01;
+  for(let it=0;it<300;it++){
+    let npv=0,d=0;
+    for(let t=0;t<f.length;t++){
+      npv+=f[t]/Math.pow(1+r,t);
+      d-=t*f[t]/Math.pow(1+r,t+1);
+    }
+    if(Math.abs(d)<1e-12) break;
+    const rn=r-npv/d;
+    if(Math.abs(rn-r)<1e-9){r=rn;break;}
+    r=rn;
+    if(r<-0.99)r=0.001;
+    if(r>100)r=0.5;
+  }
+  return r;
+}
+function calcVPL(f,tma){return f.reduce((a,v,t)=>a+v/Math.pow(1+tma,t),0);}
+
+// ═══════════════════════════════════════════════════════
+// MAIN ENGINE — CALCULAR
+// ═══════════════════════════════════════════════════════
+function calcular(vsoMult=1.0, precoMult=1.0) {
+  // === PRODUTO ===
+  const areaTotal = +$('areaTotal').value||200000;
+  const ef = (+$('efSlider').value||50)/100;
+  const tamLote = +$('tamLote').value||250;
+  const precoM2base = +$('precoM2').value||420;
+  const precoM2 = precoM2base * precoMult;
+  const qtdLotes = calcLotes();
+  const areaVend = qtdLotes*tamLote;
+  const precoLote = precoM2*tamLote;
+  const regime = $('regime').value;
+  const comissaoPct = (+$('comissao').value||5)/100;
+  const mktPct = (+$('marketing').value||1.5)/100;
+  const outrasDespesas = +$('outrasDespesas').value||0;
+  const tma = (+$('tma').value||1)/100;
+  const permuta = $('permTog').checked;
+  const permutaPct = permuta?(+$('permPct').value||25)/100:0;
+  const custoTerreno = permuta?0:(+$('custoTerreno').value||0);
+
+  // === FASES DE VENDA ===
+  const phases = phasesData.map(ph=>({
+    pct: ph.pct/100,
+    ini: ph.ini||1,
+    dur: ph.dur||1,
+  }));
+
+  // === OBRA ===
+  const custoInfra = (+$('custoInfraM2').value||85)*areaTotal;
+  const obraItems = obraData.map(o=>({
+    pct: o.pct/100,
+    ini: o.ini||1,
+    dur: o.dur||1,
+    dist: o.dist||'cs',
+  }));
+
+  // === BALDES ===
+  const jur1 = 0; // à vista — sem juros
+  const jur2 = (+$('b2jur').value||0)/100;
+  const jur3 = (+$('b3jur').value||0.8)/100;
+  const parc2 = +$('b2parc').value||24;
+  const parc3 = +$('b3parc').value||120;
+  const ent2 = (+$('b2ent').value||20)/100;
+  const ent3 = (+$('b3ent').value||20)/100;
+  const bpct1 = (+$('b1pct').value||20)/100;
+  const bpct2 = (+$('b2pct').value||30)/100;
+  const bpct3 = (+$('b3pct').value||50)/100;
+  const desc1 = (+$('b1desc').value||5)/100;
+
+  // === FISCAL ===
+  const aliqImposto = regime==='ret'?0.04:regime==='lp'?0.0673:null;
+  const aliqVendas = comissaoPct+mktPct;
+
+  // === VGV ===
+  const lotesPermuta = permuta?Math.round(qtdLotes*permutaPct):0;
+  const lotesVenda = qtdLotes-lotesPermuta;
+  const vgvBruto = qtdLotes*precoLote;
+  const vgvVenda = lotesVenda*precoLote;
+
+  // === TOTAL MESES ===
+  const maxObraFim = Math.max(...obraItems.map(o=>o.ini+o.dur));
+  const maxVendaFim = Math.max(...phases.map(p=>p.ini+p.dur));
+  // totalMeses must cover: last obra month, last sale month, AND last sale month + full LP term
+  // e.g. if last sale is month 18 and LP is 120 months → need month 138
+  const totalMeses = Math.max(maxObraFim, maxVendaFim, maxVendaFim + parc3, maxVendaFim + parc2, 60);
+
+  // === RECEITAS MENSAIS POR BALDE ===
+  // receitas[m] = {av, cp, lp} (à vista, curto prazo, longo prazo)
+  const rec = Array.from({length:totalMeses+1},()=>({av:0,cp:0,lp:0,lotes:0,fase:0}));
+
+  // Distribuição de lotes por fase com multiplicador VSO
+  phases.forEach((ph,fi)=>{
+    const lotesF = Math.round(lotesVenda*ph.pct);
+    const dur = Math.max(1, Math.round(ph.dur/vsoMult));
+    const lotesM = Math.ceil(lotesF/dur);
+    let vendidos=0;
+    for(let d=0;d<dur;d++){
+      const m = ph.ini+d;
+      if(m>totalMeses) continue;
+      const lm = Math.min(lotesM, lotesF-vendidos);
+      vendidos+=lm;
+      const valorLotes = lm*precoLote;
+      rec[m].lotes += lm;
+      rec[m].fase = fi+1;
+
+      // BALDE 1: À VISTA
+      const av = valorLotes*bpct1*(1-desc1);
+      rec[m].av += av;
+
+      // BALDE 2: CURTO PRAZO
+      const cpValor = valorLotes*bpct2;
+      const cpEnt = cpValor*ent2;
+      rec[m].cp += cpEnt;
+      const cpSaldo = cpValor*(1-ent2);
+      const pmt2 = jur2>0
+        ? cpSaldo*(jur2*Math.pow(1+jur2,parc2))/(Math.pow(1+jur2,parc2)-1)
+        : cpSaldo/parc2;
+      for(let p=1;p<=parc2;p++){
+        if(m+p<=totalMeses) rec[m+p].cp += pmt2;
+      }
+
+      // BALDE 3: LONGO PRAZO
+      const lpValor = valorLotes*bpct3;
+      const lpEnt = lpValor*ent3;
+      rec[m].lp += lpEnt;
+      const lpSaldo = lpValor*(1-ent3);
+      const pmt3 = jur3>0
+        ? lpSaldo*(jur3*Math.pow(1+jur3,parc3))/(Math.pow(1+jur3,parc3)-1)
+        : lpSaldo/parc3;
+      for(let p=1;p<=parc3;p++){
+        if(m+p<=totalMeses) rec[m+p].lp += pmt3;
+      }
+    }
+  });
+
+  // === DESEMBOLSOS DE OBRA ===
+  const obra = new Array(totalMeses+1).fill(0);
+  obraItems.forEach(item=>{
+    const tot = custoInfra*item.pct;
+    const pesos = distPesos(item.dur, item.dist);
+    for(let d=0;d<item.dur;d++){
+      const m=item.ini+d;
+      if(m<=totalMeses) obra[m] += tot*pesos[d];
+    }
+  });
+
+  // === FLUXO CAIXA MENSAL ===
+  const fluxos = [];
+  const fluxoAcum = [];
+
+  // t=0: terreno + outras despesas
+  let acum = -(custoTerreno+outrasDespesas);
+  fluxos.push(acum);
+  fluxoAcum.push(acum);
+
+  // Lucro Real: calculamos imposto ao final
+  let impostoAcumLR = 0;
+
+  for(let m=1;m<=totalMeses;m++){
+    const rb = rec[m].av+rec[m].cp+rec[m].lp;
+    const imp = aliqImposto ? rb*aliqImposto : 0;
+    const com = rb*aliqVendas;
+    const ob = obra[m];
+    const fm = rb-imp-com-ob;
+    acum+=fm;
+    fluxos.push(fm);
+    fluxoAcum.push(acum);
+  }
+
+  // Ajuste Lucro Real
+  if(regime==='lu'){
+    const recTotal=vgvVenda;
+    const custoTotal=custoTerreno+custoInfra+outrasDespesas;
+    const lucroAntes=recTotal-custoTotal-recTotal*aliqVendas;
+    impostoAcumLR=Math.max(0,lucroAntes*0.34);
+    // Subtrai do fluxo final (simplificação)
+    fluxoAcum[fluxoAcum.length-1]-=impostoAcumLR;
+  }
+
+  // === INDICADORES ===
+  const impostosTot = regime==='lu'?impostoAcumLR:vgvVenda*aliqImposto;
+  const recLiq = vgvVenda-impostosTot-vgvVenda*aliqVendas;
+  const custoTot = custoTerreno+custoInfra+outrasDespesas;
+  const lucroLiq = fluxoAcum[fluxoAcum.length-1];
+  const margemLiq = vgvBruto>0?lucroLiq/vgvBruto*100:0;
+  const roi = custoTot>0?lucroLiq/custoTot*100:0;
+  const tirMes = calcTIR(fluxos);
+  const tirAa = (Math.pow(1+tirMes,12)-1)*100;
+  const vpl = calcVPL(fluxos, tma);
+
+  let expMax=0,expMes=0,breakevenMes=null;
+  for(let i=0;i<fluxoAcum.length;i++){
+    if(fluxoAcum[i]<expMax){expMax=fluxoAcum[i];expMes=i;}
+    if(breakevenMes===null&&i>0&&fluxoAcum[i]>=0) breakevenMes=i;
+  }
+
+  return {
+    qtdLotes,areaVend,vgvBruto,vgvVenda,precoLote,precoM2,
+    custoInfra,custoTerreno,custoTot,
+    impostosTot,recLiq,lucroLiq,margemLiq,roi,
+    tirMes,tirAa,vpl,expMax,expMes,breakevenMes,
+    rec,obra,fluxos,fluxoAcum,totalMeses,lotesPermuta,lotesVenda,
+    phases, obraItems
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+// UPDATE UI
+// ═══════════════════════════════════════════════════════
+function updateUI() {
+  const R = calcular();
+
+  // KPIs
+  $('k-vgv').textContent = fmt(R.vgvBruto);
+  $('k-lotes').textContent = R.qtdLotes+' lotes · '+fmtN(R.areaVend)+'m²';
+  $('k-tir').textContent = R.tirAa.toFixed(1)+'%';
+  $('k-tirsub').textContent = (R.tirMes*100).toFixed(2)+'% a.m.';
+  $('k-exp').textContent = fmt(Math.abs(R.expMax));
+  $('k-expsub').textContent = 'Mês '+R.expMes+' do projeto';
+  $('k-luc').textContent = fmt(R.lucroLiq);
+  $('k-mar').textContent = 'Margem '+R.margemLiq.toFixed(1)+'%';
+
+  // Strip
+  $('s-vpl').textContent = fmt(R.vpl);
+  $('s-be').textContent = R.breakevenMes?'Mês '+R.breakevenMes:'Sem BE';
+  $('s-roi').textContent = R.roi.toFixed(1)+'%';
+  $('s-custo').textContent = fmt(R.custoTot);
+  $('s-imp').textContent = fmt(R.impostosTot);
+  $('s-recliq').textContent = fmt(R.recLiq);
+  $('s-qtdl').textContent = fmtN(R.qtdLotes);
+
+  const avB = $('s-aval');
+  if(R.tirAa>=20&&R.margemLiq>=15){avB.textContent='✓ Alta Rent.';avB.className='badge b-grn';}
+  else if(R.tirAa>=12&&R.margemLiq>=8){avB.textContent='◈ Moderada';avB.className='badge b-yel';}
+  else{avB.textContent='✕ Reavalie';avB.className='badge b-red';}
+
+  // Obra valors
+  updateObraTotal();
+  updatePhaseVSO();
+
+  // VPL parcelas longo prazo
+  const jur3 = (+$('b3jur').value||0.8)/100;
+  const parc3 = +$('b3parc').value||120;
+  const ent3 = (+$('b3ent').value||20)/100;
+  const bpct3 = (+$('b3pct').value||50)/100;
+  const lpSaldo = R.vgvVenda*bpct3*(1-ent3);
+  const pmt3 = jur3>0?lpSaldo*(jur3*Math.pow(1+jur3,parc3))/(Math.pow(1+jur3,parc3)-1):lpSaldo/parc3;
+  const vpParc = Array.from({length:parc3},(_,i)=>pmt3/Math.pow(1.01,i+1)).reduce((a,b)=>a+b,0);
+  $('vpParc').textContent = fmt(vpParc);
+
+  drawAllCharts(R);
+  drawFluxoTable(R);
+  drawAbsorcaoPreview();
+  drawEscadaPreview();
+  updateSensibilidade();
+  buildCurvaExposicao();
+  drawGantt();
+}
+
+// ═══════════════════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════════════════
+const CHART_DEFAULTS = {
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{
+    backgroundColor:'#191b27',borderColor:'#23263a',borderWidth:1,
+    titleColor:'#6b7099',bodyColor:'#dde0ee',
+    callbacks:{label:ctx=>' '+fmt(ctx.raw)}
+  }},
+  scales:{
+    x:{grid:{color:'rgba(35,38,58,.5)'},ticks:{color:'#6b7099',font:{size:9,family:'JetBrains Mono'},maxTicksLimit:16}},
+    y:{grid:{color:'rgba(35,38,58,.5)'},ticks:{color:'#6b7099',font:{size:9,family:'JetBrains Mono'},callback:v=>fmt(v)}}
+  }
+};
+
+function smartTicks(totalMeses) {
+  // Show a tick every N months depending on horizon length
+  if (totalMeses <= 36)  return { maxTicksLimit: totalMeses, callback: v => v }
+  if (totalMeses <= 60)  return { maxTicksLimit: 15 }
+  if (totalMeses <= 120) return { maxTicksLimit: 12 }
+  if (totalMeses <= 180) return { maxTicksLimit: 15 }
+  return { maxTicksLimit: 18 }
+}
+
+function drawAllCharts(R) {
+  // Show full horizon — all months until cash flow is settled
+  const lim = R.totalMeses;
+  const labels = Array.from({length:lim},(_,i)=>'M'+(i+1));
+
+  // Update subtitles to reflect actual horizon
+  const horizLabel = lim <= 60 ? lim+' meses' : Math.round(lim/12*10)/10+' anos ('+lim+' meses)';
+  if($('sub-fluxo'))  $('sub-fluxo').textContent  = 'Horizonte: '+horizLabel+' — curva de investimento e retorno';
+  if($('sub-fases'))  $('sub-fases').textContent  = 'Horizonte: '+horizLabel+' — entradas por fase';
+  if($('sub-tabela')) $('sub-tabela').textContent = lim+' meses (horizonte completo)';
+
+  // ── FLUXO ACUMULADO ──
+  const acumData = R.fluxoAcum.slice(1,lim+1);
+  mkChart('c-fluxo',{
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        data:acumData,borderWidth:2,pointRadius:0,pointHoverRadius:4,
+        tension:0.4,fill:true,
+        segment:{borderColor:ctx=>ctx.p1.parsed.y>=0?'rgba(45,212,160,1)':'rgba(240,82,79,1)'},
+        backgroundColor:ctx=>{
+          const {chartArea,ctx:c}=ctx.chart;
+          if(!chartArea)return'transparent';
+          const g=c.createLinearGradient(0,chartArea.top,0,chartArea.bottom);
+          g.addColorStop(0,'rgba(45,212,160,.18)');
+          g.addColorStop(.5,'rgba(45,212,160,.04)');
+          g.addColorStop(1,'rgba(240,82,79,.1)');
+          return g;
+        }
+      }]
+    },
+    options:{...CHART_DEFAULTS,
+      plugins:{...CHART_DEFAULTS.plugins,
+        annotation:{annotations:{
+          zero:{type:'line',yMin:0,yMax:0,borderColor:'rgba(232,197,71,.4)',borderWidth:1,borderDash:[4,4]}
+        }}
+      }
+    }
+  });
+
+  // ── FASES DE RECEITA ──
+  const recAV=[], recCP=[], recLP=[];
+  for(let m=1;m<=lim;m++){
+    recAV.push(R.rec[m]?.av||0);
+    recCP.push(R.rec[m]?.cp||0);
+    recLP.push(R.rec[m]?.lp||0);
+  }
+  mkChart('c-fases',{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'À Vista',data:recAV,backgroundColor:'rgba(45,212,160,.7)',borderWidth:0,stack:'r'},
+      {label:'Curto Prazo',data:recCP,backgroundColor:'rgba(91,133,245,.7)',borderWidth:0,stack:'r'},
+      {label:'Longo Prazo',data:recLP,backgroundColor:'rgba(167,139,250,.7)',borderWidth:0,stack:'r'},
+    ]},
+    options:{...CHART_DEFAULTS,
+      plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,position:'bottom',labels:{color:'#6b7099',font:{size:10},boxWidth:10,boxHeight:10}}},
+      scales:{...CHART_DEFAULTS.scales}
+    }
+  });
+
+  // ── PIE ──
+  const permutaVal = R.lotesPermuta*R.precoLote;
+  mkChart('c-pie',{
+    type:'doughnut',
+    data:{
+      labels:['Lucro Líq.','Custo Infra','Terreno','Impostos','Comissões/Mkt',R.lotesPermuta?'Permuta':null].filter(Boolean),
+      datasets:[{
+        data:[Math.max(0,R.lucroLiq),R.custoInfra,R.custoTerreno,R.impostosTot,R.vgvVenda*((+$('comissao').value/100)+(+$('marketing').value/100)),R.lotesPermuta?permutaVal:null].filter(v=>v!==null&&v>0),
+        backgroundColor:['#2dd4a0','#5b85f5','#6b7099','#f0524f','#e8c547','#a78bfa'],
+        borderWidth:0,hoverOffset:6
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',
+      plugins:{legend:{position:'bottom',labels:{color:'#6b7099',font:{size:9},boxWidth:8,boxHeight:8,padding:8}},
+        tooltip:{backgroundColor:'#191b27',borderColor:'#23263a',borderWidth:1,titleColor:'#6b7099',bodyColor:'#dde0ee',callbacks:{label:ctx=>' '+fmt(ctx.raw)}}
+      }
+    }
+  });
+
+  // ── CURVA S OBRA ──
+  const obraAcum=[], obraMens=[];
+  let acc=0;
+  for(let m=1;m<=lim;m++){
+    obraMens.push(R.obra[m]||0);
+    acc+=(R.obra[m]||0);
+    obraAcum.push(acc);
+  }
+  mkChart('c-curvas',{
+    type:'bar',
+    data:{labels,datasets:[
+      {type:'bar',label:'Mensal',data:obraMens,backgroundColor:'rgba(91,133,245,.45)',borderWidth:0,yAxisID:'y'},
+      {type:'line',label:'Acum.',data:obraAcum,borderColor:'#e8c547',borderWidth:2,pointRadius:0,tension:.4,fill:false,yAxisID:'y2'},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#191b27',borderColor:'#23263a',borderWidth:1,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#6b7099',font:{size:9},maxTicksLimit:10}},
+        y:{position:'left',grid:{color:'rgba(35,38,58,.5)'},ticks:{color:'#6b7099',font:{size:9},callback:v=>fmt(v)}},
+        y2:{position:'right',grid:{display:false},ticks:{color:'#e8c547',font:{size:9},callback:v=>fmt(v)}},
+      }
+    }
+  });
+
+  // ── MULTI-TABELA STACKED ──
+  mkChart('c-multitab',{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'À Vista',data:recAV,backgroundColor:'rgba(45,212,160,.7)',borderWidth:0,stack:'r'},
+      {label:'C. Prazo',data:recCP,backgroundColor:'rgba(91,133,245,.7)',borderWidth:0,stack:'r'},
+      {label:'L. Prazo',data:recLP,backgroundColor:'rgba(167,139,250,.7)',borderWidth:0,stack:'r'},
+      {type:'line',label:'Obra',data:obraMens,borderColor:'#f0524f',borderWidth:1.5,pointRadius:0,tension:.3,fill:false}
+    ]},
+    options:{...CHART_DEFAULTS,
+      plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,position:'bottom',labels:{color:'#6b7099',font:{size:10},boxWidth:10,boxHeight:10}}}
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// ABSORÇÃO PREVIEW (Tab Vendas)
+// ═══════════════════════════════════════════════════════
+function drawAbsorcaoPreview() {
+  const qtdLotes = calcLotes();
+  const phases = phasesData.map(ph=>({
+    pct: ph.pct/100,
+    ini: ph.ini||1,
+    dur: ph.dur||1,
+  }));
+  const labels=[], data=[], colors=[];
+  // Generate colors from phasesData (supports any number of phases)
+  const phColorBase=['rgba(232,197,71,.8)','rgba(91,133,245,.8)','rgba(45,212,160,.8)','rgba(167,139,250,.8)','rgba(240,80,80,.8)','rgba(80,200,240,.8)','rgba(240,160,80,.8)','rgba(160,240,80,.8)'];
+  const phColors = phasesData.map((_,i)=>phColorBase[i%phColorBase.length]);
+  const maxM = phases.length ? Math.max(...phases.map(p=>(p.ini||1)+(p.dur||1))) : 24;
+  for(let m=1;m<=maxM+2;m++){
+    labels.push('M'+m);
+    let lotes=0, ci=-1;
+    phases.forEach((ph,fi)=>{
+      const lotesF=Math.round(qtdLotes*ph.pct);
+      const lotesM=ph.dur>0?Math.ceil(lotesF/ph.dur):0;
+      if(m>=ph.ini&&m<ph.ini+ph.dur){lotes+=lotesM;ci=fi;}
+    });
+    data.push(lotes);
+    colors.push(ci>=0?phColors[ci]:'rgba(50,55,80,.4)');
+  }
+  mkChart('c-absorc',{
+    type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#191b27',borderColor:'#23263a',borderWidth:1,callbacks:{label:ctx=>ctx.raw+' lotes'}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#6b7099',font:{size:9}}},
+        y:{grid:{color:'rgba(35,38,58,.5)'},ticks:{color:'#6b7099',font:{size:9},callback:v=>v+' lotes'}}
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// ESCADA DE RECEBIMENTO (Tab Financeiro)
+// ═══════════════════════════════════════════════════════
+function drawEscadaPreview() {
+  // Use parseFloat with explicit fallback only for truly empty fields, never for zero
+  const pv = s => { const v = parseFloat($(s).value); return isNaN(v) ? 0 : v; };
+  const precoLote = (pv('precoM2')||420) * (pv('tamLote')||250);
+
+  // % baldes: se o slider está em 0, deve ser 0 mesmo — não usar fallback
+  const bpct1 = pv('b1pct') / 100;
+  const bpct2 = pv('b2pct') / 100;
+  const bpct3 = pv('b3pct') / 100;
+  const desc1 = pv('b1desc') / 100;
+  const ent2  = pv('b2ent')  / 100;
+  const ent3  = pv('b3ent')  / 100;
+  const parc2 = pv('b2parc') || 1;   // mínimo 1 para evitar divisão por zero
+  const parc3 = pv('b3parc') || 1;
+  const jur2  = pv('b2jur')  / 100;
+  const jur3  = pv('b3jur')  / 100;
+
+  const n=60;
+  const avArr=new Array(n+1).fill(0);
+  const cpArr=new Array(n+1).fill(0);
+  const lpArr=new Array(n+1).fill(0);
+
+  // Venda hipotética no mês 1
+  if(bpct1 > 0) avArr[1] += precoLote * bpct1 * (1 - desc1);
+
+  if(bpct2 > 0) {
+    const cp = precoLote * bpct2;
+    cpArr[1] += cp * ent2;
+    const cpSaldo = cp * (1 - ent2);
+    const pmt2 = jur2>0 ? cpSaldo*(jur2*Math.pow(1+jur2,parc2))/(Math.pow(1+jur2,parc2)-1) : cpSaldo/parc2;
+    for(let p=1; p<=Math.min(parc2,n); p++) cpArr[p] += pmt2;
+  }
+
+  if(bpct3 > 0) {
+    const lp = precoLote * bpct3;
+    lpArr[1] += lp * ent3;
+    const lpSaldo = lp * (1 - ent3);
+    const pmt3 = jur3>0 ? lpSaldo*(jur3*Math.pow(1+jur3,parc3))/(Math.pow(1+jur3,parc3)-1) : lpSaldo/parc3;
+    for(let p=1; p<=Math.min(parc3,n); p++) lpArr[p] += pmt3;
+  }
+
+  const labels=Array.from({length:n},(_,i)=>'M'+(i+1));
+  mkChart('c-escada',{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'À Vista',data:avArr.slice(1,n+1),backgroundColor:'rgba(45,212,160,.8)',borderWidth:0,stack:'r'},
+      {label:'Curto Prazo',data:cpArr.slice(1,n+1),backgroundColor:'rgba(91,133,245,.8)',borderWidth:0,stack:'r'},
+      {label:'Longo Prazo',data:lpArr.slice(1,n+1),backgroundColor:'rgba(167,139,250,.8)',borderWidth:0,stack:'r'},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{color:'#6b7099',font:{size:10},boxWidth:10,boxHeight:10}},
+        tooltip:{backgroundColor:'#191b27',borderColor:'#23263a',borderWidth:1,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#6b7099',font:{size:9},maxTicksLimit:12}},
+        y:{grid:{color:'rgba(35,38,58,.5)'},ticks:{color:'#6b7099',font:{size:9},callback:v=>fmt(v)}}
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// GANTT CANVAS (Tab Obra)
+// ═══════════════════════════════════════════════════════
+const GANTT_COLORS = ['#5b85f5','#2dd4a0','#a78bfa','#e8c547','#f0524f','#f0a050','#50d0f0','#d050f0','#50f050','#f05080'];
+
+function drawGantt() {
+  const canvas = $('c-gantt');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth||700;
+  const rowH=18, gap=4, topPad=18, leftPad=110, rightPad=10;
+  canvas.height = topPad + obraData.length*(rowH+gap) + 8;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const maxM = Math.max(...obraData.map(o=>o.ini+o.dur), 12);
+  const W = canvas.width-leftPad-rightPad;
+
+  // Month axis labels
+  ctx.fillStyle='#6b7099';
+  ctx.font='9px JetBrains Mono';
+  const step = maxM<=24?1:maxM<=48?3:maxM<=72?6:12;
+  for(let m=1;m<=maxM;m+=step){
+    const x=leftPad+(m-1)/maxM*W;
+    ctx.fillText('M'+m,x,12);
+  }
+
+  obraData.forEach((item,i)=>{
+    const color = GANTT_COLORS[i % GANTT_COLORS.length];
+    const y = topPad+i*(rowH+gap);
+    const x = leftPad+(item.ini-1)/maxM*W;
+    const w = Math.max(2, item.dur/maxM*W);
+    // Background track
+    ctx.fillStyle='#1a1e2a';
+    ctx.fillRect(leftPad,y,W,rowH-2);
+    // Bar fill
+    ctx.fillStyle=color+'33';
+    ctx.fillRect(x,y,w,rowH-2);
+    // Left accent
+    ctx.fillStyle=color;
+    ctx.fillRect(x,y,3,rowH-2);
+    // Label
+    ctx.fillStyle='#9098b8';
+    ctx.font='10px JetBrains Mono';
+    const label = item.nome.length>14 ? item.nome.slice(0,13)+'…' : item.nome;
+    ctx.fillText(label,0,y+12);
+    // % inside bar
+    ctx.fillStyle=color;
+    ctx.font='9px JetBrains Mono';
+    if(w>28) ctx.fillText(item.pct+'%',x+5,y+12);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// SENSIBILIDADE VSO
+// ═══════════════════════════════════════════════════════
+function updateSensibilidade() {
+  const mult = (+$('sensVSO').value||100)/100;
+  $('sensVSOval').textContent = Math.round(mult*100)+'%';
+
+  const R = calcular(mult);
+  $('sm-exp').textContent = fmt(Math.abs(R.expMax));
+  $('sm-be').textContent = R.breakevenMes?'Mês '+R.breakevenMes:'—';
+  $('sm-tir').textContent = R.tirAa.toFixed(1)+'%';
+  $('sm-vpl').textContent = fmt(R.vpl);
+
+  // Dois cenários no gráfico
+  const R0 = calcular(1.0);
+  const lim = R.totalMeses;
+  const labels = Array.from({length:lim},(_,i)=>'M'+(i+1));
+  mkChart('c-sens',{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Base (100%)',data:R0.fluxoAcum.slice(1,lim+1),borderColor:'#2dd4a0',borderWidth:2,pointRadius:0,tension:.4,fill:false},
+      {label:'Cenário ('+Math.round(mult*100)+'%)',data:R.fluxoAcum.slice(1,lim+1),borderColor:'#e8c547',borderWidth:2,pointRadius:0,tension:.4,fill:false,borderDash:mult<1?[5,3]:[]}
+    ]},
+    options:{...CHART_DEFAULTS,
+      plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,position:'bottom',labels:{color:'#6b7099',font:{size:10},boxWidth:10,boxHeight:10}}}
+    }
+  });
+}
+
+function updateSensPreco() {
+  const mult = (+$('sensPreco').value||100)/100;
+  $('sensPrecoVal').textContent = Math.round(mult*100)+'%';
+  const R = calcular(1.0, mult);
+  $('smp-preco').textContent = 'R$'+((+$('precoM2').value||420)*mult).toFixed(0)+'/m²';
+  $('smp-vgv').textContent = fmt(R.vgvBruto);
+  $('smp-luc').textContent = fmt(R.lucroLiq);
+  $('smp-tir').textContent = R.tirAa.toFixed(1)+'%';
+  $('smp-luc').style.color = R.lucroLiq>=0?'var(--grn)':'var(--red)';
+}
+
+// ═══════════════════════════════════════════════════════
+// CURVA EXPOSIÇÃO × VSO (Tab Sensib)
+// ═══════════════════════════════════════════════════════
+function buildCurvaExposicao() {
+  const mults = [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.2,1.5,2.0];
+  const exps = mults.map(m => Math.abs(calcular(m).expMax));
+  mkChart('c-curvexp',{
+    type:'line',
+    data:{
+      labels:mults.map(m=>Math.round(m*100)+'%'),
+      datasets:[{
+        label:'Exposição Máx.',data:exps,
+        borderColor:'#f0524f',borderWidth:2,pointRadius:5,
+        pointBackgroundColor:exps.map((_,i)=>mults[i]===1?'#e8c547':'#f0524f'),
+        tension:.3,fill:true,
+        backgroundColor:ctx=>{
+          const {chartArea,ctx:c}=ctx.chart;
+          if(!chartArea)return'transparent';
+          const g=c.createLinearGradient(0,chartArea.top,0,chartArea.bottom);
+          g.addColorStop(0,'rgba(240,82,79,.18)');g.addColorStop(1,'transparent');return g;
+        }
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#191b27',borderColor:'#23263a',borderWidth:1,callbacks:{label:ctx=>' '+fmt(ctx.raw)}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#6b7099',font:{size:10}},title:{display:true,text:'Velocidade de Vendas',color:'#6b7099',font:{size:10}}},
+        y:{grid:{color:'rgba(35,38,58,.5)'},ticks:{color:'#6b7099',font:{size:9},callback:v=>fmt(v)},title:{display:true,text:'Capital Necessário',color:'#6b7099',font:{size:10}}}
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// FLUXO TABLE (Tab Fluxo)
+// ═══════════════════════════════════════════════════════
+function getFaseColor(fi) {
+  if(fi<=0) return '#6b7099';
+  const base=['rgba(232,197,71,1)','rgba(91,133,245,1)','rgba(45,212,160,1)','rgba(167,139,250,1)','rgba(240,80,80,1)','rgba(80,200,240,1)','rgba(240,160,80,1)'];
+  return base[(fi-1) % base.length];
+}
+
+function drawFluxoTable(R) {
+  const tbody=$('fluxoTbody');
+  tbody.innerHTML='';
+  const lim=R.totalMeses;
+
+  for(let m=1;m<=lim;m++){
+    const rec=R.rec[m];
+    const rb=rec.av+rec.cp+rec.lp;
+    const aliq=$('regime').value==='ret'?0.04:$('regime').value==='lp'?0.0673:0;
+    const imp=rb*aliq;
+    const com=rb*((+$('comissao').value/100)+(+$('marketing').value/100));
+    const ob=R.obra[m]||0;
+    const fm=R.fluxos[m];
+    const acum=R.fluxoAcum[m];
+    const isBE=R.breakevenMes===m;
+    const fase=rec.fase;
+    const tr=document.createElement('tr');
+    if(isBE) tr.className='be-row';
+    tr.innerHTML=`
+      <td>${isBE?'★ ':''}M${m}</td>
+      <td style="text-align:center"><span style="color:${getFaseColor(fase)}">${fase>0&&phasesData[fase-1]?phasesData[fase-1].nome.slice(0,6):'—'}</span></td>
+      <td class="${rec.lotes>0?'pos':'neutral'}">${rec.lotes||'—'}</td>
+      <td class="${rb>0?'pos':'neutral'}">${rb>0?fmt(rb):'—'}</td>
+      <td class="${rec.av>0?'pos':'neutral'}">${rec.av>0?fmt(rec.av):'—'}</td>
+      <td class="${rec.cp>0?'pos':'neutral'}">${rec.cp>0?fmt(rec.cp):'—'}</td>
+      <td class="${rec.lp>0?'pos':'neutral'}">${rec.lp>0?fmt(rec.lp):'—'}</td>
+      <td class="${ob>0?'neg':'neutral'}">${ob>0?fmt(-ob):'—'}</td>
+      <td class="${imp>0?'neg':'neutral'}">${imp>0?fmt(-imp):'—'}</td>
+      <td class="${com>0?'neg':'neutral'}">${com>0?fmt(-com):'—'}</td>
+      <td class="${fm>=0?'pos':'neg'}">${fmt(fm)}</td>
+      <td class="${acum>=0?'pos':'neg'}">${fmt(acum)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════
+function calcular_wrapper() { updateUI(); }
+
+// ── SENSITIVITY (não dispara updateUI, só atualiza o tab de sensibilidade)
+$('sensVSO').addEventListener('input', updateSensibilidade);
+$('sensPreco').addEventListener('input', updateSensPreco);
+
+// ── BALDE sliders de % → atualiza displays e redesenha escada
+[1,2,3].forEach(i => $('b'+i+'pct').addEventListener('input', () => {
+  updateBaldes();   // só displays, sem updateUI
+  updateUI();       // recalc do fluxo
+}));
+
+// ── BALDE campos numéricos → redesenha escada e recalcula
+['b1desc','b2ent','b2parc','b2jur','b3ent','b3parc','b3jur'].forEach(id => {
+  const el = $(id);
+  if(!el) return;
+  el.addEventListener('change', () => { drawEscadaPreview(); updateUI(); });
+});
+
+// ── FASES de venda → atualiza preview VSO e recalcula
+// Phase/Obra listeners are handled inside renderPhases/renderObra via event delegation
+
+// ── CUSTO INFRA M² → atualiza displays e recalcula
+const _ci = $('custoInfraM2');
+if(_ci) _ci.addEventListener('change', () => { updateObraTotal(); updateUI(); });
+
+// ── SIDEBAR geral: produto, fiscal, financeiro
+['areaTotal','tamLote','precoM2','regime','comissao','marketing',
+ 'outrasDespesas','tma','permPct','custoTerreno'].forEach(id => {
+  const el = $(id);
+  if(!el) return;
+  el.addEventListener('change', () => updateUI());
+});
+
+// ── SLIDERS do sidebar (feedback imediato ao arrastar)
+['efSlider'].forEach(id => {
+  const el = $(id);
+  if(!el) return;
+  el.addEventListener('input', () => updateUI());
+});
+
+window.addEventListener('load',()=>{
+  renderPhases();
+  renderObra();
+  updateBaldes();
+  captureBase();
+  updateUI();
+});
+</script>
+
+<!-- ══════════════ PROJECTS MODAL ══════════════ -->
+<div class="modal-overlay" id="projectsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">📁 Meus Projetos</div>
+        <div style="font-size:11px;color:var(--mut);margin-top:2px">Salvo localmente no dispositivo</div>
+      </div>
+      <button class="modal-close" onclick="closeProjects()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Salvar análise atual -->
+      <div class="save-form">
+        <div class="save-form-title">💾 Salvar análise atual</div>
+        <div class="save-row">
+          <div class="save-field">
+            <label>Nome do Projeto</label>
+            <input type="text" id="save-name" placeholder="Ex: Loteamento Vila Nova">
+          </div>
+          <div class="save-field">
+            <label>Cidade</label>
+            <input type="text" id="save-cidade" placeholder="Ex: Campinas - SP">
+          </div>
+        </div>
+        <div class="save-row">
+          <div class="save-field">
+            <label>Cenário</label>
+            <select id="save-tipo">
+              <option value="realista">◈ Realista</option>
+              <option value="otimista">▴ Otimista</option>
+              <option value="pessimista">▾ Pessimista</option>
+            </select>
+          </div>
+          <div class="save-field">
+            <label>Observações (opcional)</label>
+            <input type="text" id="save-obs" placeholder="Ex: Revisão após reunião">
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn-save" onclick="saveProject()">💾 Salvar</button>
+        </div>
+      </div>
+
+      <!-- Lista de projetos -->
+      <div style="font-family:var(--ff);font-size:11px;font-weight:700;color:var(--mut);
+                  letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">
+        Análises Salvas
+      </div>
+      <div class="proj-list" id="projList">
+        <div class="proj-empty">
+          <div class="proj-empty-icon">🏗</div>
+          <div class="proj-empty-text">Nenhuma análise salva ainda.<br>Preencha as premissas e clique em Salvar.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PWA INSTALL BANNER ══════════════ -->
+<div class="pwa-banner hidden" id="pwaBanner">
+  <div style="font-size:28px">📲</div>
+  <div class="pwa-banner-text">
+    <strong>Instalar LoteVia PRO</strong><br>
+    <span style="font-size:11px;color:var(--mut)">Adicione à tela inicial para usar como app</span>
+  </div>
+  <button class="pwa-install-btn" onclick="installPWA()">Instalar</button>
+  <button class="pwa-dismiss" onclick="dismissBanner()">✕</button>
+</div>
+
+<!-- ══════════════ TOAST ══════════════ -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// SERVICE WORKER REGISTRATION
+// ═══════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    // Só registra se estiver em HTTPS próprio (não em preview do Claude ou localhost sem SW)
+    const isLocalFile  = location.protocol === 'file:';
+    const isClaudeHost = location.hostname.includes('claudeusercontent.com');
+    if (isLocalFile || isClaudeHost) return; // silencia — SW não se aplica aqui
+
+    try {
+      const reg = await navigator.serviceWorker.register('/service-worker.js');
+      console.log('[SW] Registrado:', reg.scope);
+      reg.addEventListener('updatefound', () => {
+        const worker = reg.installing;
+        worker?.addEventListener('statechange', () => {
+          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+            showToast('🔄 Nova versão disponível — recarregue para atualizar', 'ok', 5000);
+          }
+        });
+      });
+    } catch(e) {
+      // Falha silenciosa — app funciona normalmente sem SW
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// PWA INSTALL BANNER
+// ═══════════════════════════════════════════════════════
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Mostra banner após 3s se ainda não instalado
+  if (!localStorage.getItem('pwa-dismissed')) {
+    setTimeout(() => {
+      const b = document.getElementById('pwaBanner');
+      if(b) b.classList.remove('hidden');
+    }, 3000);
+  }
+});
+
+async function installPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  dismissBanner();
+  if (outcome === 'accepted') showToast('✅ LoteVia instalado com sucesso!', 'ok');
+}
+
+function dismissBanner() {
+  const b = document.getElementById('pwaBanner');
+  if(b) b.classList.add('hidden');
+  localStorage.setItem('pwa-dismissed', '1');
+}
+
+window.addEventListener('appinstalled', () => {
+  dismissBanner();
+  showToast('✅ App instalado!', 'ok');
+});
+
+// ═══════════════════════════════════════════════════════
+// INDEXEDDB — banco de dados local
+// ═══════════════════════════════════════════════════════
+const DB_NAME    = 'LoteViaDB';
+const DB_VERSION = 1;
+const STORE      = 'projetos';
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    if (db) return resolve(db);
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(STORE)) {
+        const store = d.createObjectStore(STORE, { keyPath: 'id' });
+        store.createIndex('updatedAt', 'updatedAt');
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror   = () => reject(req.error);
+  });
+}
+
+async function dbGetAll() {
+  const d = await openDB();
+  return new Promise((res, rej) => {
+    const tx  = d.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).index('updatedAt').getAll();
+    req.onsuccess = () => res(req.result.reverse()); // mais recente primeiro
+    req.onerror   = () => rej(req.error);
+  });
+}
+
+async function dbSave(item) {
+  const d = await openDB();
+  return new Promise((res, rej) => {
+    const tx  = d.transaction(STORE, 'readwrite');
+    const req = tx.objectStore(STORE).put(item);
+    req.onsuccess = () => res(req.result);
+    req.onerror   = () => rej(req.error);
+  });
+}
+
+async function dbDelete(id) {
+  const d = await openDB();
+  return new Promise((res, rej) => {
+    const tx  = d.transaction(STORE, 'readwrite');
+    const req = tx.objectStore(STORE).delete(id);
+    req.onsuccess = () => res();
+    req.onerror   = () => rej(req.error);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// SNAPSHOT — captura o estado atual do app
+// ═══════════════════════════════════════════════════════
+function captureSnapshot() {
+  const pv = id => { const el = document.getElementById(id); return el ? (isNaN(+el.value) ? el.value : (+el.value||0)) : 0; };
+  return {
+    // Produto
+    areaTotal:     pv('areaTotal'),
+    eficiencia:    pv('efSlider'),
+    tamLote:       pv('tamLote'),
+    precoM2:       pv('precoM2'),
+    // Obra
+    custoInfraM2:  pv('custoInfraM2'),
+    custoTerreno:  pv('custoTerreno'),
+    // Fiscal
+    regime:        document.getElementById('regime')?.value || 'ret',
+    comissao:      pv('comissao'),
+    marketing:     pv('marketing'),
+    outrasDespesas:pv('outrasDespesas'),
+    tma:           pv('tma'),
+    // Permuta
+    permuta:       document.getElementById('permTog')?.checked || false,
+    permutaPct:    pv('permPct'),
+    // Baldes
+    b1pct:  pv('b1pct'), b1desc: pv('b1desc'),
+    b2pct:  pv('b2pct'), b2ent: pv('b2ent'), b2parc: pv('b2parc'), b2jur: pv('b2jur'),
+    b3pct:  pv('b3pct'), b3ent: pv('b3ent'), b3parc: pv('b3parc'), b3jur: pv('b3jur'),
+    b3corr: document.getElementById('b3corr')?.value || 'ipca',
+    // Arrays dinâmicos
+    phasesData: JSON.parse(JSON.stringify(phasesData)),
+    obraData:   JSON.parse(JSON.stringify(obraData)),
+  };
+}
+
+function restoreSnapshot(snap) {
+  const sv = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+  sv('areaTotal', snap.areaTotal);
+  sv('efSlider', snap.eficiencia);
+  document.getElementById('efVal') && (document.getElementById('efVal').textContent = snap.eficiencia+'%');
+  sv('tamLote', snap.tamLote);
+  sv('precoM2', snap.precoM2);
+  sv('custoInfraM2', snap.custoInfraM2);
+  sv('custoTerreno', snap.custoTerreno);
+  sv('regime', snap.regime);
+  sv('comissao', snap.comissao);
+  sv('marketing', snap.marketing);
+  sv('outrasDespesas', snap.outrasDespesas);
+  sv('tma', snap.tma);
+  if(document.getElementById('permTog')) document.getElementById('permTog').checked = snap.permuta;
+  togglePerm();
+  sv('permPct', snap.permutaPct);
+  sv('b1pct', snap.b1pct); sv('b1desc', snap.b1desc);
+  sv('b2pct', snap.b2pct); sv('b2ent', snap.b2ent); sv('b2parc', snap.b2parc); sv('b2jur', snap.b2jur);
+  sv('b3pct', snap.b3pct); sv('b3ent', snap.b3ent); sv('b3parc', snap.b3parc); sv('b3jur', snap.b3jur);
+  if(snap.b3corr) sv('b3corr', snap.b3corr);
+  // Arrays dinâmicos
+  if(snap.phasesData) { phasesData = JSON.parse(JSON.stringify(snap.phasesData)); renderPhases(); }
+  if(snap.obraData)   { obraData   = JSON.parse(JSON.stringify(snap.obraData));   renderObra(); }
+  updateBaldes();
+  captureBase();
+  updateUI();
+}
+
+// ═══════════════════════════════════════════════════════
+// PROJECTS MODAL
+// ═══════════════════════════════════════════════════════
+function openProjects() {
+  document.getElementById('projectsModal').classList.add('open');
+  loadProjectsList();
+  // Sugestão de nome
+  const nameEl = document.getElementById('save-name');
+  if(nameEl && !nameEl.value) nameEl.value = currentProjectName || '';
+}
+
+function closeProjects() {
+  document.getElementById('projectsModal').classList.remove('open');
+}
+
+// Fecha modal ao clicar fora
+document.getElementById('projectsModal').addEventListener('click', e => {
+  if(e.target === document.getElementById('projectsModal')) closeProjects();
+});
+
+// ═══════════════════════════════════════════════════════
+// SAVE PROJECT
+// ═══════════════════════════════════════════════════════
+let currentProjectName = '';
+let currentProjectId   = null;
+
+async function saveProject() {
+  const name = document.getElementById('save-name').value.trim();
+  if (!name) { showToast('⚠ Digite um nome para o projeto', 'err'); return; }
+
+  const R = calcular();
+  const id = currentProjectId || ('proj_' + Date.now());
+
+  const projeto = {
+    id,
+    nome:     name,
+    cidade:   document.getElementById('save-cidade').value.trim(),
+    tipo:     document.getElementById('save-tipo').value,
+    obs:      document.getElementById('save-obs').value.trim(),
+    createdAt: currentProjectId ? undefined : new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    snapshot:  captureSnapshot(),
+    resultados: {
+      vgvBruto:     R.vgvBruto,
+      tirAa:        R.tirAa,
+      lucroLiq:     R.lucroLiq,
+      margemLiq:    R.margemLiq,
+      expMax:       R.expMax,
+      vpl:          R.vpl,
+      qtdLotes:     R.qtdLotes,
+      breakevenMes: R.breakevenMes,
+    }
+  };
+  if (!projeto.createdAt) {
+    const existing = await dbGetAll();
+    const found = existing.find(p => p.id === id);
+    projeto.createdAt = found?.createdAt || new Date().toISOString();
+  }
+
+  await dbSave(projeto);
+  currentProjectName = name;
+  currentProjectId   = id;
+
+  // Update header
+  const hdrel = document.getElementById('hdr-proj-name');
+  if(hdrel) hdrel.textContent = name;
+
+  loadProjectsList();
+  showToast('✅ Projeto "'+name+'" salvo!', 'ok');
+}
+
+// ═══════════════════════════════════════════════════════
+// LOAD PROJECTS LIST
+// ═══════════════════════════════════════════════════════
+async function loadProjectsList() {
+  const list = document.getElementById('projList');
+  const projetos = await dbGetAll();
+
+  if (!projetos.length) {
+    list.innerHTML = `
+      <div class="proj-empty">
+        <div class="proj-empty-icon">🏗</div>
+        <div class="proj-empty-text">Nenhuma análise salva ainda.<br>Preencha as premissas acima e clique em Salvar.</div>
+      </div>`;
+    return;
+  }
+
+  const tipoIcon = { otimista:'▴', realista:'◈', pessimista:'▾' };
+  const tipoCor  = { otimista:'var(--grn)', realista:'var(--acc)', pessimista:'var(--red)' };
+
+  list.innerHTML = projetos.map(p => {
+    const r = p.resultados || {};
+    const d = new Date(p.updatedAt);
+    const dataStr = d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    const isCurrent = p.id === currentProjectId;
+    return `
+    <div class="proj-item" style="${isCurrent?'border-color:var(--acc)':''}" onclick="loadProject('${p.id}')">
+      <div class="proj-icon">🏘</div>
+      <div class="proj-info">
+        <div class="proj-name">${p.nome} ${isCurrent?'<span style="font-size:10px;color:var(--acc)">● atual</span>':''}</div>
+        <div class="proj-meta">
+          <span style="color:${tipoCor[p.tipo]||'var(--mut)'}">
+            ${tipoIcon[p.tipo]||'◈'} ${p.tipo||'realista'}
+          </span>
+          ${p.cidade?' · '+p.cidade:''} · ${dataStr}
+          ${p.obs?'<br><span style="font-style:italic">'+p.obs+'</span>':''}
+        </div>
+        <div class="proj-kpis">
+          <div class="proj-kpi">
+            <span class="proj-kpi-l">VGV</span>
+            <span class="proj-kpi-v" style="color:var(--blu)">${fmtKpi(r.vgvBruto)}</span>
+          </div>
+          <div class="proj-kpi">
+            <span class="proj-kpi-l">TIR a.a.</span>
+            <span class="proj-kpi-v" style="color:var(--grn)">${r.tirAa!=null?r.tirAa.toFixed(1)+'%':'—'}</span>
+          </div>
+          <div class="proj-kpi">
+            <span class="proj-kpi-l">Lucro Líq.</span>
+            <span class="proj-kpi-v" style="color:var(--acc)">${fmtKpi(r.lucroLiq)}</span>
+          </div>
+          <div class="proj-kpi">
+            <span class="proj-kpi-l">Margem</span>
+            <span class="proj-kpi-v">${r.margemLiq!=null?r.margemLiq.toFixed(1)+'%':'—'}</span>
+          </div>
+          <div class="proj-kpi">
+            <span class="proj-kpi-l">Lotes</span>
+            <span class="proj-kpi-v">${r.qtdLotes||'—'}</span>
+          </div>
+        </div>
+      </div>
+      <div class="proj-actions" onclick="event.stopPropagation()">
+        <button class="proj-btn load" onclick="loadProject('${p.id}')">📂 Carregar</button>
+        <button class="proj-btn del"  onclick="deleteProject('${p.id}','${p.nome.replace(/'/g,'')}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fmtKpi(v) {
+  if(v==null) return '—';
+  const s = v<0?'-':'';
+  const a = Math.abs(v);
+  if(a>=1e6) return s+'R$'+(a/1e6).toFixed(1)+'M';
+  if(a>=1e3) return s+'R$'+(a/1e3).toFixed(0)+'K';
+  return s+'R$'+a.toFixed(0);
+}
+
+// ═══════════════════════════════════════════════════════
+// LOAD / DELETE PROJECT
+// ═══════════════════════════════════════════════════════
+async function loadProject(id) {
+  const projetos = await dbGetAll();
+  const p = projetos.find(x => x.id === id);
+  if (!p) return;
+
+  restoreSnapshot(p.snapshot);
+  currentProjectName = p.nome;
+  currentProjectId   = id;
+
+  // Update header
+  const hdrel = document.getElementById('hdr-proj-name');
+  if(hdrel) hdrel.textContent = p.nome;
+
+  // Pre-fill save form for quick re-save
+  const nameEl = document.getElementById('save-name');
+  const cidEl  = document.getElementById('save-cidade');
+  const tipoEl = document.getElementById('save-tipo');
+  const obsEl  = document.getElementById('save-obs');
+  if(nameEl) nameEl.value = p.nome;
+  if(cidEl)  cidEl.value  = p.cidade || '';
+  if(tipoEl) tipoEl.value = p.tipo   || 'realista';
+  if(obsEl)  obsEl.value  = p.obs    || '';
+
+  closeProjects();
+  showToast('📂 Projeto "'+p.nome+'" carregado!', 'ok');
+}
+
+async function deleteProject(id, nome) {
+  if (!confirm('Deletar "'+nome+'"? Esta ação não pode ser desfeita.')) return;
+  await dbDelete(id);
+  if (currentProjectId === id) {
+    currentProjectId   = null;
+    currentProjectName = '';
+    const hdrel = document.getElementById('hdr-proj-name');
+    if(hdrel) hdrel.textContent = 'Meus Projetos';
+  }
+  loadProjectsList();
+  showToast('🗑 Projeto deletado', 'err');
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+let toastTimer = null;
+function showToast(msg, type='ok', duration=3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show '+(type==='ok'?'ok':'err');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ t.className='toast'; }, duration);
+}
+
+// ═══════════════════════════════════════════════════════
+// KEYBOARD SHORTCUT: Ctrl+S = Salvar
+// ═══════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    if (currentProjectId && currentProjectName) {
+      // Re-salva o projeto atual diretamente sem abrir modal
+      document.getElementById('save-name').value  = currentProjectName;
+      saveProject().then(() => {});
+    } else {
+      openProjects();
+      setTimeout(()=>document.getElementById('save-name')?.focus(), 100);
+    }
+  }
+  // Esc fecha modal
+  if (e.key === 'Escape') closeProjects();
+});
+
+// ═══════════════════════════════════════════════════════
+// DEEP LINK: ?projetos=1 ou ?novo=1 na URL
+// ═══════════════════════════════════════════════════════
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('projetos') === '1') {
+  window.addEventListener('load', () => setTimeout(openProjects, 500));
+}
+</script>
+
+</body>
+</html>
