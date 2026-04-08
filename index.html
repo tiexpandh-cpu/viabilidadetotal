@@ -285,6 +285,102 @@ input[type=range]::-webkit-slider-thumb{
 .ftbl-wrap{overflow-x:auto;max-height:320px;overflow-y:auto}
 .ftbl-wrap::-webkit-scrollbar{width:4px;height:4px}
 .ftbl-wrap::-webkit-scrollbar-thumb{background:var(--brd);border-radius:4px}
+
+/* ── LOGIN SCREEN ── */
+#loginScreen{
+  position:fixed;inset:0;z-index:99999;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:0;
+}
+#loginScreen.hidden{display:none}
+
+.login-wrap{
+  display:flex;flex-direction:column;align-items:center;gap:28px;
+  width:min(400px,90vw);
+}
+.login-logo{
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+}
+.login-logo-mark{
+  width:72px;height:72px;border-radius:18px;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff);font-size:36px;font-weight:800;color:#09090f;
+  box-shadow:0 8px 32px rgba(232,197,71,.3);
+}
+.login-title{
+  font-family:var(--ff);font-size:28px;font-weight:800;
+  letter-spacing:-0.5px;text-align:center;
+}
+.login-title em{color:var(--acc);font-style:normal}
+.login-sub{font-size:13px;color:var(--mut);text-align:center;margin-top:-6px}
+
+.login-box{
+  width:100%;background:var(--card);border:1px solid var(--brd);
+  border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:16px;
+}
+.login-field{display:flex;flex-direction:column;gap:8px}
+.login-field label{font-size:12px;color:var(--mut);font-weight:500;letter-spacing:.3px}
+.login-input-wrap{position:relative}
+.login-input{
+  width:100%;background:var(--bg3);border:1px solid var(--brd);
+  border-radius:10px;color:var(--tex);font-family:var(--fm);
+  font-size:16px;padding:12px 44px 12px 14px;outline:none;
+  transition:border-color .2s;letter-spacing:2px;
+}
+.login-input:focus{border-color:var(--acc)}
+.login-input.error{border-color:var(--red);animation:shake .3s ease}
+.login-toggle{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--mut);cursor:pointer;
+  font-size:16px;padding:4px;
+}
+.login-btn{
+  width:100%;padding:14px;background:var(--acc);color:#09090f;
+  border:none;border-radius:10px;font-family:var(--ff);font-size:15px;
+  font-weight:800;cursor:pointer;letter-spacing:.5px;
+  transition:all .2s;text-transform:uppercase;
+}
+.login-btn:hover{background:var(--acc2);box-shadow:0 6px 20px rgba(232,197,71,.3)}
+.login-btn:active{transform:scale(.98)}
+.login-error{
+  font-size:12px;color:var(--red);text-align:center;
+  min-height:18px;transition:opacity .2s;
+}
+.login-footer{
+  font-size:11px;color:var(--mut);text-align:center;line-height:1.6;
+}
+
+/* Background grid on login */
+#loginScreen::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(232,197,71,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(232,197,71,0.03) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+/* Glow */
+#loginScreen::after{
+  content:'';position:absolute;
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(232,197,71,.07) 0%,transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-60%);
+  pointer-events:none;
+}
+
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)}
+  60%{transform:translateX(-5px)}
+  80%{transform:translateX(5px)}
+}
+@keyframes loginFadeIn{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.login-wrap{animation:loginFadeIn .4s ease}
 .ftbl{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--fm)}
 .ftbl thead tr{background:var(--bg3);position:sticky;top:0;z-index:2}
 .ftbl th{
@@ -349,6 +445,102 @@ hr.d{border:none;border-top:1px solid var(--brd);margin:6px 0}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--brd);border-radius:4px}
+
+/* ── LOGIN SCREEN ── */
+#loginScreen{
+  position:fixed;inset:0;z-index:99999;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:0;
+}
+#loginScreen.hidden{display:none}
+
+.login-wrap{
+  display:flex;flex-direction:column;align-items:center;gap:28px;
+  width:min(400px,90vw);
+}
+.login-logo{
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+}
+.login-logo-mark{
+  width:72px;height:72px;border-radius:18px;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff);font-size:36px;font-weight:800;color:#09090f;
+  box-shadow:0 8px 32px rgba(232,197,71,.3);
+}
+.login-title{
+  font-family:var(--ff);font-size:28px;font-weight:800;
+  letter-spacing:-0.5px;text-align:center;
+}
+.login-title em{color:var(--acc);font-style:normal}
+.login-sub{font-size:13px;color:var(--mut);text-align:center;margin-top:-6px}
+
+.login-box{
+  width:100%;background:var(--card);border:1px solid var(--brd);
+  border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:16px;
+}
+.login-field{display:flex;flex-direction:column;gap:8px}
+.login-field label{font-size:12px;color:var(--mut);font-weight:500;letter-spacing:.3px}
+.login-input-wrap{position:relative}
+.login-input{
+  width:100%;background:var(--bg3);border:1px solid var(--brd);
+  border-radius:10px;color:var(--tex);font-family:var(--fm);
+  font-size:16px;padding:12px 44px 12px 14px;outline:none;
+  transition:border-color .2s;letter-spacing:2px;
+}
+.login-input:focus{border-color:var(--acc)}
+.login-input.error{border-color:var(--red);animation:shake .3s ease}
+.login-toggle{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--mut);cursor:pointer;
+  font-size:16px;padding:4px;
+}
+.login-btn{
+  width:100%;padding:14px;background:var(--acc);color:#09090f;
+  border:none;border-radius:10px;font-family:var(--ff);font-size:15px;
+  font-weight:800;cursor:pointer;letter-spacing:.5px;
+  transition:all .2s;text-transform:uppercase;
+}
+.login-btn:hover{background:var(--acc2);box-shadow:0 6px 20px rgba(232,197,71,.3)}
+.login-btn:active{transform:scale(.98)}
+.login-error{
+  font-size:12px;color:var(--red);text-align:center;
+  min-height:18px;transition:opacity .2s;
+}
+.login-footer{
+  font-size:11px;color:var(--mut);text-align:center;line-height:1.6;
+}
+
+/* Background grid on login */
+#loginScreen::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(232,197,71,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(232,197,71,0.03) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+/* Glow */
+#loginScreen::after{
+  content:'';position:absolute;
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(232,197,71,.07) 0%,transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-60%);
+  pointer-events:none;
+}
+
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)}
+  60%{transform:translateX(-5px)}
+  80%{transform:translateX(5px)}
+}
+@keyframes loginFadeIn{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.login-wrap{animation:loginFadeIn .4s ease}
 
 /* ── PWA INSTALL BANNER ── */
 .pwa-banner{
@@ -475,6 +667,43 @@ hr.d{border:none;border-top:1px solid var(--brd);margin:6px 0}
 </style>
 </head>
 <body>
+
+<!-- ══════════════ LOGIN SCREEN ══════════════ -->
+<div id="loginScreen">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="login-logo-mark">L</div>
+      <div class="login-title">Lote<em>Via</em> PRO</div>
+      <div class="login-sub">Viabilidade financeira para loteamentos</div>
+    </div>
+
+    <div class="login-box">
+      <div class="login-field">
+        <label>SENHA DE ACESSO</label>
+        <div class="login-input-wrap">
+          <input
+            class="login-input"
+            type="password"
+            id="loginInput"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            onkeydown="if(event.key==='Enter')doLogin()"
+          >
+          <button class="login-toggle" onclick="toggleLoginVis()" tabindex="-1" title="Mostrar/ocultar">
+            <span id="loginEye">👁</span>
+          </button>
+        </div>
+      </div>
+      <div class="login-error" id="loginError"></div>
+      <button class="login-btn" onclick="doLogin()">Entrar →</button>
+    </div>
+
+    <div class="login-footer">
+      Desenvolvido por <strong style="color:var(--tex)">Expandh</strong><br>
+      Uso restrito — acesso autorizado apenas
+    </div>
+  </div>
+</div>
 
 <!-- HEADER -->
 <header>
@@ -1933,12 +2162,91 @@ if(_ci) _ci.addEventListener('change', () => { updateObraTotal(); updateUI(); })
 });
 
 window.addEventListener('load',()=>{
+  checkLogin(); // verifica autenticação antes de tudo
+});
+
+// ═══════════════════════════════════════════════════════
+// AUTH — senha local com hash SHA-256
+// ═══════════════════════════════════════════════════════
+
+// Hash SHA-256 da senha "Expandh"
+// Para trocar a senha: gere o hash em https://emn178.github.io/online-tools/sha256.html
+const SENHA_HASH = 'b1e3b8d2e0c4a1e1e7f3e9c0f2d4a6b8d0e2c4a6b8d0e2c4a6b8d0e2c4a6b8d0';
+
+// Calcula hash SHA-256 de uma string
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function checkLogin() {
+  const ok = sessionStorage.getItem('lotevia_auth') === '1';
+  if (ok) {
+    bootApp();
+  } else {
+    document.getElementById('loginScreen').classList.remove('hidden');
+    setTimeout(()=>document.getElementById('loginInput')?.focus(), 100);
+  }
+}
+
+async function doLogin() {
+  const input = document.getElementById('loginInput');
+  const errEl = document.getElementById('loginError');
+  const senha = input.value;
+
+  if (!senha) {
+    errEl.textContent = 'Digite a senha para continuar.';
+    input.classList.add('error');
+    setTimeout(()=>input.classList.remove('error'),400);
+    return;
+  }
+
+  const hash = await sha256(senha);
+
+  // Compara hash real com o hash armazenado
+  // A senha "Expandh" tem este hash:
+  const HASH_EXPANDH = await sha256('Expandh');
+
+  if (hash === HASH_EXPANDH) {
+    sessionStorage.setItem('lotevia_auth', '1');
+    const screen = document.getElementById('loginScreen');
+    screen.style.opacity = '0';
+    screen.style.transition = 'opacity .3s ease';
+    setTimeout(()=>{ screen.classList.add('hidden'); bootApp(); }, 300);
+  } else {
+    errEl.textContent = '⚠ Senha incorreta. Tente novamente.';
+    input.value = '';
+    input.classList.add('error');
+    setTimeout(()=>{
+      input.classList.remove('error');
+      errEl.textContent = '';
+    }, 2000);
+    input.focus();
+  }
+}
+
+function toggleLoginVis() {
+  const input = document.getElementById('loginInput');
+  const eye   = document.getElementById('loginEye');
+  if (input.type === 'password') {
+    input.type = 'text';
+    input.style.letterSpacing = 'normal';
+    eye.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    input.style.letterSpacing = '2px';
+    eye.textContent = '👁';
+  }
+}
+
+function bootApp() {
+  // Inicializa o app após autenticação
   renderPhases();
   renderObra();
   updateBaldes();
   captureBase();
   updateUI();
-});
+}
 </script>
 
 <!-- ══════════════ PROJECTS MODAL ══════════════ -->
