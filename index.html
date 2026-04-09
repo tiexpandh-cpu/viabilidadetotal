@@ -286,6 +286,42 @@ input[type=range]::-webkit-slider-thumb{
 .ftbl-wrap::-webkit-scrollbar{width:4px;height:4px}
 .ftbl-wrap::-webkit-scrollbar-thumb{background:var(--brd);border-radius:4px}
 
+/* ── EXPORT TOOLBAR ── */
+.export-bar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.exp-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:8px;border:1px solid var(--brd);
+  background:var(--bg3);color:var(--tex);font-family:var(--fb);
+  font-size:12px;font-weight:500;cursor:pointer;transition:all .18s;
+  white-space:nowrap;
+}
+.exp-btn:hover{border-color:var(--acc);color:var(--acc)}
+.exp-btn.primary{background:rgba(45,212,160,.12);border-color:rgba(45,212,160,.4);color:var(--grn)}
+.exp-btn.primary:hover{background:rgba(45,212,160,.2)}
+.exp-btn.pdf{background:rgba(240,82,79,.1);border-color:rgba(240,82,79,.3);color:var(--red)}
+.exp-btn.pdf:hover{background:rgba(240,82,79,.2)}
+.exp-btn.json{background:rgba(91,133,245,.1);border-color:rgba(91,133,245,.3);color:var(--blu)}
+.exp-btn.json:hover{background:rgba(91,133,245,.2)}
+.exp-sep{width:1px;height:22px;background:var(--brd)}
+
+/* Print styles */
+@media print{
+  #loginScreen,header,.tabs-bar,
+  .export-bar,.exp-btn,.pwa-banner,
+  #projectsModal,.modal-overlay,
+  .tab-pane:not(.on){display:none!important}
+  body{background:#fff!important;color:#000!important}
+  .tab-pane.on{display:block!important}
+  .ftbl th,.ftbl td{border:1px solid #ccc!important;color:#000!important;font-size:10px!important}
+  .ftbl thead tr{background:#f0f0f0!important}
+  .card{border:1px solid #ddd!important;background:#fff!important}
+  .kpi{border:1px solid #ddd!important;background:#f9f9f9!important}
+  .kpi-v{color:#000!important}
+  canvas{max-width:100%}
+}
+
 /* ── LOGIN SCREEN ── */
 #loginScreen{
   position:fixed;inset:0;z-index:99999;
@@ -445,6 +481,42 @@ hr.d{border:none;border-top:1px solid var(--brd);margin:6px 0}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--brd);border-radius:4px}
+
+/* ── EXPORT TOOLBAR ── */
+.export-bar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.exp-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:8px;border:1px solid var(--brd);
+  background:var(--bg3);color:var(--tex);font-family:var(--fb);
+  font-size:12px;font-weight:500;cursor:pointer;transition:all .18s;
+  white-space:nowrap;
+}
+.exp-btn:hover{border-color:var(--acc);color:var(--acc)}
+.exp-btn.primary{background:rgba(45,212,160,.12);border-color:rgba(45,212,160,.4);color:var(--grn)}
+.exp-btn.primary:hover{background:rgba(45,212,160,.2)}
+.exp-btn.pdf{background:rgba(240,82,79,.1);border-color:rgba(240,82,79,.3);color:var(--red)}
+.exp-btn.pdf:hover{background:rgba(240,82,79,.2)}
+.exp-btn.json{background:rgba(91,133,245,.1);border-color:rgba(91,133,245,.3);color:var(--blu)}
+.exp-btn.json:hover{background:rgba(91,133,245,.2)}
+.exp-sep{width:1px;height:22px;background:var(--brd)}
+
+/* Print styles */
+@media print{
+  #loginScreen,header,.tabs-bar,
+  .export-bar,.exp-btn,.pwa-banner,
+  #projectsModal,.modal-overlay,
+  .tab-pane:not(.on){display:none!important}
+  body{background:#fff!important;color:#000!important}
+  .tab-pane.on{display:block!important}
+  .ftbl th,.ftbl td{border:1px solid #ccc!important;color:#000!important;font-size:10px!important}
+  .ftbl thead tr{background:#f0f0f0!important}
+  .card{border:1px solid #ddd!important;background:#fff!important}
+  .kpi{border:1px solid #ddd!important;background:#f9f9f9!important}
+  .kpi-v{color:#000!important}
+  canvas{max-width:100%}
+}
 
 /* ── LOGIN SCREEN ── */
 #loginScreen{
@@ -762,6 +834,13 @@ hr.d{border:none;border-top:1px solid var(--brd);margin:6px 0}
   </div>
 
   <!-- STRIP -->
+  <!-- Dashboard export bar -->
+  <div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:8px">
+    <button class="exp-btn primary" onclick="exportExcel()" style="font-size:11px;padding:6px 12px">📊 Exportar Excel</button>
+    <button class="exp-btn pdf" onclick="exportPDF()" style="font-size:11px;padding:6px 12px">🖨 Exportar PDF</button>
+    <button class="exp-btn json" onclick="exportJSON()" style="font-size:11px;padding:6px 12px">💾 Backup JSON</button>
+  </div>
+
   <div class="strip" id="dash-strip" style="margin-bottom:18px">
     <div class="strip-item"><div class="strip-l">VPL</div><div class="strip-v" id="s-vpl">—</div></div>
     <div class="strip-item"><div class="strip-l">Break-even</div><div class="strip-v" id="s-be">—</div></div>
@@ -1086,17 +1165,25 @@ hr.d{border:none;border-top:1px solid var(--brd);margin:6px 0}
 <!-- ══════════════ TAB: FLUXO COMPLETO ══════════════ -->
 <div class="tab-pane" id="tab-fluxo">
   <div class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px">
       <div>
         <div class="card-title">Matriz de Fluxo de Caixa Mensal</div>
         <div class="card-sub">★ = break-even · Cores: verde = positivo / vermelho = negativo · <span id="sub-tabela">— meses</span></div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span style="font-size:11px;color:var(--mut)">Fase:</span>
-        <span class="phase-tag" style="background:rgba(232,197,71,.15);color:var(--acc)">🚀 Lançamento</span>
-        <span class="phase-tag" style="background:rgba(91,133,245,.15);color:var(--blu)">📈 Pós</span>
-        <span class="phase-tag" style="background:rgba(45,212,160,.15);color:var(--grn)">🌱 Mat.</span>
-        <span class="phase-tag" style="background:rgba(167,139,250,.15);color:var(--pur)">🏷 Rem.</span>
+      <div class="export-bar">
+        <button class="exp-btn primary" onclick="exportExcel()" title="Exportar para Excel (.xlsx via CSV)">
+          📊 Excel
+        </button>
+        <button class="exp-btn" onclick="exportCSV()" title="Exportar CSV puro">
+          📄 CSV
+        </button>
+        <div class="exp-sep"></div>
+        <button class="exp-btn pdf" onclick="exportPDF()" title="Imprimir / Salvar como PDF">
+          🖨 PDF
+        </button>
+        <button class="exp-btn json" onclick="exportJSON()" title="Exportar premissas e resultados em JSON">
+          💾 Backup JSON
+        </button>
       </div>
     </div>
     <div class="ftbl-wrap">
@@ -2121,6 +2208,233 @@ function drawFluxoTable(R) {
 // BOOT
 // ═══════════════════════════════════════════════════════
 function calcular_wrapper() { updateUI(); }
+
+// ═══════════════════════════════════════════════════════
+// EXPORT ENGINE
+// ═══════════════════════════════════════════════════════
+
+// ── helpers ──
+function numBR(v) {
+  // Número no formato brasileiro para Excel (vírgula decimal)
+  if(v==null||isNaN(v)) return '';
+  return v.toFixed(2).replace('.',',');
+}
+function dataBR() {
+  return new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
+}
+function projectLabel() {
+  const name = document.getElementById('hdr-proj-name')?.textContent||'LoteVia';
+  return name==='Meus Projetos'?'LoteVia-PRO':name.replace(/[^a-zA-Z0-9À-ú ]/g,'').trim().replace(/ /g,'_');
+}
+
+// ── EXCEL (via CSV with BOM — opens natively in Excel/LibreOffice) ──
+function exportExcel() {
+  const R = calcular();
+  const sep = ';'; // ponto-e-vírgula para Excel em pt-BR
+  const BOM = '\uFEFF'; // UTF-8 BOM para Excel reconhecer acentos
+
+  const rows = [];
+
+  // ── Capa / Resumo ──
+  rows.push(['LOTEVIA PRO — ANÁLISE DE VIABILIDADE FINANCEIRA']);
+  rows.push(['Projeto', projectLabel()]);
+  rows.push(['Data', dataBR()]);
+  rows.push([]);
+
+  // ── KPIs ──
+  rows.push(['RESUMO EXECUTIVO']);
+  rows.push(['Indicador','Valor']);
+  rows.push(['VGV Bruto (R$)',           numBR(R.vgvBruto)]);
+  rows.push(['Quantidade de Lotes',      R.qtdLotes]);
+  rows.push(['Lucro Líquido (R$)',        numBR(R.lucroLiq)]);
+  rows.push(['Margem Líquida (%)',        numBR(R.margemLiq)]);
+  rows.push(['TIR (% a.a.)',             numBR(R.tirAa)]);
+  rows.push(['VPL (R$)',                 numBR(R.vpl)]);
+  rows.push(['Exposição Máx. Caixa (R$)',numBR(Math.abs(R.expMax))]);
+  rows.push(['Mês Exposição Máxima',     R.expMes]);
+  rows.push(['Break-even (mês)',          R.breakevenMes||'Não atingido']);
+  rows.push(['ROI (%)',                  numBR(R.roi)]);
+  rows.push(['Custo Total (R$)',         numBR(R.custoTot)]);
+  rows.push([]);
+
+  // ── Premissas ──
+  rows.push(['PREMISSAS']);
+  rows.push(['Área Total (m²)',          +$('areaTotal').value||0]);
+  rows.push(['Eficiência (%)',           +$('efSlider').value||50]);
+  rows.push(['Tamanho médio lote (m²)', +$('tamLote').value||250]);
+  rows.push(['Preço/m² (R$)',           +$('precoM2').value||420]);
+  rows.push(['Custo Infra/m² (R$)',     +$('custoInfraM2').value||85]);
+  rows.push(['Custo Terreno (R$)',      +$('custoTerreno').value||0]);
+  rows.push(['Regime Tributário',       $('regime').value]);
+  rows.push(['Comissão (%)',            +$('comissao').value||5]);
+  rows.push(['Marketing (%)',           +$('marketing').value||1.5]);
+  rows.push(['TMA (%/mês)',             +$('tma').value||1]);
+  rows.push([]);
+
+  // ── Fases de venda ──
+  rows.push(['FASES DE VENDA']);
+  rows.push(['Fase','% VGV','Início (mês)','Duração (meses)','VSO (%/mês)']);
+  phasesData.forEach(ph => {
+    rows.push([ph.nome, numBR(ph.pct), ph.ini, ph.dur, numBR(ph.pct/(ph.dur||1))]);
+  });
+  rows.push([]);
+
+  // ── Cronograma de obras ──
+  rows.push(['CRONOGRAMA DE OBRAS']);
+  rows.push(['Rubrica','% Custo','Início (mês)','Duração (meses)','Distribuição','Custo (R$)']);
+  const custoInfraTotal = (+$('custoInfraM2').value||85)*(+$('areaTotal').value||0);
+  obraData.forEach(ob => {
+    rows.push([ob.nome, numBR(ob.pct), ob.ini, ob.dur, ob.dist, numBR(custoInfraTotal*ob.pct/100)]);
+  });
+  rows.push([]);
+
+  // ── Fluxo de caixa mensal ──
+  rows.push(['FLUXO DE CAIXA MENSAL']);
+  rows.push([
+    'Mês','Fase','Lotes Vendidos','Receita Bruta (R$)',
+    'À Vista (R$)','Curto Prazo (R$)','Longo Prazo (R$)',
+    'Custo Obra (R$)','Impostos (R$)','Comissões (R$)',
+    'Fluxo Mensal (R$)','Fluxo Acumulado (R$)'
+  ]);
+
+  const aliq = $('regime').value==='ret'?0.04:$('regime').value==='lp'?0.0673:0;
+  const aliqV = ((+$('comissao').value||0)+(+$('marketing').value||0))/100;
+
+  for(let m=1;m<=R.totalMeses;m++){
+    const rec = R.rec[m];
+    const rb  = rec.av+rec.cp+rec.lp;
+    const imp = rb*aliq;
+    const com = rb*aliqV;
+    const ob  = R.obra[m]||0;
+    const fm  = R.fluxos[m];
+    const ac  = R.fluxoAcum[m];
+    const fase = rec.fase>0&&phasesData[rec.fase-1]?phasesData[rec.fase-1].nome:'—';
+    rows.push([
+      m, fase, rec.lotes||0,
+      numBR(rb), numBR(rec.av), numBR(rec.cp), numBR(rec.lp),
+      numBR(-ob), numBR(-imp), numBR(-com),
+      numBR(fm), numBR(ac)
+    ]);
+  }
+
+  // Build CSV string
+  const csv = BOM + rows.map(r =>
+    r.map(c => {
+      const s = String(c==null?'':c);
+      // Quote cells with sep, quotes or newlines
+      return (s.includes(sep)||s.includes('"')||s.includes('\n'))
+        ? '"'+s.replace(/"/g,'""')+'"'
+        : s;
+    }).join(sep)
+  ).join('\r\n');
+
+  download(csv, projectLabel()+'_'+dataBR()+'.csv', 'text/csv;charset=utf-8');
+  showToast('📊 Excel exportado com sucesso!', 'ok');
+}
+
+// ── CSV puro (vírgula, sem BOM, para outros sistemas) ──
+function exportCSV() {
+  const R = calcular();
+  const aliq = $('regime').value==='ret'?0.04:$('regime').value==='lp'?0.0673:0;
+  const aliqV = ((+$('comissao').value||0)+(+$('marketing').value||0))/100;
+
+  const header = [
+    'mes','fase','lotes_vendidos','receita_bruta',
+    'av_vista','curto_prazo','longo_prazo',
+    'custo_obra','impostos','comissoes',
+    'fluxo_mensal','fluxo_acumulado'
+  ];
+
+  const rows = [header];
+  for(let m=1;m<=R.totalMeses;m++){
+    const rec=R.rec[m];
+    const rb=rec.av+rec.cp+rec.lp;
+    rows.push([
+      m,
+      rec.fase>0&&phasesData[rec.fase-1]?phasesData[rec.fase-1].nome:'',
+      rec.lotes||0,
+      rb.toFixed(2), rec.av.toFixed(2), rec.cp.toFixed(2), rec.lp.toFixed(2),
+      (-(R.obra[m]||0)).toFixed(2),
+      (-(rb*aliq)).toFixed(2),
+      (-(rb*aliqV)).toFixed(2),
+      R.fluxos[m].toFixed(2),
+      R.fluxoAcum[m].toFixed(2)
+    ]);
+  }
+
+  const csv = rows.map(r=>r.join(',')).join('\n');
+  download(csv, projectLabel()+'_fluxo_'+dataBR()+'.csv', 'text/csv;charset=utf-8');
+  showToast('📄 CSV exportado!', 'ok');
+}
+
+// ── PDF — abre diálogo de impressão do browser ──
+function exportPDF() {
+  // Garante que o tab do dashboard está visível para impressão
+  showToast('🖨 Abrindo diálogo de impressão...', 'ok', 2000);
+  setTimeout(()=>{ window.print(); }, 400);
+}
+
+// ── JSON — backup completo das premissas ──
+function exportJSON() {
+  const R = calcular();
+  const data = {
+    meta: {
+      app: 'LoteVia PRO',
+      versao: '2.0',
+      projeto: projectLabel(),
+      exportadoEm: new Date().toISOString(),
+    },
+    premissas: captureSnapshot(),
+    resultados: {
+      vgvBruto:     R.vgvBruto,
+      qtdLotes:     R.qtdLotes,
+      lucroLiq:     R.lucroLiq,
+      margemLiq:    R.margemLiq,
+      tirAa:        R.tirAa,
+      vpl:          R.vpl,
+      expMax:       R.expMax,
+      expMes:       R.expMes,
+      breakevenMes: R.breakevenMes,
+      roi:          R.roi,
+      custoTot:     R.custoTot,
+    },
+    fluxo: Array.from({length:R.totalMeses},(_,i)=>{
+      const m=i+1, rec=R.rec[m];
+      const rb=rec.av+rec.cp+rec.lp;
+      const aliq=$('regime').value==='ret'?0.04:$('regime').value==='lp'?0.0673:0;
+      const aliqV=((+$('comissao').value||0)+(+$('marketing').value||0))/100;
+      return {
+        mes:m,
+        fase:rec.fase,
+        lotes:rec.lotes,
+        receitaBruta:+rb.toFixed(2),
+        aVista:+rec.av.toFixed(2),
+        curtoPrazo:+rec.cp.toFixed(2),
+        longoPrazo:+rec.lp.toFixed(2),
+        custoObra:+((R.obra[m]||0)).toFixed(2),
+        impostos:+(rb*aliq).toFixed(2),
+        comissoes:+(rb*aliqV).toFixed(2),
+        fluxoMensal:+R.fluxos[m].toFixed(2),
+        fluxoAcumulado:+R.fluxoAcum[m].toFixed(2),
+      };
+    })
+  };
+
+  download(JSON.stringify(data,null,2), projectLabel()+'_backup_'+dataBR()+'.json', 'application/json');
+  showToast('💾 Backup JSON exportado!', 'ok');
+}
+
+// ── Utilitário de download ──
+function download(content, filename, mime) {
+  const blob = new Blob([content], {type: mime});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 500);
+}
 
 // ── SENSITIVITY (não dispara updateUI, só atualiza o tab de sensibilidade)
 $('sensVSO').addEventListener('input', updateSensibilidade);
