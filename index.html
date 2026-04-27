@@ -284,7 +284,140 @@ input[type=range]::-webkit-slider-thumb{
 /* ── FLUXO TABLE ── */
 .ftbl-wrap{overflow-x:auto;max-height:320px;overflow-y:auto}
 .ftbl-wrap::-webkit-scrollbar{width:4px;height:4px}
-.ftbl-wrap::-webkit-scrollbar-thumb{background:var(--brd);border-radius:4px}
+.ftbl-wrap::-webkit-scrollbar-thumb{background:var(--brd);border-radius:4px}/* ── SENSITIVITY MATRIX 2D ── */
+.matrix-wrap{overflow-x:auto;overflow-y:auto;max-height:520px;border-radius:10px;border:1px solid var(--brd)}
+.matrix-tbl{border-collapse:collapse;font-size:11px;font-family:var(--fm);white-space:nowrap;width:100%}
+.matrix-tbl th{
+  position:sticky;top:0;z-index:3;
+  padding:8px 12px;background:var(--bg3);
+  color:var(--mut);font-weight:600;letter-spacing:.5px;
+  border-bottom:1px solid var(--brd);border-right:1px solid var(--brd);
+  text-align:center;
+}
+.matrix-tbl th.row-header{
+  position:sticky;left:0;z-index:4;
+  background:var(--bg3);text-align:left;min-width:110px;
+}
+.matrix-tbl th.corner{position:sticky;left:0;top:0;z-index:5;background:var(--bg3)}
+.matrix-tbl td{
+  padding:7px 10px;border-right:1px solid rgba(35,38,58,.4);
+  border-bottom:1px solid rgba(35,38,58,.4);text-align:center;
+  cursor:default;transition:filter .1s;min-width:80px;
+}
+.matrix-tbl td:hover{filter:brightness(1.2);outline:2px solid rgba(255,255,255,.3)}
+.matrix-tbl td.row-label{
+  position:sticky;left:0;z-index:2;
+  background:var(--bg3);color:var(--mut);
+  font-weight:600;text-align:left;padding:7px 12px;
+  border-right:1px solid var(--brd);
+}
+.matrix-tbl tr td.current-cell{
+  outline:2px solid var(--acc)!important;
+  outline-offset:-2px;
+}
+.matrix-legend{
+  display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap;
+}
+.matrix-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--mut)}
+.matrix-legend-swatch{width:16px;height:16px;border-radius:4px;flex-shrink:0}
+
+/* Matrix metric selector */
+.matrix-controls{
+  display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;
+}
+.matrix-metric-btn{
+  padding:6px 14px;border-radius:20px;border:1px solid var(--brd);
+  background:transparent;color:var(--mut);font-family:var(--fb);
+  font-size:11px;font-weight:600;cursor:pointer;transition:all .18s;
+}
+.matrix-metric-btn.on{background:rgba(232,197,71,.12);border-color:var(--acc);color:var(--acc)}
+.matrix-metric-btn:hover:not(.on){border-color:var(--mut);color:var(--tex)}
+
+/* Range controls */
+.matrix-range-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;
+}
+.matrix-range-item{background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:12px}
+.matrix-range-label{font-size:10px;color:var(--mut);letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px}
+.matrix-range-inputs{display:flex;align-items:center;gap:6px}
+.matrix-range-inputs input{
+  width:60px;background:var(--bg);border:1px solid var(--brd);border-radius:6px;
+  color:var(--tex);font-family:var(--fm);font-size:12px;padding:5px 8px;
+  outline:none;text-align:center;
+}
+.matrix-range-inputs input:focus{border-color:var(--acc)}
+.matrix-range-inputs span{color:var(--mut);font-size:11px}
+
+/* Tooltip popup */
+.matrix-tooltip{
+  position:fixed;z-index:9000;background:var(--card);border:1px solid var(--brd);
+  border-radius:10px;padding:12px 14px;pointer-events:none;
+  box-shadow:0 8px 24px rgba(0,0,0,.5);min-width:180px;
+  display:none;
+}
+.matrix-tooltip.visible{display:block}
+.matrix-tooltip-title{font-family:var(--ff);font-size:12px;font-weight:700;margin-bottom:8px;color:var(--acc)}
+.matrix-tooltip-row{display:flex;justify-content:space-between;gap:16px;font-size:11px;margin-bottom:4px}
+.matrix-tooltip-label{color:var(--mut)}
+.matrix-tooltip-val{font-family:var(--fm);font-weight:600;color:var(--tex)}
+
+/* ── COMPARATOR ── */
+.comp-slot{
+  background:var(--card);border:1px solid var(--brd);border-radius:14px;
+  min-height:180px;display:flex;flex-direction:column;overflow:hidden;
+  transition:border-color .2s;
+}
+.comp-slot-empty{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:20px;text-align:center;
+}
+.comp-pick-btn{
+  padding:8px 18px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);
+  color:var(--pur);border-radius:8px;font-size:12px;font-weight:600;
+  cursor:pointer;font-family:var(--ff);transition:all .18s;
+}
+.comp-pick-btn:hover{background:rgba(167,139,250,.2)}
+.comp-slot-header{
+  padding:14px 16px;border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.comp-slot-name{font-family:var(--ff);font-size:13px;font-weight:700}
+.comp-slot-badge{font-size:10px;padding:2px 8px;border-radius:6px;font-weight:600}
+.comp-slot-kpis{padding:14px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.comp-kpi-row{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 10px;background:var(--bg3);border-radius:8px;}
+.comp-kpi-label{font-size:11px;color:var(--mut)}
+.comp-kpi-val{font-family:var(--fm);font-size:14px;font-weight:600}
+.comp-slot-footer{padding:10px 16px;border-top:1px solid var(--brd);
+  display:flex;gap:8px;justify-content:flex-end}
+.comp-clear-btn{font-size:11px;color:var(--mut);background:transparent;
+  border:1px solid var(--brd);border-radius:6px;padding:4px 10px;cursor:pointer}
+.comp-clear-btn:hover{color:var(--red);border-color:var(--red)}
+.comp-load-btn{font-size:11px;color:var(--grn);background:transparent;
+  border:1px solid rgba(45,212,160,.3);border-radius:6px;padding:4px 10px;cursor:pointer}
+.comp-load-btn:hover{background:rgba(45,212,160,.1)}
+
+/* Comparison KPI table */
+#compKpiTable th{
+  padding:10px 14px;text-align:left;background:var(--bg3);
+  font-size:10px;color:var(--mut);letter-spacing:.8px;text-transform:uppercase;
+  font-weight:600;
+}
+#compKpiTable td{
+  padding:10px 14px;border-bottom:1px solid rgba(35,38,58,.5);
+  font-size:13px;
+}
+#compKpiTable tr:last-child td{border-bottom:none}
+#compKpiTable .kpi-row-label{color:var(--mut);font-size:12px;font-weight:500}
+#compKpiTable .best{color:var(--grn);font-weight:700;font-family:var(--fm)}
+#compKpiTable .val{font-family:var(--fm);color:var(--tex)}
+#compKpiTable .worst{color:var(--red);font-family:var(--fm)}
+#compKpiTable tr:hover td{background:rgba(255,255,255,.015)}
+.comp-winner-tag{
+  display:inline-block;font-size:9px;padding:1px 6px;border-radius:4px;
+  background:rgba(45,212,160,.15);color:var(--grn);font-weight:700;
+  margin-left:6px;letter-spacing:.3px;
+}
 
 /* ── EXPORT TOOLBAR ── */
 .export-bar{
@@ -322,200 +455,377 @@ input[type=range]::-webkit-slider-thumb{
   canvas{max-width:100%}
 }
 
-/* ── LOGIN SCREEN ── */
-#loginScreen{
-  position:fixed;inset:0;z-index:99999;
-  background:var(--bg);
-  display:flex;align-items:center;justify-content:center;
-  flex-direction:column;gap:0;
-}
-#loginScreen.hidden{display:none}
+/* ══════════════════════════════════════════════════
+   DASHBOARD REDESIGN — 2×4 Grid
+══════════════════════════════════════════════════ */
 
-.login-wrap{
-  display:flex;flex-direction:column;align-items:center;gap:28px;
-  width:min(400px,90vw);
+/* Top bar */
+.dash-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:28px;padding:0 2px;flex-wrap:wrap;gap:12px;
 }
-.login-logo{
-  display:flex;flex-direction:column;align-items:center;gap:12px;
+.dash-aval-wrap{display:flex;align-items:center;gap:10px}
+.dash-export-btns{display:flex;gap:8px;flex-wrap:wrap}
+
+/* KPI Grid — 4 cols × 2 rows */
+.dash-kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  grid-template-rows:auto auto;
+  gap:16px;
+  margin-bottom:28px;
 }
-.login-logo-mark{
-  width:72px;height:72px;border-radius:18px;
+
+/* Big KPI card (row 1) */
+.dash-kpi-card{
+  background:var(--card);
+  border:1px solid var(--brd);
+  border-radius:18px;
+  padding:28px 24px;
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  position:relative;
+  overflow:hidden;
+  transition:transform .18s, box-shadow .18s;
+}
+.dash-kpi-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(0,0,0,.35);
+}
+.dash-kpi-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--dk-color,var(--acc));
+}
+.dash-kpi-card::after{
+  content:'';
+  position:absolute;
+  bottom:-30px;right:-20px;
+  width:100px;height:100px;
+  border-radius:50%;
+  background:var(--dk-color,var(--acc));
+  opacity:.04;
+}
+.dk-icon{
+  font-size:28px;
+  line-height:1;
+  flex-shrink:0;
+  margin-top:2px;
+  opacity:.85;
+}
+.dk-body{display:flex;flex-direction:column;gap:6px;min-width:0}
+.dk-label{
+  font-size:11px;font-weight:700;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--mut);
+}
+.dk-value{
+  font-family:var(--ff);font-size:32px;font-weight:800;
+  line-height:1;letter-spacing:-1px;
+  color:var(--dk-color,var(--tex));
+  white-space:nowrap;
+}
+.dk-sub{
+  font-size:12px;color:var(--mut);
+  font-family:var(--fb);
+}
+
+/* Small KPI card (row 2) */
+.dash-kpi-card--sm{
+  padding:18px 20px;
+  border-radius:14px;
+}
+.dash-kpi-card--sm .dk-icon{display:none}
+.dk-value--sm{
+  font-family:var(--fm);font-size:20px;font-weight:700;
+  letter-spacing:-.3px;color:var(--dk-color,var(--tex));
+}
+
+/* Charts rows */
+.dash-charts-main{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  margin-bottom:20px;
+}
+.dash-charts-secondary{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:20px;
+}
+.dash-card-header{
+  display:flex;align-items:flex-start;
+  justify-content:space-between;margin-bottom:4px;
+}
+
+/* ══════════════════════════════════════════════════
+   CALCULADORA DE PREÇO REVERSO
+══════════════════════════════════════════════════ */
+.rev-layout{
+  display:grid;
+  grid-template-columns:380px 1fr;
+  gap:20px;
+  align-items:start;
+}
+.rev-panel{
+  background:var(--card);border:1px solid var(--brd);
+  border-radius:16px;padding:24px;
+  display:flex;flex-direction:column;gap:18px;
+}
+.rev-section-title{
+  font-family:var(--ff);font-size:11px;font-weight:700;
+  letter-spacing:1.2px;text-transform:uppercase;color:var(--mut);
+  padding-bottom:10px;border-bottom:1px solid var(--brd);
+}
+.rev-field{display:flex;flex-direction:column;gap:5px}
+.rev-field label{font-size:11px;color:var(--mut);font-weight:500;letter-spacing:.3px}
+.rev-field input,.rev-field select{
+  background:var(--bg3);border:1px solid var(--brd);border-radius:8px;
+  color:var(--tex);font-family:var(--fm);font-size:14px;
+  padding:9px 12px;outline:none;transition:border-color .2s;width:100%;
+}
+.rev-field input:focus,.rev-field select:focus{border-color:var(--grn)}
+.rev-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rev-target-card{
+  background:linear-gradient(135deg,rgba(45,212,160,.08),rgba(45,212,160,.03));
+  border:1px solid rgba(45,212,160,.25);border-radius:12px;
+  padding:16px;display:flex;flex-direction:column;gap:10px;
+}
+.rev-target-title{
+  font-family:var(--ff);font-size:12px;font-weight:700;
+  color:var(--grn);letter-spacing:.5px;
+}
+.rev-calc-btn{
+  width:100%;padding:14px;background:var(--grn);color:#09090f;
+  border:none;border-radius:10px;font-family:var(--ff);
+  font-size:14px;font-weight:800;cursor:pointer;
+  letter-spacing:.5px;transition:all .2s;text-transform:uppercase;
+}
+.rev-calc-btn:hover{
+  filter:brightness(1.1);
+  box-shadow:0 6px 20px rgba(45,212,160,.3);
+  transform:translateY(-1px);
+}
+
+/* Results panel */
+.rev-results{display:flex;flex-direction:column;gap:16px}
+
+.rev-answer-card{
+  background:var(--card);border:1px solid var(--brd);border-radius:16px;
+  padding:28px;position:relative;overflow:hidden;
+}
+.rev-answer-card.found{border-color:rgba(45,212,160,.4)}
+.rev-answer-card.notfound{border-color:rgba(240,82,79,.4)}
+.rev-answer-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+}
+.rev-answer-card.found::before{background:var(--grn)}
+.rev-answer-card.notfound::before{background:var(--red)}
+.rev-answer-label{
+  font-size:11px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;color:var(--mut);margin-bottom:6px;
+}
+.rev-answer-value{
+  font-family:var(--ff);font-size:48px;font-weight:800;
+  line-height:1;letter-spacing:-2px;color:var(--grn);
+  margin-bottom:8px;
+}
+.rev-answer-value.notfound{color:var(--red);font-size:28px}
+.rev-answer-sub{font-size:13px;color:var(--mut);line-height:1.6}
+
+/* Achieved metrics grid */
+.rev-metrics-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+}
+.rev-metric{
+  background:var(--bg3);border:1px solid var(--brd);border-radius:12px;
+  padding:14px;display:flex;flex-direction:column;gap:5px;
+}
+.rev-metric-label{font-size:10px;color:var(--mut);letter-spacing:.6px;text-transform:uppercase}
+.rev-metric-value{font-family:var(--fm);font-size:16px;font-weight:600}
+.rev-metric-target{font-size:10px;color:var(--mut)}
+.rev-metric.hit  .rev-metric-value{color:var(--grn)}
+.rev-metric.miss .rev-metric-value{color:var(--red)}
+.rev-metric.near .rev-metric-value{color:var(--acc)}
+
+/* Sensitivity band */
+.rev-band-card{
+  background:var(--card);border:1px solid var(--brd);border-radius:16px;padding:20px;
+}
+.rev-band-title{
+  font-family:var(--ff);font-size:13px;font-weight:700;margin-bottom:4px;
+}
+.rev-band-sub{font-size:11px;color:var(--mut);margin-bottom:16px}
+.rev-band-table{width:100%;border-collapse:collapse;font-size:12px}
+.rev-band-table th{
+  padding:8px 12px;text-align:right;background:var(--bg3);
+  color:var(--mut);font-size:10px;letter-spacing:.6px;text-transform:uppercase;font-weight:600;
+}
+.rev-band-table th:first-child{text-align:left}
+.rev-band-table td{
+  padding:8px 12px;border-bottom:1px solid rgba(35,38,58,.5);
+  text-align:right;font-family:var(--fm);
+}
+.rev-band-table td:first-child{text-align:left;color:var(--mut)}
+.rev-band-table tr.target-row td{
+  background:rgba(45,212,160,.06);
+  border-top:1px solid rgba(45,212,160,.3);
+  border-bottom:1px solid rgba(45,212,160,.3);
+  font-weight:700;
+}
+.rev-band-table .green{color:var(--grn)}
+.rev-band-table .red{color:var(--red)}
+.rev-band-table .acc{color:var(--acc)}
+
+/* Empty state */
+.rev-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:300px;color:var(--mut);text-align:center;gap:12px;
+}
+.rev-empty-icon{font-size:48px;opacity:.5}
+
+/* ══════════════════════════════════════════════════
+   HELP MANUAL MODAL
+══════════════════════════════════════════════════ */
+.help-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);
+  backdrop-filter:blur(10px);z-index:6000;
+  display:none;align-items:flex-start;justify-content:center;
+  padding:24px 16px;overflow-y:auto;
+}
+.help-overlay.open{display:flex}
+.help-modal{
+  background:var(--bg2);border:1px solid var(--brd);border-radius:20px;
+  width:min(900px,98vw);display:flex;flex-direction:column;
+  box-shadow:0 32px 80px rgba(0,0,0,.7);overflow:hidden;
+  margin:auto;
+}
+.help-header{
+  padding:22px 28px;border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg3);position:sticky;top:0;z-index:2;flex-shrink:0;
+}
+.help-header-left{display:flex;align-items:center;gap:14px}
+.help-logo{
+  width:38px;height:38px;border-radius:9px;
   background:linear-gradient(135deg,var(--acc),var(--acc2));
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--ff);font-size:36px;font-weight:800;color:#09090f;
-  box-shadow:0 8px 32px rgba(232,197,71,.3);
+  font-family:var(--ff);font-size:18px;font-weight:800;color:#09090f;
 }
-.login-title{
-  font-family:var(--ff);font-size:28px;font-weight:800;
-  letter-spacing:-0.5px;text-align:center;
+.help-title{font-family:var(--ff);font-size:18px;font-weight:800}
+.help-version{font-size:10px;color:var(--mut);background:var(--brd);padding:2px 8px;border-radius:6px;font-family:var(--fm)}
+.help-close{
+  width:34px;height:34px;border-radius:8px;background:var(--card);
+  border:1px solid var(--brd);color:var(--mut);cursor:pointer;
+  font-size:16px;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
 }
-.login-title em{color:var(--acc);font-style:normal}
-.login-sub{font-size:13px;color:var(--mut);text-align:center;margin-top:-6px}
+.help-close:hover{color:var(--tex);border-color:var(--tex)}
 
-.login-box{
-  width:100%;background:var(--card);border:1px solid var(--brd);
-  border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:16px;
+.help-body{display:flex;flex:1;min-height:0}
+
+/* Sidebar nav */
+.help-nav{
+  width:220px;flex-shrink:0;padding:20px 16px;
+  border-right:1px solid var(--brd);background:var(--bg3);
+  display:flex;flex-direction:column;gap:4px;
+  position:sticky;top:0;max-height:80vh;overflow-y:auto;
 }
-.login-field{display:flex;flex-direction:column;gap:8px}
-.login-field label{font-size:12px;color:var(--mut);font-weight:500;letter-spacing:.3px}
-.login-input-wrap{position:relative}
-.login-input{
-  width:100%;background:var(--bg3);border:1px solid var(--brd);
-  border-radius:10px;color:var(--tex);font-family:var(--fm);
-  font-size:16px;padding:12px 44px 12px 14px;outline:none;
-  transition:border-color .2s;letter-spacing:2px;
+.help-nav-group{
+  font-size:9px;font-weight:700;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--mut);
+  margin:12px 0 4px 8px;
 }
-.login-input:focus{border-color:var(--acc)}
-.login-input.error{border-color:var(--red);animation:shake .3s ease}
-.login-toggle{
-  position:absolute;right:12px;top:50%;transform:translateY(-50%);
-  background:none;border:none;color:var(--mut);cursor:pointer;
-  font-size:16px;padding:4px;
+.help-nav-group:first-child{margin-top:0}
+.help-nav-item{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:8px;cursor:pointer;
+  font-size:12px;font-weight:500;color:var(--mut);
+  transition:all .15s;border:1px solid transparent;
 }
-.login-btn{
-  width:100%;padding:14px;background:var(--acc);color:#09090f;
-  border:none;border-radius:10px;font-family:var(--ff);font-size:15px;
-  font-weight:800;cursor:pointer;letter-spacing:.5px;
-  transition:all .2s;text-transform:uppercase;
+.help-nav-item:hover{background:var(--card);color:var(--tex)}
+.help-nav-item.active{
+  background:rgba(232,197,71,.1);border-color:rgba(232,197,71,.2);
+  color:var(--acc);font-weight:600;
 }
-.login-btn:hover{background:var(--acc2);box-shadow:0 6px 20px rgba(232,197,71,.3)}
-.login-btn:active{transform:scale(.98)}
-.login-error{
-  font-size:12px;color:var(--red);text-align:center;
-  min-height:18px;transition:opacity .2s;
+.help-nav-item .nav-icon{font-size:14px;flex-shrink:0}
+
+/* Content area */
+.help-content{
+  flex:1;padding:28px 32px;overflow-y:auto;max-height:80vh;
 }
-.login-footer{
-  font-size:11px;color:var(--mut);text-align:center;line-height:1.6;
+.help-content::-webkit-scrollbar{width:4px}
+.help-content::-webkit-scrollbar-thumb{background:var(--brd);border-radius:4px}
+
+/* Section */
+.help-section{display:none}
+.help-section.active{display:block}
+
+.help-section h1{
+  font-family:var(--ff);font-size:24px;font-weight:800;
+  letter-spacing:-.5px;margin-bottom:6px;color:var(--tex);
+}
+.help-section h2{
+  font-family:var(--ff);font-size:16px;font-weight:700;
+  margin:28px 0 10px;color:var(--tex);
+  padding-bottom:8px;border-bottom:1px solid var(--brd);
+}
+.help-section h3{
+  font-family:var(--ff);font-size:13px;font-weight:700;
+  margin:16px 0 6px;color:var(--acc);
+}
+.help-section p{
+  font-size:13px;line-height:1.8;color:var(--mut);margin-bottom:10px;
+}
+.help-section p strong{color:var(--tex)}
+.help-section ul{
+  margin:8px 0 12px 16px;display:flex;flex-direction:column;gap:5px;
+}
+.help-section ul li{font-size:13px;color:var(--mut);line-height:1.6}
+.help-section ul li strong{color:var(--tex)}
+
+/* Info box */
+.help-box{
+  border-radius:10px;padding:14px 16px;margin:12px 0;
+  font-size:12px;line-height:1.7;
+}
+.help-box.tip{background:rgba(45,212,160,.08);border:1px solid rgba(45,212,160,.2);color:var(--grn)}
+.help-box.warn{background:rgba(240,180,41,.08);border:1px solid rgba(240,180,41,.2);color:var(--acc)}
+.help-box.info{background:rgba(91,133,245,.08);border:1px solid rgba(91,133,245,.2);color:var(--blu)}
+.help-box strong{color:inherit}
+
+/* KV table */
+.help-kv{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:12px}
+.help-kv th{
+  background:var(--bg3);padding:8px 12px;text-align:left;
+  color:var(--mut);font-size:10px;letter-spacing:.6px;text-transform:uppercase;
+  border-bottom:1px solid var(--brd);font-weight:600;
+}
+.help-kv td{
+  padding:8px 12px;border-bottom:1px solid rgba(35,38,58,.4);
+  vertical-align:top;
+}
+.help-kv td:first-child{color:var(--acc);font-family:var(--fm);font-size:11px;white-space:nowrap;font-weight:600}
+.help-kv td:last-child{color:var(--mut);line-height:1.6}
+
+/* Shortcut badge */
+.kbd{
+  display:inline-block;background:var(--bg3);border:1px solid var(--brd);
+  border-radius:5px;padding:2px 8px;font-family:var(--fm);font-size:11px;
+  color:var(--tex);margin:0 2px;
 }
 
-/* Background grid on login */
-#loginScreen::before{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background-image:
-    linear-gradient(rgba(232,197,71,0.03) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(232,197,71,0.03) 1px,transparent 1px);
-  background-size:48px 48px;
+/* Step list */
+.help-steps{list-style:none;margin:10px 0;display:flex;flex-direction:column;gap:10px}
+.help-steps li{
+  display:flex;gap:12px;align-items:flex-start;
+  font-size:13px;color:var(--mut);line-height:1.6;
 }
-/* Glow */
-#loginScreen::after{
-  content:'';position:absolute;
-  width:400px;height:400px;border-radius:50%;
-  background:radial-gradient(circle,rgba(232,197,71,.07) 0%,transparent 70%);
-  top:50%;left:50%;transform:translate(-50%,-60%);
-  pointer-events:none;
-}
-
-@keyframes shake{
-  0%,100%{transform:translateX(0)}
-  20%{transform:translateX(-8px)}
-  40%{transform:translateX(8px)}
-  60%{transform:translateX(-5px)}
-  80%{transform:translateX(5px)}
-}
-@keyframes loginFadeIn{
-  from{opacity:0;transform:translateY(16px)}
-  to{opacity:1;transform:translateY(0)}
-}
-.login-wrap{animation:loginFadeIn .4s ease}
-.ftbl{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--fm)}
-.ftbl thead tr{background:var(--bg3);position:sticky;top:0;z-index:2}
-.ftbl th{
-  padding:9px 12px;text-align:right;color:var(--mut);
-  font-size:10px;letter-spacing:.6px;font-weight:600;text-transform:uppercase;
-  white-space:nowrap;
-}
-.ftbl th:first-child{text-align:left}
-.ftbl td{
-  padding:8px 12px;text-align:right;border-bottom:1px solid rgba(35,38,58,.4);
-  white-space:nowrap;
-}
-.ftbl td:first-child{text-align:left;color:var(--mut)}
-.ftbl tr:hover td{background:rgba(255,255,255,.015)}
-.ftbl .pos{color:var(--grn)}
-.ftbl .neg{color:var(--red)}
-.ftbl .be-row td{
-  background:rgba(232,197,71,.06)!important;
-  border-top:1px solid rgba(232,197,71,.3);
-  border-bottom:1px solid rgba(232,197,71,.3);
-}
-.ftbl .phase-indicator{
-  display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;
-}
-
-/* ── BADGES ── */
-.badge{
-  display:inline-flex;align-items:center;padding:3px 10px;
-  border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
-}
-.b-grn{background:rgba(45,212,160,.12);color:var(--grn)}
-.b-yel{background:rgba(232,197,71,.12);color:var(--acc)}
-.b-red{background:rgba(240,82,79,.12);color:var(--red)}
-.b-blu{background:rgba(91,133,245,.12);color:var(--blu)}
-
-/* ── SUMMARY STRIP ── */
-.strip{
-  display:flex;align-items:center;gap:32px;padding:14px 20px;
-  background:var(--bg3);border:1px solid var(--brd);border-radius:10px;
-  flex-wrap:wrap;
-}
-.strip-item{display:flex;flex-direction:column;gap:2px}
-.strip-l{font-size:10px;color:var(--mut);letter-spacing:.6px;text-transform:uppercase}
-.strip-v{font-family:var(--fm);font-size:14px;font-weight:600}
-
-/* ── OBRA TIMELINE ── */
-.timeline-wrap{position:relative;overflow-x:auto;padding-bottom:8px}
-.timeline-canvas{height:130px;min-width:600px;width:100%}
-
-/* ── ANIMATE ── */
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.kpi{animation:fadeUp .35s ease both}
-.kpi:nth-child(1){animation-delay:.05s}
-.kpi:nth-child(2){animation-delay:.1s}
-.kpi:nth-child(3){animation-delay:.15s}
-.kpi:nth-child(4){animation-delay:.2s}
-
-/* ── DIVIDER ── */
-hr.d{border:none;border-top:1px solid var(--brd);margin:6px 0}
-
-/* Scrollbar global */
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--brd);border-radius:4px}
-
-/* ── EXPORT TOOLBAR ── */
-.export-bar{
-  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-}
-.exp-btn{
-  display:flex;align-items:center;gap:6px;
-  padding:7px 14px;border-radius:8px;border:1px solid var(--brd);
-  background:var(--bg3);color:var(--tex);font-family:var(--fb);
-  font-size:12px;font-weight:500;cursor:pointer;transition:all .18s;
-  white-space:nowrap;
-}
-.exp-btn:hover{border-color:var(--acc);color:var(--acc)}
-.exp-btn.primary{background:rgba(45,212,160,.12);border-color:rgba(45,212,160,.4);color:var(--grn)}
-.exp-btn.primary:hover{background:rgba(45,212,160,.2)}
-.exp-btn.pdf{background:rgba(240,82,79,.1);border-color:rgba(240,82,79,.3);color:var(--red)}
-.exp-btn.pdf:hover{background:rgba(240,82,79,.2)}
-.exp-btn.json{background:rgba(91,133,245,.1);border-color:rgba(91,133,245,.3);color:var(--blu)}
-.exp-btn.json:hover{background:rgba(91,133,245,.2)}
-.exp-sep{width:1px;height:22px;background:var(--brd)}
-
-/* Print styles */
-@media print{
-  #loginScreen,header,.tabs-bar,
-  .export-bar,.exp-btn,.pwa-banner,
-  #projectsModal,.modal-overlay,
-  .tab-pane:not(.on){display:none!important}
-  body{background:#fff!important;color:#000!important}
-  .tab-pane.on{display:block!important}
-  .ftbl th,.ftbl td{border:1px solid #ccc!important;color:#000!important;font-size:10px!important}
-  .ftbl thead tr{background:#f0f0f0!important}
-  .card{border:1px solid #ddd!important;background:#fff!important}
-  .kpi{border:1px solid #ddd!important;background:#f9f9f9!important}
-  .kpi-v{color:#000!important}
-  canvas{max-width:100%}
+.step-num{
+  width:24px;height:24px;border-radius:50%;background:var(--acc);
+  color:#09090f;font-size:11px;font-weight:800;font-family:var(--ff);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  margin-top:1px;
 }
 
 /* ── LOGIN SCREEN ── */
@@ -792,6 +1102,9 @@ hr.d{border:none;border-top:1px solid var(--brd);margin:6px 0}
     <button onclick="openProjects()" style="padding:7px 14px;background:var(--bg3);color:var(--tex);border:1px solid var(--brd);border-radius:8px;font-family:var(--fb);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;">
       <span>📁</span><span id="hdr-proj-name" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Meus Projetos</span>
     </button>
+    <button onclick="openHelp()" style="padding:7px 14px;background:var(--bg3);color:var(--mut);border:1px solid var(--brd);border-radius:8px;font-family:var(--fb);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s;" onmouseover="this.style.borderColor='var(--acc)';this.style.color='var(--acc)'" onmouseout="this.style.borderColor='var(--brd)';this.style.color='var(--mut)'">
+      <span>❓</span><span>Ajuda</span>
+    </button>
     <button class="calc-hdr" onclick="updateUI()">⟳ Recalcular</button>
   </div>
 </header>
@@ -804,83 +1117,162 @@ hr.d{border:none;border-top:1px solid var(--brd);margin:6px 0}
   <button class="tab-btn" onclick="showTab('financ')">Recebimento & Multi-Tabela</button>
   <button class="tab-btn" onclick="showTab('sensib')">Sensibilidade</button>
   <button class="tab-btn" onclick="showTab('fluxo')">Fluxo Completo</button>
+  <button class="tab-btn" onclick="showTab('comp')" id="tab-btn-comp" style="color:var(--pur);border-bottom-color:transparent">⚖ Comparador</button>
+  <button class="tab-btn" onclick="showTab('reverso')" style="color:var(--grn);border-bottom-color:transparent">🎯 Preço Reverso</button>
 </div>
 
 <!-- ══════════════ TAB: DASHBOARD ══════════════ -->
 <div class="tab-pane on" id="tab-dash">
 
-  <!-- KPIs -->
-  <div class="g4" style="margin-bottom:18px">
-    <div class="kpi" style="--stripe:var(--blu);--kc:var(--blu)">
-      <div class="kpi-l">VGV Bruto</div>
-      <div class="kpi-v" id="k-vgv">—</div>
-      <div class="kpi-s" id="k-lotes">— lotes</div>
+  <!-- ── TOP BAR: export + avaliação ── -->
+  <div class="dash-topbar">
+    <div class="dash-aval-wrap">
+      <span style="font-size:11px;color:var(--mut);font-weight:600;letter-spacing:.5px;text-transform:uppercase">Avaliação</span>
+      <span class="badge" id="s-aval" style="font-size:11px;padding:4px 14px">—</span>
     </div>
-    <div class="kpi" style="--stripe:var(--grn);--kc:var(--grn)">
-      <div class="kpi-l">TIR (a.a.)</div>
-      <div class="kpi-v" id="k-tir">—</div>
-      <div class="kpi-s" id="k-tirsub">—% a.m.</div>
-    </div>
-    <div class="kpi" style="--stripe:var(--red);--kc:var(--red)">
-      <div class="kpi-l">Exposição Máx.</div>
-      <div class="kpi-v" id="k-exp">—</div>
-      <div class="kpi-s" id="k-expsub">Mês —</div>
-    </div>
-    <div class="kpi" style="--stripe:var(--acc);--kc:var(--acc)">
-      <div class="kpi-l">Lucro Líquido</div>
-      <div class="kpi-v" id="k-luc">—</div>
-      <div class="kpi-s" id="k-mar">Margem —%</div>
+    <div class="dash-export-btns">
+      <button class="exp-btn primary" onclick="exportExcel()">📊 Excel</button>
+      <button class="exp-btn pdf"     onclick="exportPDF()">🖨 PDF</button>
+      <button class="exp-btn json"    onclick="exportJSON()">💾 Backup</button>
     </div>
   </div>
 
-  <!-- STRIP -->
-  <!-- Dashboard export bar -->
-  <div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:8px">
-    <button class="exp-btn primary" onclick="exportExcel()" style="font-size:11px;padding:6px 12px">📊 Exportar Excel</button>
-    <button class="exp-btn pdf" onclick="exportPDF()" style="font-size:11px;padding:6px 12px">🖨 Exportar PDF</button>
-    <button class="exp-btn json" onclick="exportJSON()" style="font-size:11px;padding:6px 12px">💾 Backup JSON</button>
+  <!-- ── KPI GRID 2×4 ── -->
+  <div class="dash-kpi-grid">
+
+    <!-- Row 1: principais -->
+    <div class="dash-kpi-card" style="--dk-color:var(--blu)">
+      <div class="dk-icon">💰</div>
+      <div class="dk-body">
+        <div class="dk-label">VGV Bruto</div>
+        <div class="dk-value" id="k-vgv">—</div>
+        <div class="dk-sub" id="k-lotes">— lotes</div>
+      </div>
+    </div>
+
+    <div class="dash-kpi-card" style="--dk-color:var(--grn)">
+      <div class="dk-icon">📈</div>
+      <div class="dk-body">
+        <div class="dk-label">TIR (a.a.)</div>
+        <div class="dk-value" id="k-tir">—</div>
+        <div class="dk-sub" id="k-tirsub">—% a.m.</div>
+      </div>
+    </div>
+
+    <div class="dash-kpi-card" style="--dk-color:var(--acc)">
+      <div class="dk-icon">🏆</div>
+      <div class="dk-body">
+        <div class="dk-label">Lucro Líquido</div>
+        <div class="dk-value" id="k-luc">—</div>
+        <div class="dk-sub" id="k-mar">Margem —%</div>
+      </div>
+    </div>
+
+    <div class="dash-kpi-card" style="--dk-color:var(--red)">
+      <div class="dk-icon">⚠️</div>
+      <div class="dk-body">
+        <div class="dk-label">Exposição Máx. de Caixa</div>
+        <div class="dk-value" id="k-exp">—</div>
+        <div class="dk-sub" id="k-expsub">Mês —</div>
+      </div>
+    </div>
+
+    <!-- Row 2: secundários -->
+    <div class="dash-kpi-card dash-kpi-card--sm" style="--dk-color:var(--grn)">
+      <div class="dk-body">
+        <div class="dk-label">VPL</div>
+        <div class="dk-value dk-value--sm" id="s-vpl">—</div>
+      </div>
+    </div>
+
+    <div class="dash-kpi-card dash-kpi-card--sm" style="--dk-color:var(--acc)">
+      <div class="dk-body">
+        <div class="dk-label">Break-even</div>
+        <div class="dk-value dk-value--sm" id="s-be">—</div>
+      </div>
+    </div>
+
+    <div class="dash-kpi-card dash-kpi-card--sm" style="--dk-color:var(--blu)">
+      <div class="dk-body">
+        <div class="dk-label">ROI</div>
+        <div class="dk-value dk-value--sm" id="s-roi">—</div>
+      </div>
+    </div>
+
+    <div class="dash-kpi-card dash-kpi-card--sm" style="--dk-color:var(--mut)">
+      <div class="dk-body">
+        <div class="dk-label">Custo Total</div>
+        <div class="dk-value dk-value--sm" id="s-custo">—</div>
+      </div>
+    </div>
+
+    <div class="dash-kpi-card dash-kpi-card--sm" style="--dk-color:var(--red)">
+      <div class="dk-body">
+        <div class="dk-label">Impostos</div>
+        <div class="dk-value dk-value--sm" id="s-imp" style="color:var(--red)">—</div>
+      </div>
+    </div>
+
+    <div class="dash-kpi-card dash-kpi-card--sm" style="--dk-color:var(--grn)">
+      <div class="dk-body">
+        <div class="dk-label">Receita Líquida</div>
+        <div class="dk-value dk-value--sm" id="s-recliq">—</div>
+      </div>
+    </div>
+
+    <div class="dash-kpi-card dash-kpi-card--sm" style="--dk-color:var(--blu)">
+      <div class="dk-body">
+        <div class="dk-label">Qtd. Lotes</div>
+        <div class="dk-value dk-value--sm" id="s-qtdl">—</div>
+      </div>
+    </div>
+
+    <div class="dash-kpi-card dash-kpi-card--sm" style="--dk-color:var(--acc)">
+      <div class="dk-body">
+        <div class="dk-label">Área Vendável</div>
+        <div class="dk-value dk-value--sm" id="s-avend">—</div>
+      </div>
+    </div>
+
   </div>
 
-  <div class="strip" id="dash-strip" style="margin-bottom:18px">
-    <div class="strip-item"><div class="strip-l">VPL</div><div class="strip-v" id="s-vpl">—</div></div>
-    <div class="strip-item"><div class="strip-l">Break-even</div><div class="strip-v" id="s-be">—</div></div>
-    <div class="strip-item"><div class="strip-l">ROI</div><div class="strip-v" id="s-roi">—</div></div>
-    <div class="strip-item"><div class="strip-l">Custo Total</div><div class="strip-v" id="s-custo">—</div></div>
-    <div class="strip-item"><div class="strip-l">Impostos</div><div class="strip-v" id="s-imp" style="color:var(--red)">—</div></div>
-    <div class="strip-item"><div class="strip-l">Receita Líq.</div><div class="strip-v" id="s-recliq">—</div></div>
-    <div class="strip-item"><div class="strip-l">Qtd. Lotes</div><div class="strip-v" id="s-qtdl">—</div></div>
-    <div class="strip-item"><div class="strip-l">Avaliação</div><div class="strip-v"><span class="badge" id="s-aval">—</span></div></div>
-  </div>
-
-  <!-- CHARTS ROW 1 -->
-  <div class="g2" style="margin-bottom:18px">
+  <!-- ── CHARTS ROW 1: Fluxo + Fases ── -->
+  <div class="dash-charts-main">
     <div class="card">
-      <div class="card-title">Fluxo de Caixa Acumulado</div>
-      <div class="card-sub" id="sub-fluxo">Evolução mensal — "vale" de investimento e retorno</div>
+      <div class="dash-card-header">
+        <div>
+          <div class="card-title">Fluxo de Caixa Acumulado</div>
+          <div class="card-sub" id="sub-fluxo">—</div>
+        </div>
+      </div>
       <div class="ch-wrap"><canvas id="c-fluxo"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-title">Receita Mensal por Fase de Venda</div>
-      <div class="card-sub" id="sub-fases">Entradas de caixa diferenciadas por fase</div>
+      <div class="dash-card-header">
+        <div>
+          <div class="card-title">Receita Mensal por Fase</div>
+          <div class="card-sub" id="sub-fases">—</div>
+        </div>
+      </div>
       <div class="ch-wrap"><canvas id="c-fases"></canvas></div>
     </div>
   </div>
 
-  <!-- CHARTS ROW 2 -->
-  <div class="g3">
+  <!-- ── CHARTS ROW 2: 3 menores ── -->
+  <div class="dash-charts-secondary">
     <div class="card">
       <div class="card-title">Composição do VGV</div>
-      <div class="card-sub">Distribuição dos destinos da receita</div>
+      <div class="card-sub">Destino das receitas</div>
       <div class="ch-wrap-sm"><canvas id="c-pie"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-title">Curva S — Desembolso de Obra</div>
-      <div class="card-sub">Gasto acumulado por rubrica</div>
+      <div class="card-title">Curva S — Obra</div>
+      <div class="card-sub">Desembolso acumulado</div>
       <div class="ch-wrap-sm"><canvas id="c-curvas"></canvas></div>
     </div>
     <div class="card">
       <div class="card-title">Recebimento Multi-Tabela</div>
-      <div class="card-sub">Entradas por modalidade de pagamento</div>
+      <div class="card-sub">Entradas por modalidade</div>
       <div class="ch-wrap-sm"><canvas id="c-multitab"></canvas></div>
     </div>
   </div>
@@ -1105,62 +1497,130 @@ hr.d{border:none;border-top:1px solid var(--brd);margin:6px 0}
 <!-- ══════════════ TAB: SENSIBILIDADE ══════════════ -->
 <div class="tab-pane" id="tab-sensib">
   <div class="gcol">
-    <!-- SENSIB VSO -->
-    <div class="sens-wrap">
-      <div class="sens-title">🎛 Análise de Sensibilidade — Velocidade de Vendas (VSO)</div>
-      <div class="sens-desc">Mova o slider e veja o impacto imediato na exposição de caixa, TIR e break-even. Esta é a análise mais crítica para o loteador: "Se as vendas atrasarem, quanto dinheiro a mais preciso ter no banco?"</div>
-      <div class="sens-slider-wrap">
-        <span class="sens-label">Multiplicador de VSO:</span>
-        <input type="range" id="sensVSO" min="20" max="200" value="100" step="5" oninput="updateSensibilidade()">
-        <span class="sens-val-disp" id="sensVSOval">100%</span>
-      </div>
-      <div class="sens-metrics">
-        <div class="sens-m">
-          <div class="sens-ml">Exposição Máx.</div>
-          <div class="sens-mv" id="sm-exp" style="color:var(--red)">—</div>
+
+    <!-- ══ MATRIZ 2D ══ -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+        <div>
+          <div class="card-title">📐 Matriz de Sensibilidade 2D</div>
+          <div class="card-sub">Linhas = Preço/m² · Colunas = Velocidade de Vendas · Células = indicador selecionado</div>
         </div>
-        <div class="sens-m">
-          <div class="sens-ml">Break-even</div>
-          <div class="sens-mv" id="sm-be">—</div>
-        </div>
-        <div class="sens-m">
-          <div class="sens-ml">TIR a.a.</div>
-          <div class="sens-mv" id="sm-tir" style="color:var(--grn)">—</div>
-        </div>
-        <div class="sens-m">
-          <div class="sens-ml">VPL</div>
-          <div class="sens-mv" id="sm-vpl" style="color:var(--grn)">—</div>
+        <div style="display:flex;gap:8px">
+          <button class="exp-btn primary" onclick="exportMatrixExcel()" style="font-size:11px;padding:6px 14px">📊 Exportar Excel</button>
+          <button onclick="buildMatrix()" style="padding:6px 14px;background:rgba(232,197,71,.12);border:1px solid var(--acc);color:var(--acc);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff)">⟳ Recalcular</button>
         </div>
       </div>
-      <div class="ch-wrap-md"><canvas id="c-sens"></canvas></div>
+
+      <!-- Metric selector -->
+      <div class="matrix-controls">
+        <span style="font-size:11px;color:var(--mut);font-weight:600">Métrica:</span>
+        <button class="matrix-metric-btn on" onclick="setMatrixMetric('tirAa',this)">TIR a.a. (%)</button>
+        <button class="matrix-metric-btn" onclick="setMatrixMetric('margemLiq',this)">Margem (%)</button>
+        <button class="matrix-metric-btn" onclick="setMatrixMetric('lucroLiq',this)">Lucro (R$)</button>
+        <button class="matrix-metric-btn" onclick="setMatrixMetric('vpl',this)">VPL (R$)</button>
+        <button class="matrix-metric-btn" onclick="setMatrixMetric('expMax',this)">Exposição Máx.</button>
+        <button class="matrix-metric-btn" onclick="setMatrixMetric('breakevenMes',this)">Break-even (mês)</button>
+      </div>
+
+      <!-- Range controls -->
+      <div class="matrix-range-grid">
+        <div class="matrix-range-item">
+          <div class="matrix-range-label">Preço/m² — Mín</div>
+          <div class="matrix-range-inputs">
+            <input type="number" id="mx-preco-min" value="300"> <span>R$</span>
+          </div>
+        </div>
+        <div class="matrix-range-item">
+          <div class="matrix-range-label">Preço/m² — Máx</div>
+          <div class="matrix-range-inputs">
+            <input type="number" id="mx-preco-max" value="600"> <span>R$</span>
+          </div>
+        </div>
+        <div class="matrix-range-item">
+          <div class="matrix-range-label">VSO — Mín (%/mês)</div>
+          <div class="matrix-range-inputs">
+            <input type="number" id="mx-vso-min" value="0.5" step="0.5"> <span>%</span>
+          </div>
+        </div>
+        <div class="matrix-range-item">
+          <div class="matrix-range-label">VSO — Máx (%/mês)</div>
+          <div class="matrix-range-inputs">
+            <input type="number" id="mx-vso-max" value="5.0" step="0.5"> <span>%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- The matrix table -->
+      <div class="matrix-wrap" id="matrixWrap">
+        <div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--mut);font-size:13px">
+          Clique em <strong style="color:var(--acc);margin:0 6px">⟳ Recalcular</strong> para gerar a matriz
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="matrix-legend" id="matrixLegend" style="display:none">
+        <span style="font-size:11px;color:var(--mut);font-weight:600">Escala:</span>
+        <div class="matrix-legend-item"><div class="matrix-legend-swatch" style="background:#b91c1c"></div>Muito baixo</div>
+        <div class="matrix-legend-item"><div class="matrix-legend-swatch" style="background:#f0524f"></div>Baixo</div>
+        <div class="matrix-legend-item"><div class="matrix-legend-swatch" style="background:#f97316"></div>Moderado</div>
+        <div class="matrix-legend-item"><div class="matrix-legend-swatch" style="background:#e8c547"></div>Aceitável</div>
+        <div class="matrix-legend-item"><div class="matrix-legend-swatch" style="background:#84cc16"></div>Bom</div>
+        <div class="matrix-legend-item"><div class="matrix-legend-swatch" style="background:#2dd4a0"></div>Excelente</div>
+        <div class="matrix-legend-item" style="margin-left:12px">
+          <div class="matrix-legend-swatch" style="border:2px solid var(--acc);background:transparent"></div>
+          Cenário atual
+        </div>
+      </div>
     </div>
 
-    <!-- SENSIB PRECO -->
-    <div class="sens-wrap">
-      <div class="sens-title">💲 Sensibilidade — Preço de Venda</div>
-      <div class="sens-desc">Impacto da variação do preço/m² no lucro líquido e na TIR.</div>
-      <div class="sens-slider-wrap">
-        <span class="sens-label">Variação do Preço:</span>
-        <input type="range" id="sensPreco" min="60" max="160" value="100" step="5" oninput="updateSensPreco()">
-        <span class="sens-val-disp" id="sensPrecoVal">100%</span>
+    <!-- SENSIB SLIDERS (mantidos) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="sens-wrap">
+        <div class="sens-title">🎛 Velocidade de Vendas — Slider</div>
+        <div class="sens-desc">Impacto direto no fluxo de caixa e na exposição de capital.</div>
+        <div class="sens-slider-wrap">
+          <span class="sens-label">Multiplicador VSO:</span>
+          <input type="range" id="sensVSO" min="20" max="200" value="100" step="5" oninput="updateSensibilidade()">
+          <span class="sens-val-disp" id="sensVSOval">100%</span>
+        </div>
+        <div class="sens-metrics">
+          <div class="sens-m"><div class="sens-ml">Exposição Máx.</div><div class="sens-mv" id="sm-exp" style="color:var(--red)">—</div></div>
+          <div class="sens-m"><div class="sens-ml">Break-even</div><div class="sens-mv" id="sm-be">—</div></div>
+          <div class="sens-m"><div class="sens-ml">TIR a.a.</div><div class="sens-mv" id="sm-tir" style="color:var(--grn)">—</div></div>
+          <div class="sens-m"><div class="sens-ml">VPL</div><div class="sens-mv" id="sm-vpl" style="color:var(--grn)">—</div></div>
+        </div>
+        <div class="ch-wrap-md"><canvas id="c-sens"></canvas></div>
       </div>
-      <div class="sens-metrics">
-        <div class="sens-m"><div class="sens-ml">Preço/m²</div><div class="sens-mv" id="smp-preco">—</div></div>
-        <div class="sens-m"><div class="sens-ml">VGV</div><div class="sens-mv" id="smp-vgv">—</div></div>
-        <div class="sens-m"><div class="sens-ml">Lucro Líq.</div><div class="sens-mv" id="smp-luc" style="color:var(--grn)">—</div></div>
-        <div class="sens-m"><div class="sens-ml">TIR a.a.</div><div class="sens-mv" id="smp-tir" style="color:var(--grn)">—</div></div>
+
+      <div class="sens-wrap">
+        <div class="sens-title">💲 Preço de Venda — Slider</div>
+        <div class="sens-desc">Impacto da variação do preço/m² no lucro líquido e na TIR.</div>
+        <div class="sens-slider-wrap">
+          <span class="sens-label">Variação do Preço:</span>
+          <input type="range" id="sensPreco" min="60" max="160" value="100" step="5" oninput="updateSensPreco()">
+          <span class="sens-val-disp" id="sensPrecoVal">100%</span>
+        </div>
+        <div class="sens-metrics">
+          <div class="sens-m"><div class="sens-ml">Preço/m²</div><div class="sens-mv" id="smp-preco">—</div></div>
+          <div class="sens-m"><div class="sens-ml">VGV</div><div class="sens-mv" id="smp-vgv">—</div></div>
+          <div class="sens-m"><div class="sens-ml">Lucro Líq.</div><div class="sens-mv" id="smp-luc" style="color:var(--grn)">—</div></div>
+          <div class="sens-m"><div class="sens-ml">TIR a.a.</div><div class="sens-mv" id="smp-tir" style="color:var(--grn)">—</div></div>
+        </div>
       </div>
     </div>
 
-    <!-- TABELA DE CURVA -->
+    <!-- Curva exposição -->
     <div class="card">
       <div class="card-title">Curva de Exposição × Velocidade de Vendas</div>
-      <div class="card-sub">Como o atraso nas vendas aumenta o capital necessário — simulação automática</div>
+      <div class="card-sub">Como o atraso nas vendas aumenta o capital necessário</div>
       <div class="ch-wrap-md"><canvas id="c-curvexp"></canvas></div>
     </div>
 
   </div>
 </div>
+
+<!-- Matrix tooltip -->
+<div class="matrix-tooltip" id="matrixTooltip"></div>
 
 <!-- ══════════════ TAB: FLUXO COMPLETO ══════════════ -->
 <div class="tab-pane" id="tab-fluxo">
@@ -1206,6 +1666,206 @@ hr.d{border:none;border-top:1px solid var(--brd);margin:6px 0}
         </thead>
         <tbody id="fluxoTbody"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB: PREÇO REVERSO ══════════════ -->
+<div class="tab-pane" id="tab-reverso">
+  <div style="margin-bottom:20px">
+    <div style="font-family:var(--ff);font-size:22px;font-weight:800;letter-spacing:-.5px">
+      🎯 Calculadora de Preço Reverso
+    </div>
+    <div style="font-size:13px;color:var(--mut);margin-top:4px">
+      Informe suas metas de rentabilidade e o sistema calcula o preço mínimo por m² para atingi-las.
+    </div>
+  </div>
+
+  <div class="rev-layout">
+
+    <!-- ── PAINEL DE INPUTS ── -->
+    <div class="rev-panel">
+
+      <!-- Metas -->
+      <div>
+        <div class="rev-section-title">🎯 Suas metas de rentabilidade</div>
+        <div class="rev-target-card" style="margin-top:12px">
+          <div class="rev-target-title">Defina ao menos uma meta</div>
+          <div class="rev-field">
+            <label>TIR Mínima desejada (% a.a.)</label>
+            <input type="number" id="rv-tir-alvo" value="20" min="0" max="100" step="0.5">
+          </div>
+          <div class="rev-2col">
+            <div class="rev-field">
+              <label>Margem Mínima (%)</label>
+              <input type="number" id="rv-margem-alvo" value="15" min="0" max="100" step="0.5">
+            </div>
+            <div class="rev-field">
+              <label>VPL Mínimo (R$)</label>
+              <input type="number" id="rv-vpl-alvo" value="0" min="0">
+            </div>
+          </div>
+          <div class="rev-field">
+            <label>Prioridade da meta</label>
+            <select id="rv-prioridade">
+              <option value="tir">TIR em primeiro lugar</option>
+              <option value="margem">Margem em primeiro lugar</option>
+              <option value="vpl">VPL em primeiro lugar</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Restrições -->
+      <div>
+        <div class="rev-section-title">📐 Restrições do projeto</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+          <div class="rev-2col">
+            <div class="rev-field">
+              <label>Preço mínimo (R$/m²)</label>
+              <input type="number" id="rv-preco-min" value="200" min="0">
+            </div>
+            <div class="rev-field">
+              <label>Preço máximo (R$/m²)</label>
+              <input type="number" id="rv-preco-max" value="1000" min="0">
+            </div>
+          </div>
+          <div class="rev-field">
+            <label>Precisão da busca (R$/m²)</label>
+            <select id="rv-precisao">
+              <option value="1">Alta — R$1/m²</option>
+              <option value="5" selected>Média — R$5/m²</option>
+              <option value="10">Rápida — R$10/m²</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Premissas usadas -->
+      <div style="background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:14px">
+        <div style="font-size:10px;color:var(--mut);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">
+          Premissas do projeto atual
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px">
+          <div style="color:var(--mut)">Área total</div>
+          <div id="rv-info-area" style="font-family:var(--fm);text-align:right">—</div>
+          <div style="color:var(--mut)">Qtd. lotes</div>
+          <div id="rv-info-lotes" style="font-family:var(--fm);text-align:right">—</div>
+          <div style="color:var(--mut)">Custo total</div>
+          <div id="rv-info-custo" style="font-family:var(--fm);text-align:right">—</div>
+          <div style="color:var(--mut)">Preço atual</div>
+          <div id="rv-info-preco" style="font-family:var(--fm);text-align:right;color:var(--acc)">—</div>
+          <div style="color:var(--mut)">Regime</div>
+          <div id="rv-info-regime" style="font-family:var(--fm);text-align:right">—</div>
+        </div>
+      </div>
+
+      <button class="rev-calc-btn" onclick="calcReverse()">
+        🔍 Calcular Preço Mínimo
+      </button>
+    </div>
+
+    <!-- ── PAINEL DE RESULTADOS ── -->
+    <div class="rev-results" id="revResults">
+      <div class="rev-empty">
+        <div class="rev-empty-icon">🎯</div>
+        <div style="font-size:14px;font-weight:600;color:var(--tex)">Pronto para calcular</div>
+        <div style="font-size:12px;max-width:280px">
+          Defina suas metas à esquerda e clique em <strong style="color:var(--grn)">Calcular Preço Mínimo</strong>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ TAB: COMPARADOR ══════════════ -->
+<div class="tab-pane" id="tab-comp">
+
+  <!-- Slot selector bar -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+    <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--tex)">⚖ Comparador de Cenários</div>
+    <div style="font-size:11px;color:var(--mut)">Selecione até 3 análises salvas para comparar lado a lado</div>
+    <button onclick="addCurrentToComp()" style="margin-left:auto;padding:7px 16px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.4);color:var(--pur);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff)">
+      + Adicionar análise atual
+    </button>
+  </div>
+
+  <!-- 3 Slots -->
+  <div id="compSlots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px">
+    <!-- Slot A -->
+    <div class="comp-slot" id="slot-0">
+      <div class="comp-slot-empty" id="slot-0-empty">
+        <div style="font-size:32px;margin-bottom:8px">📂</div>
+        <div style="font-size:12px;color:var(--mut);margin-bottom:12px">Cenário A</div>
+        <button class="comp-pick-btn" onclick="openCompPicker(0)">Selecionar projeto</button>
+        <div style="font-size:11px;color:var(--mut);margin-top:8px">ou</div>
+        <button class="comp-pick-btn" style="background:rgba(232,197,71,.08);border-color:rgba(232,197,71,.3);color:var(--acc);margin-top:6px" onclick="addCurrentToSlot(0)">Usar análise atual</button>
+      </div>
+      <div class="comp-slot-filled" id="slot-0-filled" style="display:none"></div>
+    </div>
+    <!-- Slot B -->
+    <div class="comp-slot" id="slot-1">
+      <div class="comp-slot-empty" id="slot-1-empty">
+        <div style="font-size:32px;margin-bottom:8px">📂</div>
+        <div style="font-size:12px;color:var(--mut);margin-bottom:12px">Cenário B</div>
+        <button class="comp-pick-btn" onclick="openCompPicker(1)">Selecionar projeto</button>
+      </div>
+      <div class="comp-slot-filled" id="slot-1-filled" style="display:none"></div>
+    </div>
+    <!-- Slot C -->
+    <div class="comp-slot" id="slot-2">
+      <div class="comp-slot-empty" id="slot-2-empty">
+        <div style="font-size:32px;margin-bottom:8px">📂</div>
+        <div style="font-size:12px;color:var(--mut);margin-bottom:12px">Cenário C</div>
+        <button class="comp-pick-btn" onclick="openCompPicker(2)">Selecionar projeto</button>
+      </div>
+      <div class="comp-slot-filled" id="slot-2-filled" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- KPI comparison table -->
+  <div class="card" id="compResultsCard" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="card-title">Comparativo de Indicadores</div>
+      <button onclick="exportCompExcel()" class="exp-btn primary" style="font-size:11px;padding:6px 14px">📊 Exportar Excel</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table id="compKpiTable" style="width:100%;border-collapse:collapse;font-size:13px"></table>
+    </div>
+  </div>
+
+  <!-- Chart comparison -->
+  <div id="compChartsRow" style="display:none;margin-top:16px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="card">
+        <div class="card-title">Fluxo de Caixa Acumulado</div>
+        <div class="card-sub">Evolução comparativa dos cenários</div>
+        <div style="position:relative;height:280px"><canvas id="c-comp-fluxo"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Perfil de Rentabilidade</div>
+        <div class="card-sub">TIR · Margem · ROI · VPL normalizado</div>
+        <div style="position:relative;height:280px"><canvas id="c-comp-radar"></canvas></div>
+      </div>
+    </div>
+    <div style="margin-top:16px" class="card">
+      <div class="card-title">Receita Mensal Comparativa</div>
+      <div class="card-sub">Entradas de caixa mês a mês por cenário</div>
+      <div style="position:relative;height:220px"><canvas id="c-comp-receita"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- Comp picker modal -->
+<div class="modal-overlay" id="compPickerModal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <div class="modal-title">Selecionar Projeto</div>
+      <button class="modal-close" onclick="closeCompPicker()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="proj-list" id="compPickerList"></div>
     </div>
   </div>
 </div>
@@ -1353,6 +2013,8 @@ function showTab(t) {
   event.target.classList.add('on');
   // Redraw charts in newly visible tab
   setTimeout(()=>{ Object.values(charts).forEach(c=>c.resize&&c.resize()); }, 50);
+  // Tab-specific hooks
+  if(t==='reverso') setTimeout(updateRevInfo, 60);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2210,6 +2872,553 @@ function drawFluxoTable(R) {
 function calcular_wrapper() { updateUI(); }
 
 // ═══════════════════════════════════════════════════════
+// CALCULADORA DE PREÇO REVERSO
+// ═══════════════════════════════════════════════════════
+
+function revFmt(v) {
+  if(v==null||isNaN(v)) return '—';
+  const s=v<0?'-':''; const a=Math.abs(v);
+  if(a>=1e6) return s+'R$'+(a/1e6).toFixed(2)+'M';
+  if(a>=1e3) return s+'R$'+(a/1e3).toFixed(1)+'K';
+  return s+'R$'+a.toFixed(0);
+}
+
+// Update the info panel with current project data
+function updateRevInfo() {
+  const R = calcular();
+  const area   = +$('areaTotal').value||0;
+  const preco  = +$('precoM2').value||0;
+  const regime = $('regime').value;
+  const regimes = {ret:'RET 4%', lp:'Lucro Presumido', lu:'Lucro Real'};
+  if($('rv-info-area'))   $('rv-info-area').textContent   = (area/1000).toFixed(0)+'K m²';
+  if($('rv-info-lotes'))  $('rv-info-lotes').textContent  = R.qtdLotes.toLocaleString('pt-BR')+' lotes';
+  if($('rv-info-custo'))  $('rv-info-custo').textContent  = revFmt(R.custoTot);
+  if($('rv-info-preco'))  $('rv-info-preco').textContent  = 'R$'+preco+'/m²';
+  if($('rv-info-regime')) $('rv-info-regime').textContent = regimes[regime]||regime;
+}
+
+// Binary search — find minimum precoM2 that satisfies the primary target
+function findMinPreco(targetKey, targetVal, precoMin, precoMax, step) {
+  // Scan from min to max, return first price that hits the target
+  // Higher is better for TIR, margem, VPL
+  const higherIsBetter = (targetKey !== 'expMax');
+
+  for(let p = precoMin; p <= precoMax; p += step) {
+    const mult = p / (+$('precoM2').value||420);
+    const R = calcular(1.0, mult);
+    let val;
+    if(targetKey === 'tirAa')     val = R.tirAa;
+    else if(targetKey === 'margem') val = R.margemLiq;
+    else if(targetKey === 'vpl')    val = R.vpl;
+
+    if(higherIsBetter && val >= targetVal) return { preco: p, R };
+    if(!higherIsBetter && val <= targetVal) return { preco: p, R };
+  }
+  return null; // not achievable in range
+}
+
+function calcReverse() {
+  const tirAlvo    = +$('rv-tir-alvo').value    || 0;
+  const margemAlvo = +$('rv-margem-alvo').value  || 0;
+  const vplAlvo    = +$('rv-vpl-alvo').value     || 0;
+  const prioridade = $('rv-prioridade').value;
+  const precoMin   = +$('rv-preco-min').value    || 100;
+  const precoMax   = +$('rv-preco-max').value    || 2000;
+  const step       = +$('rv-precisao').value     || 5;
+  const precoAtual = +$('precoM2').value         || 420;
+
+  updateRevInfo();
+
+  // Map priority to target
+  const targetMap = {
+    tir:    { key: 'tirAa',   val: tirAlvo,    label: 'TIR',    fmt: v => v.toFixed(1)+'%' },
+    margem: { key: 'margem',  val: margemAlvo, label: 'Margem', fmt: v => v.toFixed(1)+'%' },
+    vpl:    { key: 'vpl',     val: vplAlvo,    label: 'VPL',    fmt: v => revFmt(v) },
+  };
+  const primary = targetMap[prioridade];
+
+  showToast('🔍 Calculando... aguarde', 'ok', 8000);
+
+  // Small delay to let toast render before heavy computation
+  setTimeout(() => {
+    const found = findMinPreco(primary.key, primary.val, precoMin, precoMax, step);
+
+    // Build band — scan all prices for the table
+    const BAND_STEPS = 10;
+    const bandStep = Math.max(step, Math.round((precoMax - precoMin) / BAND_STEPS));
+    const bandRows = [];
+    for(let p = precoMin; p <= precoMax; p += bandStep) {
+      const mult = p / precoAtual;
+      const R = calcular(1.0, mult);
+      bandRows.push({ preco: p, R, isTarget: found && Math.abs(p - found.preco) < step });
+    }
+    // Ensure the found price is in the table
+    if(found && !bandRows.find(r => r.isTarget)) {
+      const mult = found.preco / precoAtual;
+      bandRows.push({ preco: found.preco, R: found.R, isTarget: true });
+      bandRows.sort((a,b) => a.preco - b.preco);
+    }
+
+    renderReverseResults(found, primary, tirAlvo, margemAlvo, vplAlvo, bandRows, precoAtual);
+    showToast(found ? '✅ Preço mínimo encontrado!' : '❌ Meta não atingível no range definido', found ? 'ok' : 'err');
+  }, 80);
+}
+
+function renderReverseResults(found, primary, tirAlvo, margemAlvo, vplAlvo, bandRows, precoAtual) {
+  const el = $('revResults');
+  if(!el) return;
+
+  const R = found ? found.R : calcular(1.0, +$('rv-preco-max').value / precoAtual);
+  const precoFound = found ? found.preco : null;
+  const diff = precoFound ? precoFound - precoAtual : null;
+  const diffPct = diff ? (diff / precoAtual * 100) : null;
+
+  // ── Answer card ──
+  let answerHtml = '';
+  if(found) {
+    answerHtml = `
+    <div class="rev-answer-card found">
+      <div class="rev-answer-label">Preço mínimo por m² para atingir a meta</div>
+      <div class="rev-answer-value">R$${precoFound}/m²</div>
+      <div class="rev-answer-sub">
+        ${diff > 0
+          ? `<span style="color:var(--red)">▲ R$${diff}/m² acima do preço atual (${diffPct > 0 ? '+' : ''}${diffPct.toFixed(1)}%)</span>`
+          : diff < 0
+          ? `<span style="color:var(--grn)">▼ R$${Math.abs(diff)}/m² abaixo do preço atual — meta já atingida!</span>`
+          : `<span style="color:var(--grn)">✓ Exatamente o preço atual</span>`
+        }
+        <br>Meta primária: <strong style="color:var(--grn)">${primary.label} ≥ ${primary.fmt(primary.val)}</strong>
+        &nbsp;·&nbsp; VGV resultante: <strong>${revFmt(R.vgvBruto)}</strong>
+      </div>
+    </div>`;
+  } else {
+    answerHtml = `
+    <div class="rev-answer-card notfound">
+      <div class="rev-answer-label">Resultado</div>
+      <div class="rev-answer-value notfound">Meta inatingível</div>
+      <div class="rev-answer-sub">
+        A meta de <strong>${primary.label} ≥ ${primary.fmt(primary.val)}</strong> não é alcançável
+        com preços entre <strong>R$${$('rv-preco-min').value}/m²</strong> e
+        <strong>R$${$('rv-preco-max').value}/m²</strong>.<br>
+        Tente reduzir custos, aumentar o range de preços ou revisar as metas.
+      </div>
+    </div>`;
+  }
+
+  // ── Metrics achieved ──
+  const metrics = [
+    { label:'TIR a.a.',      val: R.tirAa,        alvo: tirAlvo,    fmt: v => v.toFixed(1)+'%',  unit:'%',   higher:true  },
+    { label:'Margem Líq.',   val: R.margemLiq,     alvo: margemAlvo, fmt: v => v.toFixed(1)+'%',  unit:'%',   higher:true  },
+    { label:'VPL',           val: R.vpl,           alvo: vplAlvo,    fmt: v => revFmt(v),          unit:'R$',  higher:true  },
+    { label:'Lucro Líquido', val: R.lucroLiq,      alvo: null,       fmt: v => revFmt(v),          unit:'R$',  higher:true  },
+    { label:'Exposição Máx.',val: Math.abs(R.expMax||0), alvo:null,  fmt: v => revFmt(v),          unit:'R$',  higher:false },
+    { label:'Break-even',    val: R.breakevenMes,  alvo: null,       fmt: v => v?'Mês '+v:'—',     unit:'mês', higher:false },
+  ];
+
+  const metricsHtml = `
+    <div class="rev-metrics-grid">
+      ${metrics.map(m => {
+        let cls = '', targetTxt = '';
+        if(m.alvo != null && m.alvo > 0) {
+          const hit = m.higher ? m.val >= m.alvo : m.val <= m.alvo;
+          const near = m.higher
+            ? (m.val >= m.alvo * 0.9 && m.val < m.alvo)
+            : (m.val <= m.alvo * 1.1 && m.val > m.alvo);
+          cls = hit ? 'hit' : near ? 'near' : 'miss';
+          targetTxt = `Meta: ${m.higher?'≥':'≤'} ${m.fmt(m.alvo)} ${hit?'✓':near?'~':'✗'}`;
+        }
+        return `
+        <div class="rev-metric ${cls}">
+          <div class="rev-metric-label">${m.label}</div>
+          <div class="rev-metric-value">${m.val!=null?m.fmt(m.val):'—'}</div>
+          ${targetTxt?`<div class="rev-metric-target">${targetTxt}</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  // ── Sensitivity band table ──
+  const bandHtml = `
+    <div class="rev-band-card">
+      <div class="rev-band-title">Tabela de Sensibilidade — Preço × Indicadores</div>
+      <div class="rev-band-sub">Como cada preço/m² afeta os principais resultados</div>
+      <div style="overflow-x:auto">
+        <table class="rev-band-table">
+          <thead>
+            <tr>
+              <th style="text-align:left">Preço/m²</th>
+              <th>TIR a.a.</th>
+              <th>Margem</th>
+              <th>Lucro Líq.</th>
+              <th>VPL</th>
+              <th>Break-even</th>
+              <th>VGV</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${bandRows.map(row => {
+              const r = row.R;
+              const tir  = r.tirAa;
+              const mar  = r.margemLiq;
+              const tirOk  = tir  >= tirAlvo;
+              const marOk  = mar  >= margemAlvo;
+              const vplOk  = r.vpl >= vplAlvo;
+              const allOk  = tirOk && marOk && vplOk;
+              return `
+              <tr class="${row.isTarget?'target-row':''}">
+                <td style="font-weight:${row.isTarget?'700':'400'};color:${row.isTarget?'var(--grn)':'var(--mut)'}">
+                  R$${row.preco}/m² ${row.isTarget?'★':''}
+                </td>
+                <td class="${tir>=tirAlvo?'green':tir>=tirAlvo*0.9?'acc':'red'}">${tir.toFixed(1)}%</td>
+                <td class="${mar>=margemAlvo?'green':mar>=margemAlvo*0.9?'acc':'red'}">${mar.toFixed(1)}%</td>
+                <td class="${r.lucroLiq>=0?'green':'red'}">${revFmt(r.lucroLiq)}</td>
+                <td class="${r.vpl>=vplAlvo?'green':'red'}">${revFmt(r.vpl)}</td>
+                <td>${r.breakevenMes?'M'+r.breakevenMes:'—'}</td>
+                <td>${revFmt(r.vgvBruto)}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+
+  // ── Apply to project button ──
+  const applyHtml = found ? `
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+      <button onclick="applyReversePrice(${precoFound})"
+        style="padding:12px 24px;background:var(--grn);color:#09090f;border:none;border-radius:10px;
+               font-family:var(--ff);font-size:13px;font-weight:800;cursor:pointer;transition:all .2s;"
+        onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter=''">
+        ✅ Aplicar R$${precoFound}/m² ao projeto
+      </button>
+      <button onclick="exportReverseExcel()"
+        style="padding:12px 24px;background:rgba(45,212,160,.12);border:1px solid rgba(45,212,160,.3);
+               color:var(--grn);border-radius:10px;font-family:var(--ff);font-size:13px;
+               font-weight:600;cursor:pointer;">
+        📊 Exportar Excel
+      </button>
+    </div>` : '';
+
+  el.innerHTML = answerHtml + metricsHtml + bandHtml + applyHtml;
+}
+
+function applyReversePrice(preco) {
+  $('precoM2').value = preco;
+  updateUI();
+  showToast('✅ Preço R$'+preco+'/m² aplicado ao projeto!', 'ok');
+  // Switch to dashboard
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelector('.tab-btn[onclick*="dash"]').classList.add('on');
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));
+  $('tab-dash').classList.add('on');
+}
+
+function exportReverseExcel() {
+  const tirAlvo    = +$('rv-tir-alvo').value    || 0;
+  const margemAlvo = +$('rv-margem-alvo').value  || 0;
+  const precoAtual = +$('precoM2').value         || 420;
+  const precoMin   = +$('rv-preco-min').value    || 100;
+  const precoMax   = +$('rv-preco-max').value    || 2000;
+  const step       = +$('rv-precisao').value     || 5;
+
+  const BOM='﻿', sep=';';
+  const rows=[
+    ['LOTEVIA PRO — ANÁLISE DE PREÇO REVERSO'],
+    ['Exportado em:', new Date().toLocaleString('pt-BR')],
+    [],
+    ['Meta TIR (%a.a.):', tirAlvo],
+    ['Meta Margem (%):', margemAlvo],
+    ['Preço atual (R$/m²):', precoAtual],
+    [],
+    ['Preço/m²','TIR a.a. (%)','Margem (%)','Lucro Líq. (R$)','VPL (R$)','Break-even (mês)','VGV (R$)'],
+  ];
+
+  for(let p=precoMin; p<=precoMax; p+=step) {
+    const R = calcular(1.0, p/precoAtual);
+    rows.push([
+      p,
+      R.tirAa.toFixed(2).replace('.',','),
+      R.margemLiq.toFixed(2).replace('.',','),
+      R.lucroLiq.toFixed(2).replace('.',','),
+      R.vpl.toFixed(2).replace('.',','),
+      R.breakevenMes||'',
+      R.vgvBruto.toFixed(2).replace('.',','),
+    ]);
+  }
+
+  const csv = BOM+rows.map(r=>r.map(c=>{
+    const s=String(c==null?'':c);
+    return s.includes(sep)?'"'+s+'"':s;
+  }).join(sep)).join('\r\n');
+
+  download(csv,'LoteVia_PrecoReverso_'+dataBR()+'.csv','text/csv;charset=utf-8');
+  showToast('📊 Análise exportada!','ok');
+}
+
+// ═══════════════════════════════════════════════════════
+// SENSITIVITY MATRIX 2D
+// ═══════════════════════════════════════════════════════
+
+let matrixMetric     = 'tirAa';
+let matrixMetricLabel = 'TIR a.a. (%)';
+let matrixData       = null; // { precos[], vsos[], cells[][] }
+
+const MATRIX_METRICS = {
+  tirAa:       { label:'TIR a.a. (%)',     fmt: v => v!=null ? v.toFixed(1)+'%' : '—',  higher:true,  thresholds:[0,8,15,20,30] },
+  margemLiq:   { label:'Margem (%)',        fmt: v => v!=null ? v.toFixed(1)+'%' : '—',  higher:true,  thresholds:[0,5,12,20,30] },
+  lucroLiq:    { label:'Lucro (R$)',        fmt: v => v!=null ? fmtM(v)          : '—',  higher:true,  thresholds:[0,0.5e6,2e6,5e6,10e6] },
+  vpl:         { label:'VPL (R$)',          fmt: v => v!=null ? fmtM(v)          : '—',  higher:true,  thresholds:[0,0.5e6,2e6,5e6,10e6] },
+  expMax:      { label:'Exposição Máx.',    fmt: v => v!=null ? fmtM(Math.abs(v)): '—',  higher:false, thresholds:[20e6,15e6,10e6,5e6,2e6] },
+  breakevenMes:{ label:'Break-even (mês)', fmt: v => v!=null ? 'M'+v            : '—',  higher:false, thresholds:[60,48,36,24,12] },
+};
+
+function fmtM(v) {
+  if(v==null||isNaN(v)) return '—';
+  const s = v<0?'-':''; const a = Math.abs(v);
+  if(a>=1e6) return s+'R$'+(a/1e6).toFixed(1)+'M';
+  if(a>=1e3) return s+'R$'+(a/1e3).toFixed(0)+'K';
+  return s+'R$'+a.toFixed(0);
+}
+
+function setMatrixMetric(key, btn) {
+  matrixMetric = key;
+  matrixMetricLabel = MATRIX_METRICS[key].label;
+  document.querySelectorAll('.matrix-metric-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(matrixData) renderMatrix();
+}
+
+// ── Color scale ──
+function matrixColor(val, metric, min, max) {
+  const m = MATRIX_METRICS[metric];
+  if(val==null||isNaN(val)) return '#23263a';
+
+  // Normalize 0-1
+  let norm;
+  if(max===min) { norm=0.5; }
+  else if(m.higher) { norm = Math.max(0, Math.min(1, (val-min)/(max-min))); }
+  else              { norm = Math.max(0, Math.min(1, (max-val)/(max-min))); }
+
+  // 6-stop gradient: deep red → red → orange → yellow → lime → teal
+  const stops = [
+    [0.00, [185, 28, 28]],   // #b91c1c deep red
+    [0.20, [240, 82, 79]],   // red
+    [0.40, [249,115, 22]],   // orange
+    [0.60, [232,197, 71]],   // yellow
+    [0.80, [132,204, 22]],   // lime
+    [1.00, [ 45,212,160]],   // teal
+  ];
+
+  let lo=stops[0], hi=stops[stops.length-1];
+  for(let i=0;i<stops.length-1;i++) {
+    if(norm>=stops[i][0]&&norm<=stops[i+1][0]) { lo=stops[i]; hi=stops[i+1]; break; }
+  }
+  const t = lo[0]===hi[0] ? 0 : (norm-lo[0])/(hi[0]-lo[0]);
+  const r = Math.round(lo[1][0]+(hi[1][0]-lo[1][0])*t);
+  const g = Math.round(lo[1][1]+(hi[1][1]-lo[1][1])*t);
+  const b = Math.round(lo[1][2]+(hi[1][2]-lo[1][2])*t);
+  return `rgb(${r},${g},${b})`;
+}
+
+function textColor(bgHex) {
+  // Return black or white depending on bg luminance
+  const m = bgHex.match(/\d+/g);
+  if(!m) return '#fff';
+  const lum = (0.299*+m[0]+0.587*+m[1]+0.114*+m[2])/255;
+  return lum>0.55?'#09090f':'#ffffff';
+}
+
+// ── Build matrix ──
+function buildMatrix() {
+  const precoMin = +$('mx-preco-min').value || 200;
+  const precoMax = +$('mx-preco-max').value || 700;
+  const vsoMin   = +$('mx-vso-min').value   || 0.5;
+  const vsoMax   = +$('mx-vso-max').value   || 6.0;
+
+  if(precoMin>=precoMax) { showToast('⚠ Preço mínimo deve ser menor que o máximo','err'); return; }
+  if(vsoMin>=vsoMax)     { showToast('⚠ VSO mínimo deve ser menor que o máximo','err'); return; }
+
+  // Generate evenly spaced steps (max 8 rows × 10 cols = 80 calculations)
+  const N_PRECO = 8, N_VSO = 10;
+  const precos = Array.from({length:N_PRECO}, (_,i) => Math.round(precoMin + (precoMax-precoMin)*i/(N_PRECO-1)));
+  const vsos   = Array.from({length:N_VSO},   (_,i) => +(vsoMin + (vsoMax-vsoMin)*i/(N_VSO-1)).toFixed(2));
+
+  // Show loading state
+  $('matrixWrap').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--mut);font-size:13px">⏳ Calculando '+N_PRECO*N_VSO+' cenários...</div>';
+
+  // Get base preco for VSO mult calculation
+  const basePreco = +$('precoM2').value || 420;
+
+  // Run calculations (sync, small grid)
+  const cells = precos.map(preco => {
+    const precoMult = preco / basePreco;
+    return vsos.map(vso => {
+      // Convert VSO % to multiplier relative to base phases
+      // VSO mult = desired VSO / base VSO
+      // Base VSO = weighted avg of phasesData
+      const totalPct = phasesData.reduce((s,p)=>s+p.pct,0)||100;
+      const baseVSO  = phasesData.reduce((s,p)=>s+(p.pct*(p.pct/(p.dur||1))/totalPct),0)||2.5;
+      const vsoMult  = (vso/100) / (baseVSO/100);
+
+      try {
+        const R = calcular(vsoMult, precoMult);
+        return {
+          tirAa:       R.tirAa,
+          margemLiq:   R.margemLiq,
+          lucroLiq:    R.lucroLiq,
+          vpl:         R.vpl,
+          expMax:      R.expMax,
+          breakevenMes:R.breakevenMes,
+          preco, vso,
+        };
+      } catch(e) { return null; }
+    });
+  });
+
+  matrixData = { precos, vsos, cells };
+  renderMatrix();
+  buildCurvaExposicao(); // refresh the curve chart too
+}
+
+function renderMatrix() {
+  if(!matrixData) return;
+  const { precos, vsos, cells } = matrixData;
+  const m = MATRIX_METRICS[matrixMetric];
+
+  // Find min/max of current metric
+  let minV=Infinity, maxV=-Infinity;
+  cells.forEach(row=>row.forEach(c=>{
+    if(c&&c[matrixMetric]!=null) {
+      const v = matrixMetric==='expMax'?Math.abs(c[matrixMetric]):c[matrixMetric];
+      if(!isNaN(v)){minV=Math.min(minV,v);maxV=Math.max(maxV,v);}
+    }
+  }));
+
+  // Current scenario values for highlighting
+  const basePreco = +$('precoM2').value||420;
+  const baseTotalPct = phasesData.reduce((s,p)=>s+p.pct,0)||100;
+  const baseVSO  = phasesData.reduce((s,p)=>s+(p.pct*(p.pct/(p.dur||1))/baseTotalPct),0)||2.5;
+
+  // Find closest row/col to current scenario
+  const curPrecoIdx = precos.reduce((bi,v,i)=>Math.abs(v-basePreco)<Math.abs(precos[bi]-basePreco)?i:bi,0);
+  const curVsoIdx   = vsos.reduce((bi,v,i)=>Math.abs(v-baseVSO/100)<Math.abs(vsos[bi]-baseVSO/100)?i:bi,0);
+
+  // Build table HTML
+  let html = '<table class="matrix-tbl"><thead><tr>';
+  html += '<th class="corner" style="font-size:10px">Preço/m² \ VSO</th>';
+  vsos.forEach((v,ci) => {
+    const isCur = ci===curVsoIdx;
+    html += `<th style="${isCur?'color:var(--acc);':''}border-bottom:${isCur?'2px solid var(--acc)':'1px solid var(--brd)'}">${v.toFixed(1)}%/mês</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  precos.forEach((preco,ri) => {
+    const isCurRow = ri===curPrecoIdx;
+    html += `<tr>`;
+    html += `<td class="row-label" style="${isCurRow?'color:var(--acc);border-right:2px solid var(--acc)':''}">R$${preco}/m²</td>`;
+    cells[ri].forEach((c,ci) => {
+      const isCurCell = ri===curPrecoIdx && ci===curVsoIdx;
+      const rawVal = c ? (matrixMetric==='expMax'?Math.abs(c[matrixMetric]):c[matrixMetric]) : null;
+      const bg   = matrixColor(rawVal, matrixMetric, minV, maxV);
+      const txtC = textColor(bg);
+      const disp = c ? m.fmt(c[matrixMetric]) : '—';
+      html += `<td
+        class="${isCurCell?'current-cell':''}"
+        style="background:${bg};color:${txtC};font-weight:${isCurCell?'700':'500'}"
+        onmousemove="showMatrixTooltip(event,${JSON.stringify(c).replace(/"/g,'&quot;')})"
+        onmouseleave="hideMatrixTooltip()"
+      >${disp}</td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  $('matrixWrap').innerHTML = html;
+  $('matrixLegend').style.display = '';
+}
+
+// ── Tooltip ──
+function showMatrixTooltip(e, cell) {
+  if(!cell) return;
+  const tip = $('matrixTooltip');
+  const metrics = [
+    ['TIR a.a.',      cell.tirAa!=null        ? cell.tirAa.toFixed(1)+'%'            : '—'],
+    ['Margem',        cell.margemLiq!=null     ? cell.margemLiq.toFixed(1)+'%'        : '—'],
+    ['Lucro Líq.',    cell.lucroLiq!=null      ? fmtM(cell.lucroLiq)                  : '—'],
+    ['VPL',           cell.vpl!=null           ? fmtM(cell.vpl)                       : '—'],
+    ['Exposição Máx.',cell.expMax!=null        ? fmtM(Math.abs(cell.expMax))           : '—'],
+    ['Break-even',    cell.breakevenMes!=null  ? 'Mês '+cell.breakevenMes              : 'Não atingido'],
+  ];
+  tip.innerHTML = `
+    <div class="matrix-tooltip-title">R$${cell.preco}/m² · VSO ${cell.vso}%/mês</div>
+    ${metrics.map(([l,v])=>`<div class="matrix-tooltip-row"><span class="matrix-tooltip-label">${l}</span><span class="matrix-tooltip-val">${v}</span></div>`).join('')}
+  `;
+  tip.classList.add('visible');
+  const pad=12;
+  let x=e.clientX+pad, y=e.clientY+pad;
+  if(x+200>window.innerWidth) x=e.clientX-204;
+  if(y+180>window.innerHeight) y=e.clientY-184;
+  tip.style.left=x+'px'; tip.style.top=y+'px';
+}
+function hideMatrixTooltip() {
+  $('matrixTooltip').classList.remove('visible');
+}
+
+// ── Export matrix to Excel ──
+function exportMatrixExcel() {
+  if(!matrixData) { showToast('⚠ Gere a matriz primeiro clicando em Recalcular','err'); return; }
+  const { precos, vsos, cells } = matrixData;
+  const m = MATRIX_METRICS[matrixMetric];
+  const BOM='﻿', sep=';';
+  const rows = [];
+
+  rows.push(['LOTEVIA PRO — MATRIZ DE SENSIBILIDADE 2D']);
+  rows.push(['Métrica:', m.label]);
+  rows.push(['Exportado em:', new Date().toLocaleString('pt-BR')]);
+  rows.push([]);
+
+  // Header: VSO values
+  rows.push(['Preço/m² \ VSO',...vsos.map(v=>v.toFixed(1)+'%/mês')]);
+
+  // Data rows
+  precos.forEach((preco,ri)=>{
+    const row = ['R$'+preco+'/m²'];
+    cells[ri].forEach(c=>{
+      if(!c){ row.push(''); return; }
+      const v = c[matrixMetric];
+      row.push(v!=null ? String(v.toFixed?v.toFixed(2):v).replace('.',',') : '');
+    });
+    rows.push(row);
+  });
+
+  rows.push([]);
+  rows.push(['TODOS OS INDICADORES — Preço × VSO']);
+
+  // Full data dump for all metrics
+  const allMetricKeys = ['tirAa','margemLiq','lucroLiq','vpl','expMax','breakevenMes'];
+  allMetricKeys.forEach(mk=>{
+    rows.push([]);
+    rows.push([MATRIX_METRICS[mk].label,'Preço/m² \ VSO',...vsos.map(v=>v.toFixed(1)+'%/mês')]);
+    precos.forEach((preco,ri)=>{
+      const row = ['','R$'+preco+'/m²'];
+      cells[ri].forEach(c=>{
+        if(!c){row.push('');return;}
+        const v=c[mk];
+        row.push(v!=null?String((v.toFixed?v.toFixed(2):v)).replace('.',','):'');
+      });
+      rows.push(row);
+    });
+  });
+
+  const csv = BOM+rows.map(r=>r.map(c=>{
+    const s=String(c==null?'':c);
+    return (s.includes(sep)||s.includes('"'))?'"'+s.replace(/"/g,'""')+'"':s;
+  }).join(sep)).join('\r\n');
+
+  download(csv,'LoteVia_Matriz2D_'+dataBR()+'.csv','text/csv;charset=utf-8');
+  showToast('📊 Matriz exportada para Excel!','ok');
+}
+
+// ═══════════════════════════════════════════════════════
 // EXPORT ENGINE
 // ═══════════════════════════════════════════════════════
 
@@ -2362,7 +3571,7 @@ function exportCSV() {
     ]);
   }
 
-  const csv = rows.map(r=>r.join(',')).join('\n');
+  const csv = rows.map(r=>r.join(',')).join('\r\n');
   download(csv, projectLabel()+'_fluxo_'+dataBR()+'.csv', 'text/csv;charset=utf-8');
   showToast('📄 CSV exportado!', 'ok');
 }
@@ -2562,6 +3771,463 @@ function bootApp() {
   updateUI();
 }
 </script>
+
+<!-- ══════════════ HELP MANUAL MODAL ══════════════ -->
+<div class="help-overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()">
+  <div class="help-modal">
+
+    <div class="help-header">
+      <div class="help-header-left">
+        <div class="help-logo">L</div>
+        <div>
+          <div class="help-title">LoteVia PRO — Manual</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:3px">
+            <span class="help-version">v2.0</span>
+            <span style="font-size:11px;color:var(--mut)">Desenvolvido por Expandh</span>
+          </div>
+        </div>
+      </div>
+      <button class="help-close" onclick="closeHelp()">✕</button>
+    </div>
+
+    <div class="help-body">
+
+      <!-- NAV SIDEBAR -->
+      <nav class="help-nav" id="helpNav">
+        <div class="help-nav-group">Início</div>
+        <div class="help-nav-item active" onclick="showHelpSection('intro')"><span class="nav-icon">🏠</span>Visão Geral</div>
+        <div class="help-nav-item" onclick="showHelpSection('login')"><span class="nav-icon">🔐</span>Acesso & Senha</div>
+        <div class="help-nav-item" onclick="showHelpSection('atalhos')"><span class="nav-icon">⌨️</span>Atalhos</div>
+
+        <div class="help-nav-group">Funcionalidades</div>
+        <div class="help-nav-item" onclick="showHelpSection('dashboard')"><span class="nav-icon">📊</span>Dashboard</div>
+        <div class="help-nav-item" onclick="showHelpSection('vendas')"><span class="nav-icon">🚀</span>Fases de Vendas</div>
+        <div class="help-nav-item" onclick="showHelpSection('obra')"><span class="nav-icon">🏗</span>Cronograma de Obras</div>
+        <div class="help-nav-item" onclick="showHelpSection('recebimento')"><span class="nav-icon">💰</span>Recebimento & Baldes</div>
+        <div class="help-nav-item" onclick="showHelpSection('sensib')"><span class="nav-icon">🎛</span>Sensibilidade</div>
+        <div class="help-nav-item" onclick="showHelpSection('matriz')"><span class="nav-icon">📐</span>Matriz 2D</div>
+        <div class="help-nav-item" onclick="showHelpSection('fluxo')"><span class="nav-icon">📋</span>Fluxo Completo</div>
+        <div class="help-nav-item" onclick="showHelpSection('comparador')"><span class="nav-icon">⚖</span>Comparador</div>
+        <div class="help-nav-item" onclick="showHelpSection('reverso')"><span class="nav-icon">🎯</span>Preço Reverso</div>
+
+        <div class="help-nav-group">Dados & Exportação</div>
+        <div class="help-nav-item" onclick="showHelpSection('projetos')"><span class="nav-icon">📁</span>Meus Projetos</div>
+        <div class="help-nav-item" onclick="showHelpSection('export')"><span class="nav-icon">📤</span>Exportação</div>
+        <div class="help-nav-item" onclick="showHelpSection('cenarios')"><span class="nav-icon">🎬</span>Cenários</div>
+
+        <div class="help-nav-group">Conceitos</div>
+        <div class="help-nav-item" onclick="showHelpSection('glossario')"><span class="nav-icon">📖</span>Glossário</div>
+        <div class="help-nav-item" onclick="showHelpSection('formulas')"><span class="nav-icon">🧮</span>Fórmulas</div>
+      </nav>
+
+      <!-- CONTENT -->
+      <div class="help-content" id="helpContent">
+
+        <!-- INTRO -->
+        <div class="help-section active" id="hs-intro">
+          <h1>🏘 LoteVia PRO</h1>
+          <p>Ferramenta profissional de <strong>análise de viabilidade financeira para loteamentos</strong>, desenvolvida pela Expandh. Simula o fluxo de caixa completo do empreendimento, do desembolso de obra até o recebimento das últimas parcelas.</p>
+          <div class="help-box info">
+            <strong>Como usar:</strong> Preencha as premissas nas abas laterais, clique em <strong>⟳ Recalcular</strong> e analise os resultados no Dashboard. O sistema recalcula automaticamente ao alterar qualquer campo.
+          </div>
+          <h2>Estrutura do sistema</h2>
+          <table class="help-kv">
+            <tr><th>Aba</th><th>O que faz</th></tr>
+            <tr><td>📊 Dashboard</td><td>KPIs principais, gráficos de fluxo de caixa, composição do VGV e curva S</td></tr>
+            <tr><td>🚀 Fases de Vendas</td><td>Define velocidade de absorção do estoque por fase (lançamento, maturação etc.)</td></tr>
+            <tr><td>🏗 Cronograma de Obras</td><td>Distribui o custo de infraestrutura por rubrica com Curva S, Linear ou Final</td></tr>
+            <tr><td>💰 Recebimento & Multi-Tabela</td><td>Configura 3 modalidades de pagamento (à vista, curto e longo prazo)</td></tr>
+            <tr><td>🎛 Sensibilidade</td><td>Sliders interativos de VSO e preço + Curva de Exposição</td></tr>
+            <tr><td>📐 Matriz 2D</td><td>Tabela preço × velocidade com heatmap de TIR/Margem/VPL</td></tr>
+            <tr><td>📋 Fluxo Completo</td><td>Tabela mês a mês com todas as entradas e saídas</td></tr>
+            <tr><td>⚖ Comparador</td><td>Compara até 3 cenários salvos lado a lado</td></tr>
+            <tr><td>🎯 Preço Reverso</td><td>Calcula o preço mínimo por m² para atingir metas de TIR/Margem/VPL</td></tr>
+          </table>
+          <h2>Os 4 pilares do modelo</h2>
+          <ul>
+            <li><strong>Engenharia & Urbanismo:</strong> Área total, eficiência (% vendável), tamanho de lote, custo de infraestrutura</li>
+            <li><strong>Comercial & Mercado:</strong> Preço por m², velocidade de vendas (VSO), fases de absorção</li>
+            <li><strong>Jurídico & Fiscal:</strong> Regime tributário (RET, Lucro Presumido ou Real), comissões, permuta</li>
+            <li><strong>Financeiro:</strong> TIR, VPL, Exposição Máxima de Caixa, Break-even, ROI</li>
+          </ul>
+        </div>
+
+        <!-- LOGIN -->
+        <div class="help-section" id="hs-login">
+          <h1>🔐 Acesso & Senha</h1>
+          <p>O LoteVia PRO é protegido por senha para garantir uso exclusivo da equipe Expandh.</p>
+          <h2>Informações de acesso</h2>
+          <div class="help-box warn">
+            <strong>Senha atual:</strong> Expandh (com E maiúsculo)<br>
+            A senha é verificada via hash SHA-256 — nunca fica em texto puro no código.
+          </div>
+          <h2>Comportamento da sessão</h2>
+          <ul>
+            <li>A sessão dura enquanto o browser estiver aberto (sessionStorage)</li>
+            <li>Ao fechar e reabrir o browser, a senha será solicitada novamente</li>
+            <li>Os projetos salvos <strong>não são apagados</strong> ao fechar — ficam no IndexedDB do dispositivo</li>
+          </ul>
+          <h2>Trocar a senha</h2>
+          <p>Localize no código a linha:</p>
+          <div class="help-box info"><strong>const HASH_EXPANDH = await sha256('Expandh');</strong><br>Substitua <strong>'Expandh'</strong> pela nova senha desejada.</div>
+        </div>
+
+        <!-- ATALHOS -->
+        <div class="help-section" id="hs-atalhos">
+          <h1>⌨️ Atalhos de Teclado</h1>
+          <table class="help-kv">
+            <tr><th>Atalho</th><th>Ação</th></tr>
+            <tr><td><span class="kbd">Ctrl</span> + <span class="kbd">S</span></td><td>Salva o projeto atual diretamente (se já tem nome) ou abre o painel de Projetos</td></tr>
+            <tr><td><span class="kbd">Esc</span></td><td>Fecha qualquer modal aberto (Projetos, Ajuda, Comparador)</td></tr>
+            <tr><td><span class="kbd">Enter</span></td><td>Na tela de login, confirma a senha</td></tr>
+          </table>
+          <div class="help-box tip">
+            <strong>Dica:</strong> Após alterar qualquer campo numérico, pressione <span class="kbd">Tab</span> para sair do campo e disparar o recálculo automático.
+          </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div class="help-section" id="hs-dashboard">
+          <h1>📊 Dashboard</h1>
+          <p>Tela principal com todos os indicadores do projeto em tempo real.</p>
+          <h2>Grid de KPIs (2×4)</h2>
+          <p><strong>Linha superior — 4 indicadores principais:</strong></p>
+          <table class="help-kv">
+            <tr><th>KPI</th><th>Descrição</th></tr>
+            <tr><td>VGV Bruto</td><td>Valor Geral de Vendas — total de lotes × preço médio por lote</td></tr>
+            <tr><td>TIR (a.a.)</td><td>Taxa Interna de Retorno anualizada do projeto</td></tr>
+            <tr><td>Lucro Líquido</td><td>Receita total menos todos os custos, impostos e comissões</td></tr>
+            <tr><td>Exposição Máx.</td><td>Maior valor negativo do fluxo acumulado — capital mínimo necessário</td></tr>
+          </table>
+          <p><strong>Linha inferior — 8 indicadores secundários:</strong> VPL, Break-even, ROI, Custo Total, Impostos, Receita Líquida, Qtd. Lotes e Área Vendável.</p>
+          <h2>Gráficos</h2>
+          <ul>
+            <li><strong>Fluxo de Caixa Acumulado:</strong> Curva do "vale" (investimento) ao retorno. A parte vermelha mostra o período de exposição de caixa.</li>
+            <li><strong>Receita Mensal por Fase:</strong> Barras empilhadas separando à vista, curto e longo prazo por mês.</li>
+            <li><strong>Composição do VGV:</strong> Donut com destino de cada real — lucro, infra, terreno, impostos, comissões.</li>
+            <li><strong>Curva S — Obra:</strong> Barras mensais de desembolso + linha de acumulado. Representa o ritmo de gasto de cada rubrica.</li>
+            <li><strong>Recebimento Multi-Tabela:</strong> Comparativo visual de entradas por modalidade de pagamento.</li>
+          </ul>
+          <h2>Avaliação automática</h2>
+          <table class="help-kv">
+            <tr><th>Badge</th><th>Critério</th></tr>
+            <tr><td>✓ Alta Rentabilidade</td><td>TIR ≥ 20% a.a. E Margem ≥ 15%</td></tr>
+            <tr><td>◈ Rentabilidade Moderada</td><td>TIR ≥ 12% a.a. E Margem ≥ 8%</td></tr>
+            <tr><td>✕ Reavalie as Premissas</td><td>Abaixo dos critérios acima</td></tr>
+          </table>
+        </div>
+
+        <!-- VENDAS -->
+        <div class="help-section" id="hs-vendas">
+          <h1>🚀 Fases de Vendas</h1>
+          <p>Define a curva de absorção do estoque — como os lotes são vendidos ao longo do tempo. Cada fase tem velocidade e momento próprios.</p>
+          <h2>Campos de cada fase</h2>
+          <table class="help-kv">
+            <tr><th>Campo</th><th>Descrição</th></tr>
+            <tr><td>Nome</td><td>Identificação da fase (ex: Lançamento, Maturação)</td></tr>
+            <tr><td>% VGV</td><td>Percentual do total de lotes a ser vendido nesta fase. Soma deve ser 100%.</td></tr>
+            <tr><td>Início (mês)</td><td>Em qual mês do projeto esta fase começa</td></tr>
+            <tr><td>Duração (meses)</td><td>Por quantos meses a venda desta fase se estende</td></tr>
+            <tr><td>VSO resultante</td><td>Calculado automaticamente: % VGV ÷ duração = % vendido por mês</td></tr>
+            <tr><td>Lotes</td><td>Quantidade de lotes vendidos nesta fase (calculado automaticamente)</td></tr>
+          </table>
+          <h2>Fases padrão</h2>
+          <ul>
+            <li><strong>🚀 Lançamento:</strong> 40% do VGV em 2 meses — pico de vendas no evento de lançamento</li>
+            <li><strong>📈 Pós-Lançamento:</strong> 30% em 3 meses — demanda aquecida após o lançamento</li>
+            <li><strong>🌱 Maturação:</strong> 20% em 6 meses — ritmo sustentado</li>
+            <li><strong>🏷 Remanescentes:</strong> 10% em 6 meses — liquidação do estoque final</li>
+          </ul>
+          <div class="help-box tip">
+            <strong>Dica:</strong> Clique em <strong>+ Adicionar Fase</strong> para criar quantas fases precisar. Clique em ✕ para remover. O total deve sempre somar 100%.
+          </div>
+          <h2>Cenários (Pessimista / Realista / Otimista)</h2>
+          <p>Os botões no cabeçalho ajustam automaticamente as durações e percentuais das fases. O Otimista encurta as fases em 30%; o Pessimista alonga em 50%.</p>
+        </div>
+
+        <!-- OBRA -->
+        <div class="help-section" id="hs-obra">
+          <h1>🏗 Cronograma de Obras</h1>
+          <p>Distribui o custo de infraestrutura entre as diferentes etapas da obra, com controle de início, duração e curva de desembolso.</p>
+          <h2>Campos de cada rubrica</h2>
+          <table class="help-kv">
+            <tr><th>Campo</th><th>Descrição</th></tr>
+            <tr><td>Nome</td><td>Identificação da rubrica (ex: Terraplenagem, Asfalto)</td></tr>
+            <tr><td>% do Custo Total</td><td>Percentual do custo total de infraestrutura. Soma deve ser 100%.</td></tr>
+            <tr><td>Início (mês)</td><td>Mês em que esta etapa começa</td></tr>
+            <tr><td>Duração (meses)</td><td>Por quantos meses os gastos se distribuem</td></tr>
+            <tr><td>Distribuição</td><td>Como o gasto é distribuído ao longo da duração (ver abaixo)</td></tr>
+            <tr><td>Custo R$</td><td>Valor estimado calculado automaticamente (% × custo infra total)</td></tr>
+          </table>
+          <h2>Tipos de distribuição</h2>
+          <table class="help-kv">
+            <tr><th>Tipo</th><th>Como funciona</th><th>Quando usar</th></tr>
+            <tr><td>Curva S</td><td>Desembolso lento no início, acelera no meio, desacelera no final</td><td>Terraplenagem, redes — reflete mobilização gradual</td></tr>
+            <tr><td>Linear</td><td>Gasto igual a cada mês da duração</td><td>Serviços contínuos como drenagem e esgoto</td></tr>
+            <tr><td>Final</td><td>98% do gasto concentrado no último mês</td><td>Asfalto — pago na entrega da etapa</td></tr>
+          </table>
+          <h2>Gantt</h2>
+          <p>O diagrama à direita mostra a linha do tempo de cada rubrica. A barra colorida representa o período de execução, com o percentual indicado dentro.</p>
+          <div class="help-box warn">
+            <strong>Atenção:</strong> O custo base é definido pelo campo <strong>Custo por m² do terreno total</strong>. Altere este valor para ajustar a escala de todos os custos proporcionalmente.
+          </div>
+        </div>
+
+        <!-- RECEBIMENTO -->
+        <div class="help-section" id="hs-recebimento">
+          <h1>💰 Recebimento & Multi-Tabela</h1>
+          <p>Define como os compradores pagam pelos lotes — distribuindo as vendas entre 3 modalidades com condições distintas.</p>
+          <h2>Os 3 Baldes</h2>
+          <table class="help-kv">
+            <tr><th>Balde</th><th>Configuração</th><th>Impacto no Caixa</th></tr>
+            <tr><td>💰 À Vista</td><td>Desconto opcional. 100% recebido no mês da venda.</td><td>Entrada imediata — reduz exposição de caixa rapidamente</td></tr>
+            <tr><td>📅 Curto Prazo</td><td>Entrada + parcelas de 12 a 48 meses, sem juros (apenas correção)</td><td>Entrada parcial imediata + recebimentos mensais por 1-4 anos</td></tr>
+            <tr><td>🏦 Longo Prazo</td><td>Entrada + parcelas de 60 a 120 meses com juros de 0,8% a 1% a.m. + IPCA</td><td>Menor entrada, fluxo longo — principal fonte de receita futura</td></tr>
+          </table>
+          <div class="help-box warn">
+            <strong>Regra:</strong> A soma dos 3 baldes deve ser exatamente 100%. O badge indicará se estiver fora do total.
+          </div>
+          <h2>Escada de Recebimento</h2>
+          <p>O gráfico mostra uma venda hipotética realizada no Mês 1 — como o caixa recebe esse valor ao longo dos 60 meses seguintes, separado por modalidade. É a "escada" de recebimentos futuros.</p>
+          <h2>Valor Presente das Parcelas</h2>
+          <p>O sistema calcula o VPL das parcelas do longo prazo usando a TMA configurada. Um lote de R$100K parcelado em 120x pode ter VPL de R$70K — relevante para comparações.</p>
+        </div>
+
+        <!-- SENSIBILIDADE -->
+        <div class="help-section" id="hs-sensib">
+          <h1>🎛 Análise de Sensibilidade</h1>
+          <p>Responde à pergunta crítica do loteador: <em>"Se as vendas atrasarem 3 meses, quanto dinheiro a mais preciso ter no banco?"</em></p>
+          <h2>Slider de VSO</h2>
+          <p>Multiplica a velocidade de vendas de todas as fases sem alterar as premissas originais. Em 50%, o projeto leva o dobro do tempo para vender.</p>
+          <table class="help-kv">
+            <tr><th>Indicador</th><th>O que muda com VSO menor</th></tr>
+            <tr><td>Exposição Máxima</td><td>Sobe — precisa de mais capital para cobrir o período sem receitas</td></tr>
+            <tr><td>Break-even</td><td>Atrasado — demora mais para o caixa ficar positivo</td></tr>
+            <tr><td>TIR</td><td>Cai — o mesmo lucro obtido em mais tempo reduz a taxa</td></tr>
+            <tr><td>VPL</td><td>Cai — o dinheiro demora mais para chegar, perde valor presente</td></tr>
+          </table>
+          <h2>Slider de Preço</h2>
+          <p>Varia o preço por m² independentemente das fases. Útil para simular descontos ou reajustes sem alterar as premissas originais.</p>
+          <h2>Curva de Exposição × Velocidade</h2>
+          <p>Gráfico automático que mostra quanto capital é necessário para cada nível de velocidade de vendas (de 30% a 200% da base). A estrela marca o cenário atual.</p>
+        </div>
+
+        <!-- MATRIZ 2D -->
+        <div class="help-section" id="hs-matriz">
+          <h1>📐 Matriz de Sensibilidade 2D</h1>
+          <p>Heatmap que cruza duas variáveis simultaneamente — <strong>preço por m²</strong> (linhas) e <strong>velocidade de vendas</strong> (colunas) — mostrando o resultado de qualquer indicador para cada combinação.</p>
+          <h2>Como usar</h2>
+          <ol class="help-steps">
+            <li><div class="step-num">1</div>Defina o <strong>range de preço</strong> (mín e máx em R$/m²)</li>
+            <li><div class="step-num">2</div>Defina o <strong>range de VSO</strong> (mín e máx em %/mês)</li>
+            <li><div class="step-num">3</div>Escolha a <strong>métrica</strong> a exibir: TIR, Margem, Lucro, VPL, Exposição ou Break-even</li>
+            <li><div class="step-num">4</div>Clique em <strong>⟳ Recalcular</strong> — o sistema roda 80 cenários automaticamente</li>
+            <li><div class="step-num">5</div>Passe o mouse sobre as células para ver todos os 6 indicadores do cenário</li>
+          </ol>
+          <h2>Interpretação das cores</h2>
+          <table class="help-kv">
+            <tr><th>Cor</th><th>Significado (para TIR/Margem)</th></tr>
+            <tr><td style="color:#b91c1c">■ Vermelho escuro</td><td>Resultado muito baixo — projeto inviável</td></tr>
+            <tr><td style="color:#f0524f">■ Vermelho</td><td>Resultado baixo — risco alto</td></tr>
+            <tr><td style="color:#f97316">■ Laranja</td><td>Resultado moderado — atenção</td></tr>
+            <tr><td style="color:#e8c547">■ Amarelo</td><td>Resultado aceitável</td></tr>
+            <tr><td style="color:#84cc16">■ Verde claro</td><td>Resultado bom</td></tr>
+            <tr><td style="color:#2dd4a0">■ Verde/Teal</td><td>Resultado excelente</td></tr>
+          </table>
+          <div class="help-box tip">
+            <strong>A borda amarela</strong> marca o cenário atual do projeto — você vê imediatamente onde está na matriz.
+          </div>
+        </div>
+
+        <!-- FLUXO -->
+        <div class="help-section" id="hs-fluxo">
+          <h1>📋 Fluxo de Caixa Completo</h1>
+          <p>Tabela mensal com todas as entradas e saídas do projeto, mês a mês, do início até o recebimento da última parcela.</p>
+          <h2>Colunas da tabela</h2>
+          <table class="help-kv">
+            <tr><th>Coluna</th><th>Descrição</th></tr>
+            <tr><td>Mês</td><td>Período do projeto (★ indica o mês de break-even)</td></tr>
+            <tr><td>Fase</td><td>Fase de venda ativa naquele mês</td></tr>
+            <tr><td>Lotes Vend.</td><td>Quantidade de lotes vendidos no mês</td></tr>
+            <tr><td>Rec. Bruta</td><td>Total recebido no mês (todos os baldes somados)</td></tr>
+            <tr><td>À Vista / C. Prazo / L. Prazo</td><td>Receita discriminada por modalidade de pagamento</td></tr>
+            <tr><td>Custo Obra</td><td>Desembolso de infraestrutura no mês (negativo)</td></tr>
+            <tr><td>Impostos</td><td>Tributação sobre a receita do mês</td></tr>
+            <tr><td>Comissões</td><td>Comissão de corretores + marketing sobre a receita</td></tr>
+            <tr><td>Fluxo Mês</td><td>Resultado líquido do mês (positivo = entrada líquida)</td></tr>
+            <tr><td>Fluxo Acum.</td><td>Saldo acumulado desde o início. Fica positivo no break-even.</td></tr>
+          </table>
+          <div class="help-box info">
+            A tabela mostra o horizonte completo do projeto — se o longo prazo tem 120 parcelas e as vendas terminam no mês 18, a tabela vai até o mês 138.
+          </div>
+        </div>
+
+        <!-- COMPARADOR -->
+        <div class="help-section" id="hs-comparador">
+          <h1>⚖ Comparador de Cenários</h1>
+          <p>Compara até 3 análises salvas lado a lado — ideal para decidir entre terrenos diferentes, estratégias de preço ou modelos de parcelamento.</p>
+          <h2>Como usar</h2>
+          <ol class="help-steps">
+            <li><div class="step-num">1</div>Salve ao menos 2 análises em <strong>📁 Meus Projetos</strong></li>
+            <li><div class="step-num">2</div>Vá para a aba <strong>⚖ Comparador</strong></li>
+            <li><div class="step-num">3</div>Clique em <strong>Selecionar projeto</strong> em cada slot ou <strong>Usar análise atual</strong></li>
+            <li><div class="step-num">4</div>Com 2+ slots preenchidos, os resultados aparecem automaticamente</li>
+          </ol>
+          <h2>O que o comparador mostra</h2>
+          <ul>
+            <li><strong>Tabela comparativa:</strong> 11 indicadores com destaque ★ para o melhor em cada linha</li>
+            <li><strong>Fluxo Acumulado:</strong> Curvas sobrepostas — veja qual cenário sai do "vale" mais rápido</li>
+            <li><strong>Radar de Rentabilidade:</strong> Perfil visual normalizado — TIR, Margem, ROI, VPL, Lotes</li>
+            <li><strong>Receita Mensal:</strong> Barras comparativas dos primeiros 60 meses</li>
+          </ul>
+          <div class="help-box tip">
+            Clique em <strong>📂 Carregar</strong> em qualquer slot para abrir aquele cenário no app e continuar editando.
+          </div>
+        </div>
+
+        <!-- PREÇO REVERSO -->
+        <div class="help-section" id="hs-reverso">
+          <h1>🎯 Calculadora de Preço Reverso</h1>
+          <p>Responde a pergunta: <em>"Dado meu custo e estrutura de vendas, qual é o preço mínimo por m² para atingir TIR de X% e margem de Y%?"</em></p>
+          <h2>Como usar</h2>
+          <ol class="help-steps">
+            <li><div class="step-num">1</div>Configure todas as premissas (obra, fases, baldes) nas outras abas primeiro</li>
+            <li><div class="step-num">2</div>Defina suas <strong>metas</strong>: TIR mínima, Margem mínima e/ou VPL mínimo</li>
+            <li><div class="step-num">3</div>Escolha a <strong>prioridade</strong> (qual meta domina a busca)</li>
+            <li><div class="step-num">4</div>Defina o range de preço (mín e máx) e a precisão da busca</li>
+            <li><div class="step-num">5</div>Clique em <strong>🔍 Calcular Preço Mínimo</strong></li>
+          </ol>
+          <h2>Resultados</h2>
+          <table class="help-kv">
+            <tr><th>Elemento</th><th>O que mostra</th></tr>
+            <tr><td>Preço mínimo</td><td>Valor por m² que atinge exatamente a meta definida</td></tr>
+            <tr><td>Diferença</td><td>Quanto está acima (▲) ou abaixo (▼) do preço atual</td></tr>
+            <tr><td>Métricas alcançadas</td><td>Verde = meta atingida · Amarelo = próximo · Vermelho = abaixo</td></tr>
+            <tr><td>Tabela de sensibilidade</td><td>Como cada faixa de preço afeta todos os indicadores</td></tr>
+          </table>
+          <div class="help-box tip">
+            Clique em <strong>✅ Aplicar ao projeto</strong> para transferir o preço calculado diretamente para as premissas.
+          </div>
+        </div>
+
+        <!-- PROJETOS -->
+        <div class="help-section" id="hs-projetos">
+          <h1>📁 Meus Projetos</h1>
+          <p>Sistema de salvamento local — todas as análises ficam armazenadas no <strong>IndexedDB</strong> do seu dispositivo, sem necessidade de internet ou servidor.</p>
+          <h2>Salvar um projeto</h2>
+          <ol class="help-steps">
+            <li><div class="step-num">1</div>Clique em <strong>📁 Meus Projetos</strong> no cabeçalho</li>
+            <li><div class="step-num">2</div>Preencha nome, cidade, cenário e observações</li>
+            <li><div class="step-num">3</div>Clique em <strong>💾 Salvar</strong></li>
+          </ol>
+          <div class="help-box tip">
+            <strong>Atalho:</strong> <span class="kbd">Ctrl</span>+<span class="kbd">S</span> salva o projeto atual instantaneamente se já tiver nome, ou abre o painel para nomear.
+          </div>
+          <h2>O que é salvo</h2>
+          <p>Um snapshot completo de todas as premissas — área, lotes, preço, fases de venda, rubricas de obra, baldes, regime fiscal, permuta, TMA — além dos resultados (TIR, VPL, Lucro etc.).</p>
+          <h2>Carregar um projeto</h2>
+          <p>Clique em <strong>📂 Carregar</strong> na lista de projetos salvos. Todas as premissas serão restauradas e o app recalculará automaticamente.</p>
+          <div class="help-box warn">
+            <strong>Atenção:</strong> Os dados ficam apenas no dispositivo atual. Para usar em outro computador, use a função <strong>💾 Backup JSON</strong>.
+          </div>
+        </div>
+
+        <!-- EXPORTAÇÃO -->
+        <div class="help-section" id="hs-export">
+          <h1>📤 Exportação de Dados</h1>
+          <p>Disponível no Dashboard e na aba Fluxo Completo.</p>
+          <h2>Formatos disponíveis</h2>
+          <table class="help-kv">
+            <tr><th>Formato</th><th>Conteúdo</th><th>Quando usar</th></tr>
+            <tr><td>📊 Excel (.csv)</td><td>Resumo + premissas + fases + obra + fluxo mensal completo</td><td>Análise detalhada, apresentação para investidores</td></tr>
+            <tr><td>📄 CSV puro</td><td>Fluxo mensal com separador vírgula (padrão internacional)</td><td>Importar no Power BI, Google Sheets ou Python</td></tr>
+            <tr><td>🖨 PDF</td><td>Abre o diálogo de impressão do browser com CSS otimizado</td><td>Relatório para reunião, impressão física</td></tr>
+            <tr><td>💾 Backup JSON</td><td>Todas as premissas + resultados + fluxo em formato estruturado</td><td>Backup completo, transferir entre dispositivos</td></tr>
+          </table>
+          <div class="help-box info">
+            O arquivo Excel usa <strong>separador ponto-e-vírgula</strong> e <strong>vírgula decimal</strong> — padrão brasileiro. Ao abrir no Excel, selecione "Dados → De Texto/CSV" se não abrir automaticamente no formato correto.
+          </div>
+          <h2>Exportação do Comparador</h2>
+          <p>Na aba Comparador, o botão <strong>📊 Exportar Excel</strong> gera uma planilha com a tabela de indicadores de todos os cenários + fluxo acumulado comparativo.</p>
+          <h2>Exportação da Matriz 2D</h2>
+          <p>Na aba Sensibilidade, o botão <strong>📊 Exportar Excel</strong> gera uma planilha com todas as 6 métricas (TIR, Margem, Lucro, VPL, Exposição, Break-even) para cada combinação de preço × velocidade.</p>
+        </div>
+
+        <!-- CENÁRIOS -->
+        <div class="help-section" id="hs-cenarios">
+          <h1>🎬 Cenários: Pessimista · Realista · Otimista</h1>
+          <p>Os 3 botões no cabeçalho aplicam ajustes automáticos sobre as premissas atuais para simular diferentes condições de mercado.</p>
+          <h2>O que cada cenário altera</h2>
+          <table class="help-kv">
+            <tr><th>Premissa</th><th>Pessimista</th><th>Realista</th><th>Otimista</th></tr>
+            <tr><td>Preço por m²</td><td>−10%</td><td>Base</td><td>+10%</td></tr>
+            <tr><td>Custo Infra/m²</td><td>+15%</td><td>Base</td><td>−5%</td></tr>
+            <tr><td>Duração das fases</td><td>+50% (mais lento)</td><td>Base</td><td>−30% (mais rápido)</td></tr>
+            <tr><td>% no Lançamento</td><td>−30%</td><td>Base</td><td>+30%</td></tr>
+          </table>
+          <div class="help-box tip">
+            <strong>Fluxo recomendado:</strong> Configure o cenário Realista primeiro e salve. Depois alterne para Pessimista/Otimista para comparar. Ao voltar para Realista, os valores originais são restaurados.
+          </div>
+        </div>
+
+        <!-- GLOSSÁRIO -->
+        <div class="help-section" id="hs-glossario">
+          <h1>📖 Glossário</h1>
+          <table class="help-kv">
+            <tr><th>Termo</th><th>Definição</th></tr>
+            <tr><td>VGV</td><td>Valor Geral de Vendas — soma de todos os lotes pelo preço de tabela</td></tr>
+            <tr><td>VSO</td><td>Velocidade de Vendas sobre Oferta — % do estoque vendido por mês</td></tr>
+            <tr><td>TIR</td><td>Taxa Interna de Retorno — rentabilidade que zera o VPL do projeto</td></tr>
+            <tr><td>VPL</td><td>Valor Presente Líquido — soma dos fluxos futuros trazidos a valor de hoje pela TMA</td></tr>
+            <tr><td>TMA</td><td>Taxa Mínima de Atratividade — rendimento mínimo aceitável para o investidor (ex: CDI)</td></tr>
+            <tr><td>Exposição Máxima</td><td>Maior valor negativo do fluxo acumulado — capital necessário antes do projeto se tornar sustentável</td></tr>
+            <tr><td>Break-even</td><td>Mês em que o fluxo de caixa acumulado fica positivo pela primeira vez</td></tr>
+            <tr><td>ROI</td><td>Return on Investment — Lucro Líquido ÷ Custo Total × 100%</td></tr>
+            <tr><td>RET</td><td>Regime Especial de Tributação — alíquota de 4% sobre a receita bruta para loteamentos</td></tr>
+            <tr><td>Curva S</td><td>Distribuição de desembolso com aceleração no meio do período — reflete mobilização gradual de obra</td></tr>
+            <tr><td>Permuta</td><td>Modalidade onde o terreno é pago com lotes ao proprietário, sem desembolso de caixa</td></tr>
+            <tr><td>Eficiência</td><td>% da área total que se torna lote vendável (40-60% é típico — o resto vai para vias, áreas verdes e institucionais)</td></tr>
+            <tr><td>IndexedDB</td><td>Banco de dados local do browser — onde os projetos são salvos no dispositivo</td></tr>
+          </table>
+        </div>
+
+        <!-- FÓRMULAS -->
+        <div class="help-section" id="hs-formulas">
+          <h1>🧮 Fórmulas e Cálculos</h1>
+          <h2>Indicadores principais</h2>
+          <table class="help-kv">
+            <tr><th>Indicador</th><th>Fórmula</th></tr>
+            <tr><td>VGV Bruto</td><td>Qtd. Lotes × Tamanho Médio (m²) × Preço/m²</td></tr>
+            <tr><td>Qtd. Lotes</td><td>⌊ Área Total × Eficiência ÷ Tamanho Médio ⌋</td></tr>
+            <tr><td>Lucro Líquido</td><td>Fluxo de Caixa Acumulado no último mês</td></tr>
+            <tr><td>Margem</td><td>Lucro Líquido ÷ VGV Bruto × 100%</td></tr>
+            <tr><td>ROI</td><td>Lucro Líquido ÷ Custo Total × 100%</td></tr>
+          </table>
+          <h2>Parcela do Sistema Price (Longo Prazo)</h2>
+          <div class="help-box info">
+            PMT = Saldo × (i × (1+i)ⁿ) ÷ ((1+i)ⁿ − 1)<br>
+            Onde: <strong>i</strong> = taxa mensal · <strong>n</strong> = número de parcelas · <strong>Saldo</strong> = valor financiado (sem entrada)
+          </div>
+          <h2>TIR (Taxa Interna de Retorno)</h2>
+          <p>Calculada via método de <strong>Newton-Raphson</strong> aplicado ao fluxo de caixa mensal completo (até 300 iterações, convergência em 1e-9). A TIR mensal é anualizada: TIR a.a. = (1 + TIR mensal)¹² − 1.</p>
+          <h2>VPL (Valor Presente Líquido)</h2>
+          <div class="help-box info">
+            VPL = Σ [ Fluxo(t) ÷ (1 + TMA)ᵗ ]<br>
+            Para t = 0 até o mês final do projeto.
+          </div>
+          <h2>Regime Tributário</h2>
+          <table class="help-kv">
+            <tr><th>Regime</th><th>Alíquota</th><th>Base de cálculo</th></tr>
+            <tr><td>RET</td><td>4,00%</td><td>Receita bruta mensal</td></tr>
+            <tr><td>Lucro Presumido</td><td>6,73%</td><td>Receita bruta mensal</td></tr>
+            <tr><td>Lucro Real</td><td>34,00%</td><td>Lucro apurado no final</td></tr>
+          </table>
+        </div>
+
+      </div><!-- /help-content -->
+    </div><!-- /help-body -->
+  </div><!-- /help-modal -->
+</div><!-- /help-overlay -->
 
 <!-- ══════════════ PROJECTS MODAL ══════════════ -->
 <div class="modal-overlay" id="projectsModal">
@@ -3022,6 +4688,534 @@ function showToast(msg, type='ok', duration=3000) {
 }
 
 // ═══════════════════════════════════════════════════════
+// COMPARADOR DE CENÁRIOS
+// ═══════════════════════════════════════════════════════
+
+const SLOT_COLORS = ['#e8c547','#5b85f5','#2dd4a0'];
+const SLOT_LABELS = ['A','B','C'];
+const SLOT_TIPO_COLORS = { otimista:'var(--grn)', realista:'var(--acc)', pessimista:'var(--red)' };
+
+// State: each slot holds { nome, cidade, tipo, resultados, snapshot, fluxoAcum, rec, totalMeses }
+let compSlots = [null, null, null];
+let compPickerTargetSlot = 0;
+
+// ── Recalcula R a partir de um snapshot e retorna resultados + fluxo ──
+function calcFromSnapshot(snap) {
+  // Temporarily swap global state, calculate, then restore
+  const savedPhases = JSON.parse(JSON.stringify(phasesData));
+  const savedObra   = JSON.parse(JSON.stringify(obraData));
+
+  // Inject snapshot values into DOM (silently)
+  const sv = (id,val) => { const el=document.getElementById(id); if(el) el.value=val; };
+  sv('areaTotal',    snap.areaTotal);
+  sv('efSlider',     snap.eficiencia);
+  sv('tamLote',      snap.tamLote);
+  sv('precoM2',      snap.precoM2);
+  sv('custoInfraM2', snap.custoInfraM2);
+  sv('custoTerreno', snap.custoTerreno);
+  sv('regime',       snap.regime);
+  sv('comissao',     snap.comissao);
+  sv('marketing',    snap.marketing);
+  sv('outrasDespesas',snap.outrasDespesas);
+  sv('tma',          snap.tma);
+  if(document.getElementById('permTog')) document.getElementById('permTog').checked = snap.permuta||false;
+  sv('permPct',      snap.permutaPct);
+  sv('b1pct',snap.b1pct); sv('b1desc',snap.b1desc);
+  sv('b2pct',snap.b2pct); sv('b2ent',snap.b2ent); sv('b2parc',snap.b2parc); sv('b2jur',snap.b2jur);
+  sv('b3pct',snap.b3pct); sv('b3ent',snap.b3ent); sv('b3parc',snap.b3parc); sv('b3jur',snap.b3jur);
+  phasesData = snap.phasesData ? JSON.parse(JSON.stringify(snap.phasesData)) : phasesData;
+  obraData   = snap.obraData   ? JSON.parse(JSON.stringify(snap.obraData))   : obraData;
+
+  const R = calcular();
+
+  // Restore original state
+  phasesData = savedPhases;
+  obraData   = savedObra;
+  restoreSnapshot(captureSnapshot()); // re-sync DOM to original
+
+  return R;
+}
+
+// ── Add current analysis to first available slot ──
+function addCurrentToComp() {
+  const idx = compSlots.findIndex(s => s===null);
+  if(idx === -1) { showToast('⚠ Todos os slots estão ocupados. Limpe um para adicionar.','err'); return; }
+  addCurrentToSlot(idx);
+}
+
+function addCurrentToSlot(idx) {
+  const R    = calcular();
+  const snap = captureSnapshot();
+  const nome = currentProjectName || 'Análise Atual';
+  compSlots[idx] = {
+    nome, cidade:'', tipo:'realista',
+    snapshot: snap,
+    resultados: buildResultados(R),
+    fluxoAcum: [...R.fluxoAcum],
+    rec: R.rec.map(r=>({...r})),
+    obra: [...R.obra],
+    fluxos: [...R.fluxos],
+    totalMeses: R.totalMeses,
+  };
+  renderCompSlot(idx);
+  renderCompResults();
+  showToast('✅ "'+nome+'" adicionado ao comparador','ok');
+}
+
+function buildResultados(R) {
+  return {
+    vgvBruto: R.vgvBruto, qtdLotes: R.qtdLotes,
+    lucroLiq: R.lucroLiq, margemLiq: R.margemLiq,
+    tirAa: R.tirAa, tirMes: R.tirMes,
+    vpl: R.vpl, expMax: R.expMax, expMes: R.expMes,
+    breakevenMes: R.breakevenMes, roi: R.roi, custoTot: R.custoTot,
+  };
+}
+
+// ── Slot rendering ──
+function renderCompSlot(idx) {
+  const slot = compSlots[idx];
+  const emptyEl  = document.getElementById('slot-'+idx+'-empty');
+  const filledEl = document.getElementById('slot-'+idx+'-filled');
+  if(!slot) {
+    emptyEl.style.display  = '';
+    filledEl.style.display = 'none';
+    filledEl.innerHTML = '';
+    document.getElementById('slot-'+idx).style.borderColor = '';
+    return;
+  }
+
+  const r = slot.resultados;
+  const col = SLOT_COLORS[idx];
+  const tipoCol = SLOT_TIPO_COLORS[slot.tipo] || 'var(--mut)';
+  emptyEl.style.display  = 'none';
+  filledEl.style.display = '';
+  document.getElementById('slot-'+idx).style.borderColor = col+'66';
+
+  const fmtR = v => { if(v==null||isNaN(v))return'—'; const s=v<0?'-':''; const a=Math.abs(v); if(a>=1e6)return s+'R$'+(a/1e6).toFixed(2)+'M'; if(a>=1e3)return s+'R$'+(a/1e3).toFixed(1)+'K'; return s+'R$'+a.toFixed(0); };
+
+  filledEl.innerHTML = `
+    <div class="comp-slot-header">
+      <div>
+        <div style="font-size:9px;color:${col};font-weight:700;letter-spacing:1px;margin-bottom:2px">CENÁRIO ${SLOT_LABELS[idx]}</div>
+        <div class="comp-slot-name">${slot.nome}</div>
+        ${slot.cidade?'<div style="font-size:10px;color:var(--mut)">'+slot.cidade+'</div>':''}
+      </div>
+      <span class="comp-slot-badge" style="background:${tipoCol}22;color:${tipoCol}">${slot.tipo||'realista'}</span>
+    </div>
+    <div class="comp-slot-kpis">
+      <div class="comp-kpi-row">
+        <span class="comp-kpi-label">VGV Bruto</span>
+        <span class="comp-kpi-val" style="color:var(--blu)">${fmtR(r.vgvBruto)}</span>
+      </div>
+      <div class="comp-kpi-row">
+        <span class="comp-kpi-label">TIR (a.a.)</span>
+        <span class="comp-kpi-val" style="color:var(--grn)">${r.tirAa!=null?r.tirAa.toFixed(1)+'%':'—'}</span>
+      </div>
+      <div class="comp-kpi-row">
+        <span class="comp-kpi-label">Lucro Líquido</span>
+        <span class="comp-kpi-val" style="color:var(--acc)">${fmtR(r.lucroLiq)}</span>
+      </div>
+      <div class="comp-kpi-row">
+        <span class="comp-kpi-label">VPL</span>
+        <span class="comp-kpi-val">${fmtR(r.vpl)}</span>
+      </div>
+      <div class="comp-kpi-row">
+        <span class="comp-kpi-label">Exposição Máx.</span>
+        <span class="comp-kpi-val" style="color:var(--red)">${fmtR(Math.abs(r.expMax||0))}</span>
+      </div>
+      <div class="comp-kpi-row">
+        <span class="comp-kpi-label">Break-even</span>
+        <span class="comp-kpi-val">${r.breakevenMes?'Mês '+r.breakevenMes:'—'}</span>
+      </div>
+    </div>
+    <div class="comp-slot-footer">
+      <button class="comp-load-btn" onclick="loadSlotToApp(${idx})">📂 Carregar</button>
+      <button class="comp-clear-btn" onclick="clearSlot(${idx})">✕ Remover</button>
+    </div>`;
+}
+
+function clearSlot(idx) {
+  compSlots[idx] = null;
+  renderCompSlot(idx);
+  renderCompResults();
+}
+
+function loadSlotToApp(idx) {
+  const slot = compSlots[idx];
+  if(!slot?.snapshot) return;
+  restoreSnapshot(slot.snapshot);
+  currentProjectName = slot.nome;
+  const hdrel = document.getElementById('hdr-proj-name');
+  if(hdrel) hdrel.textContent = slot.nome;
+  showTab('dash');
+  document.querySelector('.tab-btn.on')?.classList.remove('on');
+  document.querySelector('.tab-btn[onclick*="dash"]')?.classList.add('on');
+  showToast('📂 "'+slot.nome+'" carregado no app','ok');
+}
+
+// ── Comp picker (from saved projects) ──
+function openCompPicker(idx) {
+  compPickerTargetSlot = idx;
+  document.getElementById('compPickerModal').classList.add('open');
+  loadCompPickerList();
+}
+function closeCompPicker() {
+  document.getElementById('compPickerModal').classList.remove('open');
+}
+document.getElementById('compPickerModal')?.addEventListener('click', e => {
+  if(e.target===document.getElementById('compPickerModal')) closeCompPicker();
+});
+
+async function loadCompPickerList() {
+  const list = document.getElementById('compPickerList');
+  const projetos = await dbGetAll();
+  if(!projetos.length) {
+    list.innerHTML = '<div class="proj-empty"><div class="proj-empty-icon">🏗</div><div class="proj-empty-text">Nenhum projeto salvo ainda.</div></div>';
+    return;
+  }
+  const fmtR = v=>{ if(v==null)return'—'; const a=Math.abs(v); return (v<0?'-':'')+'R$'+(a>=1e6?(a/1e6).toFixed(1)+'M':a>=1e3?(a/1e3).toFixed(0)+'K':a.toFixed(0)); };
+  list.innerHTML = projetos.map(p => {
+    const r = p.resultados||{};
+    return `
+    <div class="proj-item" onclick="pickProjectForComp('${p.id}')">
+      <div class="proj-icon">🏘</div>
+      <div class="proj-info">
+        <div class="proj-name">${p.nome}</div>
+        <div class="proj-meta">${p.cidade||''} · ${new Date(p.updatedAt).toLocaleDateString('pt-BR')}</div>
+        <div class="proj-kpis">
+          <div class="proj-kpi"><span class="proj-kpi-l">VGV</span><span class="proj-kpi-v" style="color:var(--blu)">${fmtR(r.vgvBruto)}</span></div>
+          <div class="proj-kpi"><span class="proj-kpi-l">TIR</span><span class="proj-kpi-v" style="color:var(--grn)">${r.tirAa!=null?r.tirAa.toFixed(1)+'%':'—'}</span></div>
+          <div class="proj-kpi"><span class="proj-kpi-l">Lucro</span><span class="proj-kpi-v" style="color:var(--acc)">${fmtR(r.lucroLiq)}</span></div>
+        </div>
+      </div>
+      <button class="proj-btn load" style="flex-shrink:0">Selecionar</button>
+    </div>`;
+  }).join('');
+}
+
+async function pickProjectForComp(id) {
+  const projetos = await dbGetAll();
+  const p = projetos.find(x=>x.id===id);
+  if(!p?.snapshot) return;
+
+  // Recalculate from snapshot to get full R data
+  const R = calcFromSnapshot(p.snapshot);
+  compSlots[compPickerTargetSlot] = {
+    nome: p.nome, cidade: p.cidade||'', tipo: p.tipo||'realista',
+    snapshot: p.snapshot,
+    resultados: p.resultados || buildResultados(R),
+    fluxoAcum: [...R.fluxoAcum],
+    rec: R.rec.map(r=>({...r})),
+    obra: [...R.obra],
+    fluxos: [...R.fluxos],
+    totalMeses: R.totalMeses,
+  };
+  closeCompPicker();
+  renderCompSlot(compPickerTargetSlot);
+  renderCompResults();
+  showToast('✅ "'+p.nome+'" adicionado ao Cenário '+SLOT_LABELS[compPickerTargetSlot],'ok');
+}
+
+// ── Render full comparison results ──
+function renderCompResults() {
+  const filled = compSlots.filter(Boolean);
+  const resultsCard = document.getElementById('compResultsCard');
+  const chartsRow   = document.getElementById('compChartsRow');
+  if(filled.length < 2) {
+    resultsCard.style.display = 'none';
+    chartsRow.style.display   = 'none';
+    return;
+  }
+  resultsCard.style.display = '';
+  chartsRow.style.display   = '';
+  buildCompKpiTable();
+  buildCompCharts();
+}
+
+function buildCompKpiTable() {
+  const slots = compSlots;
+  const filled = slots.filter(Boolean);
+  const table  = document.getElementById('compKpiTable');
+
+  // Helper: find best/worst index among filled slots for a metric
+  const bestIdx  = (vals, higher=true) => {
+    let bi=-1, bv=higher?-Infinity:Infinity;
+    vals.forEach((v,i)=>{ if(v!=null&&(higher?v>bv:v<bv)){bv=v;bi=i;} });
+    return bi;
+  };
+  const fmtV = (v, type) => {
+    if(v==null||isNaN(v)) return '—';
+    if(type==='pct')  return v.toFixed(1)+'%';
+    if(type==='mes')  return 'Mês '+v;
+    if(type==='int')  return Math.round(v).toLocaleString('pt-BR');
+    const a=Math.abs(v); const s=v<0?'-':'';
+    if(a>=1e6) return s+'R$'+(a/1e6).toFixed(2)+'M';
+    if(a>=1e3) return s+'R$'+(a/1e3).toFixed(1)+'K';
+    return s+'R$'+a.toFixed(0);
+  };
+
+  const metrics = [
+    { label:'VGV Bruto',              key:'vgvBruto',     type:'brl',  higher:true  },
+    { label:'Qtd. Lotes',             key:'qtdLotes',     type:'int',  higher:true  },
+    { label:'Custo Total',            key:'custoTot',     type:'brl',  higher:false },
+    { label:'Lucro Líquido',          key:'lucroLiq',     type:'brl',  higher:true  },
+    { label:'Margem Líquida',         key:'margemLiq',    type:'pct',  higher:true  },
+    { label:'TIR (% a.a.)',           key:'tirAa',        type:'pct',  higher:true  },
+    { label:'VPL',                    key:'vpl',          type:'brl',  higher:true  },
+    { label:'ROI',                    key:'roi',          type:'pct',  higher:true  },
+    { label:'Exposição Máx. Caixa',   key:'expMax',       type:'brl',  higher:false, abs:true },
+    { label:'Mês da Exposição Máx.',  key:'expMes',       type:'mes',  higher:false },
+    { label:'Break-even (mês)',       key:'breakevenMes', type:'mes',  higher:false },
+  ];
+
+  // Build header
+  const filledSlots = slots.map((s,i)=>s?i:-1).filter(i=>i>=0);
+  let html = '<thead><tr><th style="min-width:180px">Indicador</th>';
+  filledSlots.forEach(i => {
+    html += `<th style="color:${SLOT_COLORS[i]};min-width:140px">
+      Cenário ${SLOT_LABELS[i]}<br>
+      <span style="font-weight:400;color:var(--mut);font-size:10px">${slots[i].nome}</span>
+    </th>`;
+  });
+  html += '<th style="color:var(--mut);min-width:100px">Melhor</th></tr></thead><tbody>';
+
+  metrics.forEach(m => {
+    const vals = filledSlots.map(i => {
+      const v = slots[i].resultados[m.key];
+      return m.abs && v!=null ? Math.abs(v) : v;
+    });
+    const bi = bestIdx(vals, m.higher);
+
+    html += `<tr><td class="kpi-row-label">${m.label}</td>`;
+    filledSlots.forEach((si, vi) => {
+      const v = vals[vi];
+      const isBest  = vi === bi;
+      const isWorst = vals.length > 1 && vi === bestIdx(vals, !m.higher) && bi !== vi;
+      const cls = isBest ? 'best' : isWorst ? 'worst' : 'val';
+      const disp = m.key==='expMax'&&v!=null ? fmtV(-Math.abs(v),'brl') : fmtV(v, m.type);
+      html += `<td class="${cls}">${disp}${isBest?'<span class="comp-winner-tag">★ melhor</span>':''}</td>`;
+    });
+    // Best column
+    const bestSlot = bi>=0 ? slots[filledSlots[bi]] : null;
+    html += `<td style="color:var(--grn);font-size:12px;font-weight:600">${bestSlot?'<span style="font-size:16px">'+SLOT_COLORS[filledSlots[bi]].replace('var(--','').replace(')','')+'</span> '+SLOT_LABELS[filledSlots[bi]]:'—'}</td>`;
+    html += '</tr>';
+  });
+
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+function buildCompCharts() {
+  const filledSlots = compSlots.map((s,i)=>s?i:-1).filter(i=>i>=0);
+  const maxM = Math.max(...filledSlots.map(i=>compSlots[i].totalMeses));
+  const labels = Array.from({length:maxM},(_,i)=>'M'+(i+1));
+
+  // ── Fluxo acumulado ──
+  destroyChart('c-comp-fluxo');
+  const ctxF = document.getElementById('c-comp-fluxo').getContext('2d');
+  charts['c-comp-fluxo'] = new Chart(ctxF, {
+    type:'line',
+    data:{
+      labels,
+      datasets: filledSlots.map(i=>({
+        label: 'Cenário '+SLOT_LABELS[i]+' — '+compSlots[i].nome,
+        data: compSlots[i].fluxoAcum.slice(1),
+        borderColor: SLOT_COLORS[i],
+        borderWidth: 2.5,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        tension: 0.4,
+        fill: false,
+      }))
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{color:'#6b7099',font:{size:10},boxWidth:12,boxHeight:12}},
+        tooltip:{backgroundColor:'#191b27',borderColor:'#23263a',borderWidth:1,
+          callbacks:{label:ctx=>' '+ctx.dataset.label.split(' — ')[0]+': '+fmt(ctx.raw)}}
+      },
+      scales:{
+        x:{grid:{color:'rgba(35,38,58,.5)'},ticks:{color:'#6b7099',font:{size:9},maxTicksLimit:16}},
+        y:{grid:{color:'rgba(35,38,58,.5)'},ticks:{color:'#6b7099',font:{size:9},callback:v=>fmt(v)}}
+      }
+    }
+  });
+
+  // ── Radar de rentabilidade ──
+  destroyChart('c-comp-radar');
+  const ctxR = document.getElementById('c-comp-radar').getContext('2d');
+  const radarLabels = ['TIR (a.a.)','Margem (%)','ROI (%)','VPL norm.','Lotes'];
+  // Normalize each metric 0-100 across slots
+  const allR = filledSlots.map(i=>compSlots[i].resultados);
+  const norm = (key, vals) => {
+    const max = Math.max(...vals.map(r=>Math.abs(r[key]||0)));
+    return vals.map(r => max>0?Math.round(Math.abs(r[key]||0)/max*100):0);
+  };
+  const metrics = ['tirAa','margemLiq','roi','vpl','qtdLotes'];
+  const normalized = metrics.map(k=>norm(k,allR));
+
+  charts['c-comp-radar'] = new Chart(ctxR, {
+    type:'radar',
+    data:{
+      labels: radarLabels,
+      datasets: filledSlots.map((si,di)=>({
+        label: 'Cenário '+SLOT_LABELS[si],
+        data: metrics.map((_,mi)=>normalized[mi][di]),
+        borderColor: SLOT_COLORS[si],
+        backgroundColor: SLOT_COLORS[si]+'22',
+        borderWidth: 2,
+        pointBackgroundColor: SLOT_COLORS[si],
+        pointRadius: 4,
+      }))
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{color:'#6b7099',font:{size:10},boxWidth:10}},
+        tooltip:{backgroundColor:'#191b27',borderColor:'#23263a',borderWidth:1}
+      },
+      scales:{
+        r:{
+          grid:{color:'rgba(35,38,58,.6)'},
+          ticks:{display:false},
+          pointLabels:{color:'#9098b8',font:{size:10}},
+          angleLines:{color:'rgba(35,38,58,.6)'},
+          suggestedMin:0,suggestedMax:100,
+        }
+      }
+    }
+  });
+
+  // ── Receita mensal comparativa ──
+  destroyChart('c-comp-receita');
+  const ctxRec = document.getElementById('c-comp-receita').getContext('2d');
+  const limRec = Math.min(maxM, 60);
+  const labelsRec = Array.from({length:limRec},(_,i)=>'M'+(i+1));
+  charts['c-comp-receita'] = new Chart(ctxRec, {
+    type:'bar',
+    data:{
+      labels: labelsRec,
+      datasets: filledSlots.map(i=>({
+        label: 'Cenário '+SLOT_LABELS[i]+' — '+compSlots[i].nome,
+        data: Array.from({length:limRec},(_,mi)=>{
+          const r=compSlots[i].rec[mi+1];
+          return r?(r.av+r.cp+r.lp):0;
+        }),
+        backgroundColor: SLOT_COLORS[i]+'88',
+        borderColor: SLOT_COLORS[i],
+        borderWidth: 1,
+        borderRadius: 2,
+      }))
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{color:'#6b7099',font:{size:10},boxWidth:10}},
+        tooltip:{backgroundColor:'#191b27',borderColor:'#23263a',borderWidth:1,
+          callbacks:{label:ctx=>' '+ctx.dataset.label.split(' — ')[0]+': '+fmt(ctx.raw)}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#6b7099',font:{size:9},maxTicksLimit:12}},
+        y:{grid:{color:'rgba(35,38,58,.5)'},ticks:{color:'#6b7099',font:{size:9},callback:v=>fmt(v)}}
+      }
+    }
+  });
+}
+
+// ── Export comparator to Excel ──
+function exportCompExcel() {
+  const filledSlots = compSlots.map((s,i)=>s?i:-1).filter(i=>i>=0);
+  if(filledSlots.length<2){ showToast('⚠ Adicione pelo menos 2 cenários','err'); return; }
+
+  const BOM='﻿', sep=';';
+  const rows=[];
+  rows.push(['LOTEVIA PRO — COMPARATIVO DE CENÁRIOS']);
+  rows.push(['Exportado em', new Date().toLocaleString('pt-BR')]);
+  rows.push([]);
+
+  // Header row
+  const hdr = ['Indicador',...filledSlots.map(i=>'Cenário '+SLOT_LABELS[i]+' — '+compSlots[i].nome),'Melhor'];
+  rows.push(hdr);
+
+  const fmtN = v=>v!=null&&!isNaN(v)?v.toFixed(2).replace('.',','):'';
+  const metrics = [
+    {label:'VGV Bruto (R$)',key:'vgvBruto',higher:true},
+    {label:'Qtd. Lotes',key:'qtdLotes',higher:true},
+    {label:'Custo Total (R$)',key:'custoTot',higher:false},
+    {label:'Lucro Líquido (R$)',key:'lucroLiq',higher:true},
+    {label:'Margem Líquida (%)',key:'margemLiq',higher:true},
+    {label:'TIR (% a.a.)',key:'tirAa',higher:true},
+    {label:'VPL (R$)',key:'vpl',higher:true},
+    {label:'ROI (%)',key:'roi',higher:true},
+    {label:'Exposição Máx. (R$)',key:'expMax',higher:false,abs:true},
+    {label:'Break-even (mês)',key:'breakevenMes',higher:false},
+  ];
+
+  metrics.forEach(m=>{
+    const vals = filledSlots.map(i=>{ const v=compSlots[i].resultados[m.key]; return m.abs&&v!=null?Math.abs(v):v; });
+    let bestIdx=-1, bestV=m.higher?-Infinity:Infinity;
+    vals.forEach((v,i)=>{ if(v!=null&&(m.higher?v>bestV:v<bestV)){bestV=v;bestIdx=i;} });
+    rows.push([m.label,...vals.map(v=>fmtN(v)),bestIdx>=0?'Cenário '+SLOT_LABELS[filledSlots[bestIdx]]:'—']);
+  });
+
+  rows.push([]);
+  rows.push(['FLUXO DE CAIXA ACUMULADO (R$)']);
+  rows.push(['Mês',...filledSlots.map(i=>'Cenário '+SLOT_LABELS[i])]);
+  const maxM=Math.max(...filledSlots.map(i=>compSlots[i].totalMeses));
+  for(let m=1;m<=maxM;m++){
+    rows.push([m,...filledSlots.map(i=>fmtN(compSlots[i].fluxoAcum[m]||0))]);
+  }
+
+  const csv = BOM+rows.map(r=>r.map(c=>{
+    const s=String(c==null?'':c);
+    return (s.includes(sep)||s.includes('"'))?'"'+s.replace(/"/g,'""')+'"':s;
+  }).join(sep)).join('\r\n');
+
+  download(csv,'LoteVia_Comparativo_'+dataBR()+'.csv','text/csv;charset=utf-8');
+  showToast('📊 Comparativo exportado!','ok');
+}
+
+// ── keyboard shortcut: Ctrl+S = Salvar
+// ═══════════════════════════════════════════════════════
+// HELP MANUAL
+// ═══════════════════════════════════════════════════════
+
+function openHelp() {
+  document.getElementById('helpOverlay').classList.add('open');
+  showHelpSection('intro');
+}
+
+function closeHelp() {
+  document.getElementById('helpOverlay').classList.remove('open');
+}
+
+function showHelpSection(id) {
+  // Deactivate all sections and nav items
+  document.querySelectorAll('.help-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.help-nav-item').forEach(n => n.classList.remove('active'));
+
+  // Activate the selected section
+  const sec = document.getElementById('hs-'+id);
+  if(sec) sec.classList.add('active');
+
+  // Activate the matching nav item
+  const navItems = document.querySelectorAll('.help-nav-item');
+  navItems.forEach(item => {
+    if(item.getAttribute('onclick') && item.getAttribute('onclick').includes("'"+id+"'")) {
+      item.classList.add('active');
+    }
+  });
+
+  // Scroll content to top
+  const content = document.getElementById('helpContent');
+  if(content) content.scrollTop = 0;
+}
+
+// Escape handled by main keydown listener below
+
+// ═══════════════════════════════════════════════════════
 // KEYBOARD SHORTCUT: Ctrl+S = Salvar
 // ═══════════════════════════════════════════════════════
 document.addEventListener('keydown', e => {
@@ -3036,8 +5230,8 @@ document.addEventListener('keydown', e => {
       setTimeout(()=>document.getElementById('save-name')?.focus(), 100);
     }
   }
-  // Esc fecha modal
-  if (e.key === 'Escape') closeProjects();
+  // Esc fecha modais
+  if (e.key === 'Escape') { closeProjects(); closeHelp(); }
 });
 
 // ═══════════════════════════════════════════════════════
