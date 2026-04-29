@@ -943,6 +943,86 @@ input[type=range]::-webkit-slider-thumb{
   color:var(--mut);text-align:center;gap:12px;
 }
 
+/* ══════════════════════════════════════════════════
+   PERMUTA FÍSICO-FINANCEIRA
+══════════════════════════════════════════════════ */
+.perm-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.perm-panel{background:var(--card);border:1px solid var(--brd);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px}
+.perm-section{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut);padding-bottom:8px;border-bottom:1px solid var(--brd)}
+.perm-field{display:flex;flex-direction:column;gap:5px}
+.perm-field label{font-size:11px;color:var(--mut);font-weight:500}
+.perm-field input,.perm-field select{background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--tex);font-family:var(--fm);font-size:13px;padding:8px 11px;outline:none;transition:border-color .2s;width:100%}
+.perm-field input:focus,.perm-field select:focus{border-color:var(--pur)}
+.perm-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* Lote blocks */
+.perm-lote-grid{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.perm-lote-item{
+  background:var(--bg3);border:1px solid var(--brd);border-radius:12px;
+  padding:14px;display:grid;
+  grid-template-columns:auto 1fr 1fr 1fr auto;
+  gap:10px;align-items:center;
+}
+.perm-lote-num{
+  width:28px;height:28px;border-radius:8px;
+  background:rgba(167,139,250,.15);color:var(--pur);
+  font-family:var(--ff);font-size:12px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.perm-lote-field{display:flex;flex-direction:column;gap:3px}
+.perm-lote-label{font-size:10px;color:var(--mut);letter-spacing:.4px}
+.perm-lote-input{
+  background:var(--bg);border:1px solid var(--brd);border-radius:6px;
+  color:var(--tex);font-family:var(--fm);font-size:12px;
+  padding:6px 9px;outline:none;width:100%;
+}
+.perm-lote-input:focus{border-color:var(--pur)}
+.perm-lote-del{
+  background:rgba(240,82,79,.1);border:1px solid rgba(240,82,79,.2);
+  color:var(--red);border-radius:6px;padding:4px 8px;
+  font-size:12px;cursor:pointer;
+}
+.perm-lote-del:hover{background:rgba(240,82,79,.2)}
+.perm-lote-del:disabled{opacity:.3;cursor:not-allowed}
+
+/* Summary card */
+.perm-summary-card{
+  background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(167,139,250,.03));
+  border:1px solid rgba(167,139,250,.2);border-radius:14px;padding:20px;
+  display:flex;flex-direction:column;gap:14px;
+}
+.perm-summary-title{font-family:var(--ff);font-size:13px;font-weight:700;color:var(--pur)}
+.perm-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.perm-kpi{background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.perm-kpi-label{font-size:10px;color:var(--mut);letter-spacing:.5px;text-transform:uppercase}
+.perm-kpi-val{font-family:var(--fm);font-size:15px;font-weight:600;color:var(--tex)}
+
+/* Timeline */
+.perm-timeline{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.perm-timeline-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;background:var(--bg3);border-radius:10px;
+  border-left:3px solid var(--pur);
+}
+.perm-timeline-dot{width:8px;height:8px;border-radius:50%;background:var(--pur);flex-shrink:0}
+.perm-timeline-info{flex:1;min-width:0}
+.perm-timeline-label{font-size:12px;font-weight:600;color:var(--tex)}
+.perm-timeline-sub{font-size:11px;color:var(--mut);margin-top:1px}
+.perm-timeline-val{font-family:var(--fm);font-size:13px;font-weight:600;color:var(--pur);text-align:right}
+
+/* Btn */
+.perm-btn{
+  width:100%;padding:13px;background:var(--pur);color:#fff;
+  border:none;border-radius:10px;font-family:var(--ff);
+  font-size:14px;font-weight:800;cursor:pointer;
+  letter-spacing:.5px;transition:all .2s;
+}
+.perm-btn:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 6px 20px rgba(167,139,250,.3)}
+
+/* VGV meter */
+.perm-meter{width:100%;height:8px;background:var(--brd);border-radius:4px;overflow:hidden;margin-top:4px}
+.perm-meter-fill{height:100%;border-radius:4px;background:var(--pur);transition:width .3s}
+
 /* ── LOGIN SCREEN ── */
 #loginScreen{
   position:fixed;inset:0;z-index:99999;
@@ -1235,6 +1315,7 @@ input[type=range]::-webkit-slider-thumb{
   <button class="tab-btn" onclick="showTab('comp')" id="tab-btn-comp" style="color:var(--pur);border-bottom-color:transparent">⚖ Comparador</button>
   <button class="tab-btn" onclick="showTab('reverso')" style="color:var(--grn);border-bottom-color:transparent">🎯 Preço Reverso</button>
   <button class="tab-btn" onclick="showTab('sfo')" style="color:#f97316;border-bottom-color:transparent">🏦 Financiamento</button>
+  <button class="tab-btn" onclick="showTab('permuta')" style="color:#a78bfa;border-bottom-color:transparent">🤝 Permuta</button>
 </div>
 
 <!-- ══════════════ TAB: DASHBOARD ══════════════ -->
@@ -1430,12 +1511,22 @@ input[type=range]::-webkit-slider-thumb{
             <div class="field"><label>Outras Despesas (R$)</label><input type="number" id="outrasDespesas" value="500000"></div>
             <div class="field"><label>TMA — Taxa Mínima de Atratividade (% a.m.)</label><input type="number" id="tma" value="1.0" step="0.1"></div>
           </div>
-          <div class="tog-row">
-            <label>Terreno em Permuta</label>
-            <label class="tog"><input type="checkbox" id="permTog" onchange="togglePerm()"><span class="tog-tr"></span></label>
-          </div>
-          <div id="permSec" style="display:none">
-            <div class="field"><label>% do VGV destinado ao proprietário</label><input type="number" id="permPct" value="25" min="0" max="80"></div>
+          <div style="background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:12px">
+            <div class="tog-row">
+              <div>
+                <div style="font-size:12px;font-weight:600;color:var(--tex)">Terreno em Permuta</div>
+                <div style="font-size:10px;color:var(--mut);margin-top:2px" id="perm-summary-label">Configure na aba 🤝 Permuta</div>
+              </div>
+              <label class="tog"><input type="checkbox" id="permTog" onchange="togglePerm()"><span class="tog-tr"></span></label>
+            </div>
+            <div id="permSec" style="display:none;margin-top:10px;flex-direction:column;gap:8px">
+              <div class="field"><label>% do VGV (referência rápida)</label>
+                <input type="number" id="permPct" value="25" min="0" max="80" oninput="syncPermPct()">
+              </div>
+              <button onclick="showPermutaTab()" style="width:100%;padding:8px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:var(--pur);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff)">
+                🤝 Configurar Permuta Detalhada →
+              </button>
+            </div>
           </div>
           <div id="terrenoSec">
             <div class="field"><label>Custo de Aquisição do Terreno (R$)</label><input type="number" id="custoTerreno" value="8000000"></div>
@@ -1782,6 +1873,198 @@ input[type=range]::-webkit-slider-thumb{
         </thead>
         <tbody id="fluxoTbody"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB: PERMUTA FÍSICO-FINANCEIRA ══════════════ -->
+<div class="tab-pane" id="tab-permuta">
+  <div style="margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <div style="font-family:var(--ff);font-size:22px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:10px">
+        🤝 Permuta Físico-Financeira
+      </div>
+      <div style="font-size:13px;color:var(--mut);margin-top:4px">
+        Defina quais lotes vão para o proprietário do terreno, em qual fase e com qual valor de avaliação.
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="calcPermuta()" class="perm-btn" style="width:auto;padding:9px 20px;font-size:13px">⟳ Recalcular Permuta</button>
+      <button onclick="exportPermutaExcel()" class="exp-btn primary">📊 Exportar Excel</button>
+    </div>
+  </div>
+
+  <div class="perm-layout">
+
+    <!-- ── PAINEL ESQUERDO: Configuração ── -->
+    <div class="gcol">
+
+      <!-- Dados do Proprietário -->
+      <div class="perm-panel">
+        <div class="perm-section">👤 Dados do Proprietário do Terreno</div>
+        <div class="perm-field"><label>Nome do Proprietário</label>
+          <input type="text" id="perm-nome" value="" placeholder="Ex: João da Silva"></div>
+        <div class="perm-2col">
+          <div class="perm-field"><label>CPF / CNPJ</label>
+            <input type="text" id="perm-doc" placeholder="000.000.000-00"></div>
+          <div class="perm-field"><label>Tipo de Pessoa</label>
+            <select id="perm-tipo-pessoa">
+              <option value="pf">Pessoa Física</option>
+              <option value="pj">Pessoa Jurídica</option>
+            </select>
+          </div>
+        </div>
+        <div class="perm-field"><label>Área total do terreno (m²) — referência</label>
+          <input type="number" id="perm-area-ref" value="200000" min="0"></div>
+        <div class="perm-field"><label>Valor de Avaliação do Terreno (R$)</label>
+          <input type="number" id="perm-valor-terreno" value="8000000" min="0"
+            oninput="updatePermutaSummary()"></div>
+      </div>
+
+      <!-- Modalidade -->
+      <div class="perm-panel">
+        <div class="perm-section">📋 Modalidade da Permuta</div>
+        <div class="perm-field"><label>Tipo de Permuta</label>
+          <select id="perm-modalidade" onchange="updatePermutaModalidade()">
+            <option value="fisica">Física — Lotes específicos ao proprietário</option>
+            <option value="financeira">Financeira — % do VGV em dinheiro</option>
+            <option value="mista">Mista — Parte em lotes + parte em dinheiro</option>
+          </select>
+        </div>
+
+        <!-- Física -->
+        <div id="perm-fisica-sec">
+          <div class="perm-section" style="margin-top:8px">🏘 Lotes da Permuta</div>
+          <div id="permLoteGrid" class="perm-lote-grid"></div>
+          <button onclick="addPermLote()" style="margin-top:10px;width:100%;padding:8px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);color:var(--pur);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff)">
+            + Adicionar Lote
+          </button>
+        </div>
+
+        <!-- Financeira -->
+        <div id="perm-financeira-sec" style="display:none">
+          <div class="perm-2col">
+            <div class="perm-field"><label>% do VGV para o proprietário</label>
+              <input type="number" id="perm-pct-vgv" value="25" min="0" max="80" step="0.5"
+                oninput="syncPermPctFromModal();updatePermutaSummary()"></div>
+            <div class="perm-field"><label>Mês de Pagamento</label>
+              <input type="number" id="perm-mes-pag" value="6" min="1"></div>
+          </div>
+        </div>
+
+        <!-- Mista -->
+        <div id="perm-mista-sec" style="display:none">
+          <div class="perm-2col">
+            <div class="perm-field"><label>% em Lotes (do total da permuta)</label>
+              <input type="number" id="perm-pct-lotes-mista" value="60" min="0" max="100"
+                oninput="updatePermutaSummary()"></div>
+            <div class="perm-field"><label>% em Dinheiro (do total)</label>
+              <input type="number" id="perm-pct-din-mista" value="40" min="0" max="100"></div>
+          </div>
+          <div class="perm-field" style="margin-top:8px"><label>% total do VGV para o proprietário</label>
+            <input type="number" id="perm-pct-mista-total" value="25" min="0" max="80" step="0.5"
+              oninput="syncPermPctFromModal();updatePermutaSummary()"></div>
+          <div id="permLoteGridMista" class="perm-lote-grid" style="margin-top:8px"></div>
+          <button onclick="addPermLote('mista')" style="margin-top:8px;width:100%;padding:8px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);color:var(--pur);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff)">
+            + Adicionar Lote
+          </button>
+        </div>
+
+        <!-- VGV Meter -->
+        <div style="margin-top:8px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--mut);margin-bottom:4px">
+            <span>% do VGV na permuta</span><span id="perm-pct-display" style="color:var(--pur);font-family:var(--fm)">—</span>
+          </div>
+          <div class="perm-meter"><div class="perm-meter-fill" id="perm-meter-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- Condições Contratuais -->
+      <div class="perm-panel">
+        <div class="perm-section">📄 Condições Contratuais</div>
+        <div class="perm-2col">
+          <div class="perm-field"><label>Índice de Correção</label>
+            <select id="perm-correcao">
+              <option value="igpm">IGP-M</option>
+              <option value="ipca">IPCA</option>
+              <option value="sem">Sem correção</option>
+            </select>
+          </div>
+          <div class="perm-field"><label>Prazo de Entrega (mês)</label>
+            <input type="number" id="perm-prazo-entrega" value="18" min="1"></div>
+        </div>
+        <div class="perm-field"><label>Cláusula de Rescisão</label>
+          <select id="perm-rescisao">
+            <option value="lotes">Devolução dos lotes</option>
+            <option value="dinheiro">Pagamento em dinheiro pelo valor de avaliação</option>
+            <option value="nenhuma">Sem cláusula específica</option>
+          </select>
+        </div>
+        <div class="perm-field"><label>Observações / Condições Especiais</label>
+          <input type="text" id="perm-obs" placeholder="Ex: Lotes de esquina, posição preferencial..."></div>
+      </div>
+    </div>
+
+    <!-- ── PAINEL DIREITO: Resumo e Resultados ── -->
+    <div class="gcol">
+
+      <!-- Summary card -->
+      <div class="perm-summary-card" id="permSummaryCard">
+        <div class="perm-summary-title">📊 Resumo da Permuta</div>
+        <div class="perm-kpi-grid">
+          <div class="perm-kpi"><div class="perm-kpi-label">Qtd. Lotes Permuta</div><div class="perm-kpi-val" id="ps-qtd">—</div></div>
+          <div class="perm-kpi"><div class="perm-kpi-label">Área Total (m²)</div><div class="perm-kpi-val" id="ps-area">—</div></div>
+          <div class="perm-kpi"><div class="perm-kpi-label">VGV da Permuta</div><div class="perm-kpi-val" id="ps-vgv" style="color:var(--pur)">—</div></div>
+          <div class="perm-kpi"><div class="perm-kpi-label">Valor Avaliação</div><div class="perm-kpi-val" id="ps-aval">—</div></div>
+          <div class="perm-kpi"><div class="perm-kpi-label">% do VGV Total</div><div class="perm-kpi-val" id="ps-pct">—</div></div>
+          <div class="perm-kpi"><div class="perm-kpi-label">Deságio / Ágio</div><div class="perm-kpi-val" id="ps-desagio">—</div></div>
+        </div>
+
+        <!-- Timeline de entrega -->
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--mut);letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px">Cronograma de Entrega dos Lotes</div>
+          <div class="perm-timeline" id="permTimeline">
+            <div style="font-size:12px;color:var(--mut);text-align:center;padding:12px">
+              Configure os lotes para ver o cronograma
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparativo financeiro -->
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--mut);letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px">Comparativo: Permuta vs Compra</div>
+          <div id="permComparativo" style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+            <div style="text-align:center;color:var(--mut);padding:8px">Aguardando cálculo...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Impacto no Fluxo -->
+      <div class="card">
+        <div class="card-title">Impacto no Fluxo de Caixa</div>
+        <div class="card-sub">Lotes da permuta saem do estoque de vendas — impacto na receita e nos indicadores</div>
+        <div id="permImpacto" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+          <div style="text-align:center;color:var(--mut);padding:20px;grid-column:span 2;font-size:12px">Clique em ⟳ Recalcular para ver o impacto</div>
+        </div>
+      </div>
+
+      <!-- Lotes detalhados -->
+      <div class="card">
+        <div class="card-title">Detalhamento dos Lotes da Permuta</div>
+        <div class="card-sub">Quadro completo por lote — posição, metragem, valor e fase de entrega</div>
+        <div id="permLoteTabela" style="overflow-x:auto;margin-top:12px">
+          <div style="text-align:center;color:var(--mut);padding:20px;font-size:12px">Adicione lotes no painel ao lado</div>
+        </div>
+      </div>
+
+      <!-- Minuta de Cláusula -->
+      <div class="card">
+        <div class="card-title">📋 Minuta de Cláusula de Permuta</div>
+        <div class="card-sub">Texto base para inclusão no contrato — revise com seu advogado</div>
+        <div id="permMinuta" style="background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-top:12px;font-size:12px;line-height:1.8;color:var(--mut)">
+          Configure a permuta para gerar a minuta automática.
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2288,6 +2571,7 @@ function showTab(t) {
   setTimeout(()=>{ Object.values(charts).forEach(c=>c.resize&&c.resize()); }, 50);
   // Tab-specific hooks
   if(t==='reverso') setTimeout(updateRevInfo, 60);
+  if(t==='permuta') setTimeout(()=>{ renderPermLotes(); updatePermutaModalidade(); updatePermutaSummary(); }, 60);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -3143,6 +3427,434 @@ function drawFluxoTable(R) {
 // BOOT
 // ═══════════════════════════════════════════════════════
 function calcular_wrapper() { updateUI(); }
+
+// ═══════════════════════════════════════════════════════
+// PERMUTA FÍSICO-FINANCEIRA
+// ═══════════════════════════════════════════════════════
+
+// Data store para lotes da permuta
+let permLotes = [
+  { id:1, quadra:'A', lote:'01', area:250, fase:'Lançamento', mes:6, valorAval:105000 }
+];
+let permLotesIdCounter = 2;
+
+function pFmt(v) {
+  if(v==null||isNaN(v)) return '—';
+  const s=v<0?'-':''; const a=Math.abs(v);
+  if(a>=1e6) return s+'R$'+(a/1e6).toFixed(2)+'M';
+  if(a>=1e3) return s+'R$'+(a/1e3).toFixed(1)+'K';
+  return s+'R$'+a.toFixed(0);
+}
+
+function showPermutaTab() {
+  // Switch to permuta tab
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  $('tab-permuta').classList.add('on');
+  document.querySelector('.tab-btn[onclick*="permuta"]')?.classList.add('on');
+  renderPermLotes();
+  updatePermutaSummary();
+}
+
+function updatePermutaModalidade() {
+  const mod = $('perm-modalidade').value;
+  $('perm-fisica-sec').style.display     = mod==='fisica'    ? '' : 'none';
+  $('perm-financeira-sec').style.display = mod==='financeira'? '' : 'none';
+  $('perm-mista-sec').style.display      = mod==='mista'     ? '' : 'none';
+  updatePermutaSummary();
+}
+
+// ── Lote management ──
+function renderPermLotes(gridId='permLoteGrid') {
+  const grid = $(gridId);
+  if(!grid) return;
+  const src = gridId==='permLoteGridMista' ? permLotesMista : permLotes;
+  grid.innerHTML = '';
+  if(!src.length) {
+    grid.innerHTML='<div style="text-align:center;color:var(--mut);font-size:12px;padding:10px">Nenhum lote adicionado</div>';
+    return;
+  }
+  src.forEach((lote, i) => {
+    const div = document.createElement('div');
+    div.className = 'perm-lote-item';
+    div.innerHTML = `
+      <div class="perm-lote-num">${i+1}</div>
+      <div class="perm-lote-field">
+        <div class="perm-lote-label">Quadra / Lote</div>
+        <div style="display:flex;gap:4px">
+          <input class="perm-lote-input" type="text" value="${lote.quadra}" placeholder="Q" style="width:44px"
+            oninput="permLotes[${i}].quadra=this.value;updatePermutaSummary()">
+          <input class="perm-lote-input" type="text" value="${lote.lote}" placeholder="L" style="width:50px"
+            oninput="permLotes[${i}].lote=this.value;updatePermutaSummary()">
+        </div>
+      </div>
+      <div class="perm-lote-field">
+        <div class="perm-lote-label">Área (m²)</div>
+        <input class="perm-lote-input" type="number" value="${lote.area}" min="1" style="width:80px"
+          oninput="permLotes[${i}].area=+this.value||0;updatePermutaSummary()">
+      </div>
+      <div class="perm-lote-field">
+        <div class="perm-lote-label">Fase / Mês Entrega</div>
+        <div style="display:flex;gap:4px">
+          <input class="perm-lote-input" type="text" value="${lote.fase}" placeholder="Fase" style="width:90px"
+            oninput="permLotes[${i}].fase=this.value">
+          <input class="perm-lote-input" type="number" value="${lote.mes}" min="1" placeholder="Mês" style="width:54px"
+            oninput="permLotes[${i}].mes=+this.value||1">
+        </div>
+      </div>
+      <div class="perm-lote-field">
+        <div class="perm-lote-label">Valor Avaliação (R$)</div>
+        <input class="perm-lote-input" type="number" value="${lote.valorAval}" min="0"
+          oninput="permLotes[${i}].valorAval=+this.value||0;updatePermutaSummary()">
+      </div>
+      <button class="perm-lote-del" onclick="removePermLote(${i})" ${src.length<=1?'disabled':''}>✕</button>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+let permLotesMista = [];
+
+function addPermLote(tipo='fisica') {
+  const precoM2 = +$('precoM2').value||420;
+  const tamLote = +$('tamLote').value||250;
+  const newLote = { id:permLotesIdCounter++, quadra:'', lote:String(permLotes.length+1).padStart(2,'0'), area:tamLote, fase:'Entrega', mes:18, valorAval: precoM2*tamLote };
+  if(tipo==='mista') { permLotesMista.push(newLote); renderPermLotes('permLoteGridMista'); }
+  else { permLotes.push(newLote); renderPermLotes(); }
+  updatePermutaSummary();
+}
+
+function removePermLote(i, tipo='fisica') {
+  if(tipo==='mista') { if(permLotesMista.length<=0) return; permLotesMista.splice(i,1); renderPermLotes('permLoteGridMista'); }
+  else { if(permLotes.length<=1) return; permLotes.splice(i,1); renderPermLotes(); }
+  updatePermutaSummary();
+}
+
+// ── Sync permPct between modal and main input ──
+function syncPermPctFromModal() {
+  const mod = $('perm-modalidade')?.value;
+  let pct = 0;
+  if(mod==='financeira') pct = +$('perm-pct-vgv')?.value||0;
+  else if(mod==='mista')  pct = +$('perm-pct-mista-total')?.value||0;
+  else {
+    const R = calcular();
+    const vgv = R.vgvBruto;
+    const totalAval = permLotes.reduce((s,l)=>s+l.valorAval,0);
+    pct = vgv>0?totalAval/vgv*100:0;
+  }
+  if($('permPct')) $('permPct').value = pct.toFixed(1);
+}
+
+function syncPermPct() {
+  // Called when the quick % field changes — sync back to permuta tab
+  const pct = +$('permPct').value||0;
+  if($('perm-pct-vgv'))         $('perm-pct-vgv').value = pct;
+  if($('perm-pct-mista-total')) $('perm-pct-mista-total').value = pct;
+  updatePermutaSummary();
+}
+
+// ── Update summary panel ──
+function updatePermutaSummary() {
+  const mod = $('perm-modalidade')?.value || 'fisica';
+  const R   = calcular();
+  const vgvTotal = R.vgvBruto;
+  const precoM2  = +$('precoM2').value||420;
+  const valorAval = +$('perm-valor-terreno').value||0;
+
+  let qtdLotesP=0, areaTotal=0, vgvPermuta=0, pct=0;
+
+  if(mod==='fisica') {
+    qtdLotesP  = permLotes.length;
+    areaTotal  = permLotes.reduce((s,l)=>s+l.area,0);
+    vgvPermuta = permLotes.reduce((s,l)=>s+l.valorAval,0);
+    pct        = vgvTotal>0?vgvPermuta/vgvTotal*100:0;
+    if($('permPct')) $('permPct').value = pct.toFixed(1);
+  } else if(mod==='financeira') {
+    pct        = +$('perm-pct-vgv')?.value||0;
+    vgvPermuta = vgvTotal*pct/100;
+    qtdLotesP  = Math.round(R.qtdLotes*pct/100);
+    areaTotal  = qtdLotesP*(+$('tamLote').value||250);
+  } else { // mista
+    pct        = +$('perm-pct-mista-total')?.value||0;
+    vgvPermuta = vgvTotal*pct/100;
+    qtdLotesP  = permLotesMista.length + Math.round(R.qtdLotes*pct/100*(+$('perm-pct-din-mista')?.value||40)/100);
+    areaTotal  = permLotesMista.reduce((s,l)=>s+l.area,0);
+  }
+
+  const desagio = valorAval>0 ? ((vgvPermuta-valorAval)/valorAval*100) : 0;
+
+  // Update KPIs
+  if($('ps-qtd'))    $('ps-qtd').textContent    = qtdLotesP + ' lotes';
+  if($('ps-area'))   $('ps-area').textContent   = areaTotal.toLocaleString('pt-BR') + ' m²';
+  if($('ps-vgv'))    $('ps-vgv').textContent    = pFmt(vgvPermuta);
+  if($('ps-aval'))   $('ps-aval').textContent   = pFmt(valorAval);
+  if($('ps-pct'))    $('ps-pct').textContent    = pct.toFixed(1)+'%';
+  if($('ps-desagio'))  {
+    $('ps-desagio').textContent = (desagio>=0?'+':'')+desagio.toFixed(1)+'%';
+    $('ps-desagio').style.color = desagio>0?'var(--grn)':desagio<0?'var(--red)':'var(--tex)';
+  }
+
+  // Meter
+  if($('perm-pct-display')) $('perm-pct-display').textContent = pct.toFixed(1)+'%';
+  if($('perm-meter-fill'))  $('perm-meter-fill').style.width   = Math.min(100,pct)+'%';
+
+  // VGV label in sidebar
+  const lbl = $('perm-summary-label');
+  if(lbl) lbl.textContent = $('permTog').checked
+    ? `${pct.toFixed(1)}% do VGV · ${qtdLotesP} lotes · ${pFmt(vgvPermuta)}`
+    : 'Configure na aba 🤝 Permuta';
+
+  // Timeline
+  renderPermTimeline(mod);
+
+  // Comparativo
+  renderPermComparativo(vgvPermuta, valorAval, R);
+}
+
+function renderPermTimeline(mod) {
+  const el = $('permTimeline');
+  if(!el) return;
+  const src = mod==='fisica' ? permLotes : mod==='mista' ? permLotesMista : [];
+
+  if(!src.length && mod!=='financeira') {
+    el.innerHTML='<div style="text-align:center;color:var(--mut);font-size:12px;padding:12px">Adicione lotes para ver o cronograma</div>';
+    return;
+  }
+
+  if(mod==='financeira') {
+    const mes = +$('perm-mes-pag')?.value||6;
+    const pct = +$('perm-pct-vgv')?.value||0;
+    const R = calcular();
+    const valor = R.vgvBruto*pct/100;
+    el.innerHTML=`
+      <div class="perm-timeline-item">
+        <div class="perm-timeline-info">
+          <div class="perm-timeline-label">Pagamento Financeiro</div>
+          <div class="perm-timeline-sub">Mês ${mes} · ${pct.toFixed(1)}% do VGV</div>
+        </div>
+        <div class="perm-timeline-val">${pFmt(valor)}</div>
+      </div>`;
+    return;
+  }
+
+  // Group by mes
+  const byMes = {};
+  src.forEach(l => {
+    const key = l.mes||1;
+    if(!byMes[key]) byMes[key]=[];
+    byMes[key].push(l);
+  });
+
+  el.innerHTML = Object.keys(byMes).sort((a,b)=>+a-+b).map(mes => {
+    const lts = byMes[mes];
+    const totalVal = lts.reduce((s,l)=>s+l.valorAval,0);
+    const totalArea = lts.reduce((s,l)=>s+l.area,0);
+    const lotesStr = lts.map(l=>`Q${l.quadra||'?'}L${l.lote||'?'}`).join(', ');
+    return `
+      <div class="perm-timeline-item">
+        <div class="perm-timeline-info">
+          <div class="perm-timeline-label">Mês ${mes} — ${lts.length} lote${lts.length>1?'s':''}</div>
+          <div class="perm-timeline-sub">${lotesStr} · ${totalArea.toLocaleString('pt-BR')} m²</div>
+        </div>
+        <div class="perm-timeline-val">${pFmt(totalVal)}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderPermComparativo(vgvPermuta, valorAval, R) {
+  const el = $('permComparativo');
+  if(!el) return;
+  const custoTerreno = +$('custoTerreno').value||0;
+  const row = (label, a, b, higherBetter=true) => {
+    const better = higherBetter ? b>=a : b<=a;
+    return `
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg3);border-radius:8px">
+        <span style="flex:1;color:var(--mut)">${label}</span>
+        <span style="font-family:var(--fm);font-size:12px;text-decoration:line-through;color:var(--mut)">${a}</span>
+        <span style="color:var(--mut)">→</span>
+        <span style="font-family:var(--fm);font-size:12px;font-weight:600;color:${better?'var(--grn)':'var(--red)'}">${b}</span>
+      </div>`;
+  };
+
+  const Rperm = calcPermutaImpact();
+  if(!Rperm) { el.innerHTML='<div style="text-align:center;color:var(--mut);font-size:12px;padding:8px">Ative a permuta para comparar</div>'; return; }
+
+  el.innerHTML =
+    row('Custo do Terreno', pFmt(custoTerreno||valorAval), pFmt(vgvPermuta), false) +
+    row('Lotes à Venda', R.lotesVenda.toLocaleString(), Rperm.lotesVenda.toLocaleString(), true) +
+    row('VGV de Vendas', pFmt(R.vgvVenda), pFmt(Rperm.vgvVenda), true) +
+    row('Lucro Líquido', pFmt(R.lucroLiq), pFmt(Rperm.lucroLiq), true) +
+    row('TIR (a.a.)', R.tirAa.toFixed(1)+'%', Rperm.tirAa.toFixed(1)+'%', true) +
+    row('Exposição Máx.', pFmt(Math.abs(R.expMax)), pFmt(Math.abs(Rperm.expMax)), false);
+}
+
+function calcPermutaImpact() {
+  if(!$('permTog')?.checked) return null;
+  return calcular();
+}
+
+// ── Main calc permuta ──
+function calcPermuta() {
+  const mod = $('perm-modalidade')?.value||'fisica';
+  syncPermPctFromModal();
+  updatePermutaSummary();
+  renderPermLotes();
+  renderPermLoteTabela(mod);
+  renderPermImpacto(mod);
+  renderPermMinuta(mod);
+  showToast('✅ Permuta recalculada!','ok');
+}
+
+function renderPermLoteTabela(mod) {
+  const el = $('permLoteTabela');
+  if(!el) return;
+  const src = mod==='fisica' ? permLotes : mod==='mista' ? permLotesMista : [];
+  const precoM2 = +$('precoM2').value||420;
+
+  if(!src.length && mod!=='financeira') {
+    el.innerHTML='<div style="text-align:center;color:var(--mut);font-size:12px;padding:16px">Nenhum lote configurado</div>';
+    return;
+  }
+  if(mod==='financeira') {
+    const R=calcular(); const pct=+$('perm-pct-vgv')?.value||0;
+    el.innerHTML=`<div style="padding:12px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--mut)">
+      Permuta financeira: ${pct.toFixed(1)}% do VGV = <strong style="color:var(--pur)">${pFmt(R.vgvBruto*pct/100)}</strong> pago no Mês ${$('perm-mes-pag')?.value||6}
+    </div>`;
+    return;
+  }
+  const totalArea=src.reduce((s,l)=>s+l.area,0);
+  const totalVal =src.reduce((s,l)=>s+l.valorAval,0);
+  const totalVGV =src.reduce((s,l)=>s+l.area*precoM2,0);
+  el.innerHTML=`
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="background:var(--bg3)">
+          <th style="padding:8px 10px;text-align:left;color:var(--mut);font-size:10px;letter-spacing:.5px;text-transform:uppercase">Quadra/Lote</th>
+          <th style="padding:8px 10px;text-align:right;color:var(--mut);font-size:10px">Área m²</th>
+          <th style="padding:8px 10px;text-align:right;color:var(--mut);font-size:10px">Fase</th>
+          <th style="padding:8px 10px;text-align:right;color:var(--mut);font-size:10px">Entrega</th>
+          <th style="padding:8px 10px;text-align:right;color:var(--mut);font-size:10px">Valor Tabela</th>
+          <th style="padding:8px 10px;text-align:right;color:var(--mut);font-size:10px">Valor Avaliação</th>
+          <th style="padding:8px 10px;text-align:right;color:var(--mut);font-size:10px">Deságio</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${src.map(l=>{
+          const vtab=l.area*precoM2;
+          const desa=vtab>0?(l.valorAval-vtab)/vtab*100:0;
+          return `<tr style="border-bottom:1px solid rgba(35,38,58,.4)">
+            <td style="padding:8px 10px;font-family:var(--fm)">Q${l.quadra||'?'} L${l.lote||'?'}</td>
+            <td style="padding:8px 10px;text-align:right;font-family:var(--fm)">${l.area.toLocaleString('pt-BR')}</td>
+            <td style="padding:8px 10px;text-align:right;color:var(--mut)">${l.fase||'—'}</td>
+            <td style="padding:8px 10px;text-align:right;font-family:var(--fm)">M${l.mes||'?'}</td>
+            <td style="padding:8px 10px;text-align:right;font-family:var(--fm)">${pFmt(vtab)}</td>
+            <td style="padding:8px 10px;text-align:right;font-family:var(--fm);color:var(--pur)">${pFmt(l.valorAval)}</td>
+            <td style="padding:8px 10px;text-align:right;font-family:var(--fm);color:${desa>=0?'var(--grn)':'var(--red)'}">${(desa>=0?'+':'')+desa.toFixed(1)}%</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+      <tfoot>
+        <tr style="background:var(--bg3);font-weight:700">
+          <td style="padding:8px 10px">TOTAL</td>
+          <td style="padding:8px 10px;text-align:right;font-family:var(--fm)">${totalArea.toLocaleString('pt-BR')}</td>
+          <td colspan="2"></td>
+          <td style="padding:8px 10px;text-align:right;font-family:var(--fm)">${pFmt(totalVGV)}</td>
+          <td style="padding:8px 10px;text-align:right;font-family:var(--fm);color:var(--pur)">${pFmt(totalVal)}</td>
+          <td style="padding:8px 10px;text-align:right;font-family:var(--fm);color:${totalVal>=totalVGV?'var(--grn)':'var(--red)'}">
+            ${totalVGV>0?((totalVal-totalVGV)/totalVGV*100>=0?'+':'')+((totalVal-totalVGV)/totalVGV*100).toFixed(1)+'%':'—'}
+          </td>
+        </tr>
+      </tfoot>
+    </table>`;
+}
+
+function renderPermImpacto(mod) {
+  const el = $('permImpacto');
+  if(!el) return;
+  const R0 = calcular();
+  // Temporarily enable permuta if not active
+  const wasActive = $('permTog').checked;
+  if(!wasActive) { $('permTog').checked=true; syncPermPctFromModal(); }
+  const R1 = calcular();
+  if(!wasActive) { $('permTog').checked=false; }
+
+  const box = (label, v0, v1, higher=true, pctMode=false) => {
+    const diff = v1 - v0;
+    const better = higher ? diff >= 0 : diff <= 0;
+    const diffStr = pctMode ? (diff>=0?'+':'')+diff.toFixed(1)+'pp' : pFmt(diff);
+    return `
+      <div style="background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:5px">
+        <div style="font-size:10px;color:var(--mut);letter-spacing:.5px;text-transform:uppercase">${label}</div>
+        <div style="font-family:var(--fm);font-size:16px;font-weight:700;color:var(--tex)">${pctMode?v1.toFixed(1)+'%':pFmt(v1)}</div>
+        <div style="font-size:11px;color:${better?'var(--grn)':'var(--red)'}">${diffStr} vs compra</div>
+      </div>`;
+  };
+
+  el.innerHTML =
+    box('Lucro Líquido',   R0.lucroLiq,  R1.lucroLiq,  true) +
+    box('TIR (a.a.)',      R0.tirAa,     R1.tirAa,     true, true) +
+    box('VGV de Vendas',   R0.vgvVenda,  R1.vgvVenda,  true) +
+    box('Exposição Máx.',  Math.abs(R0.expMax), Math.abs(R1.expMax), false) +
+    box('Lotes à Venda',   R0.lotesVenda, R1.lotesVenda, true) +
+    box('VPL',             R0.vpl,       R1.vpl,       true);
+}
+
+function renderPermMinuta(mod) {
+  const el = $('permMinuta');
+  if(!el) return;
+  const nome    = $('perm-nome')?.value    || '[NOME DO PROPRIETÁRIO]';
+  const doc     = $('perm-doc')?.value     || '[CPF/CNPJ]';
+  const tipo    = $('perm-tipo-pessoa')?.value==='pj' ? 'pessoa jurídica' : 'pessoa física';
+  const aval    = pFmt(+$('perm-valor-terreno')?.value||0);
+  const entrega = $('perm-prazo-entrega')?.value || '18';
+  const idx     = $('perm-correcao')?.value==='igpm'?'IGP-M':$('perm-correcao')?.value==='ipca'?'IPCA':'sem correção monetária';
+  const src = mod==='fisica' ? permLotes : mod==='mista' ? permLotesMista : [];
+  const lotesStr = src.length
+    ? src.map(l=>`Quadra ${l.quadra||'?'}, Lote ${l.lote||'?'} (${l.area||0} m²)`).join('; ')
+    : '[LOTES A DEFINIR]';
+  const obs = $('perm-obs')?.value || '';
+
+  el.innerHTML = `
+    <strong style="color:var(--tex)">CLÁUSULA DE PERMUTA</strong><br><br>
+    As partes ajustam que, em contraprestação pela cessão dos direitos sobre a área objeto deste instrumento,
+    a <strong style="color:var(--tex)">PERMUTANTE</strong> — ${nome}, ${tipo}, inscrita sob o nº ${doc} —
+    receberá, a título de permuta, os seguintes imóveis a serem implantados no loteamento:<br><br>
+    <strong style="color:var(--pur)">${lotesStr}</strong><br><br>
+    O valor de referência dos imóveis permutados é de <strong style="color:var(--pur)">${aval}</strong>,
+    correspondente à avaliação patrimonial do terreno objeto desta permuta.<br><br>
+    Os lotes serão entregues até o Mês <strong style="color:var(--tex)">${entrega}</strong> do cronograma do empreendimento,
+    devidamente matriculados no Cartório de Registro de Imóveis, livres e desembaraçados de quaisquer ônus.
+    Os valores serão corrigidos pelo índice <strong style="color:var(--tex)">${idx}</strong> até a data da entrega.
+    ${obs?'<br><br><strong style="color:var(--tex)">Condições especiais:</strong> '+obs:''}<br><br>
+    <span style="font-size:11px;color:var(--red)">⚠ Este texto é apenas uma minuta de referência. Consulte seu advogado para a redação definitiva.</span>`;
+}
+
+function exportPermutaExcel() {
+  const mod = $('perm-modalidade')?.value||'fisica';
+  const src = mod==='fisica'?permLotes:mod==='mista'?permLotesMista:[];
+  const precoM2 = +$('precoM2').value||420;
+  const BOM='﻿', sep=';';
+  const rows=[
+    ['LOTEVIA PRO — PERMUTA FÍSICO-FINANCEIRA'],
+    ['Proprietário:', $('perm-nome')?.value||''],
+    ['Modalidade:', mod],
+    ['Exportado em:', new Date().toLocaleString('pt-BR')],
+    [],
+    ['Quadra','Lote','Área (m²)','Fase','Mês Entrega','Valor Tabela (R$)','Valor Avaliação (R$)','Deságio/Ágio (%)'],
+    ...src.map(l=>{
+      const vtab=l.area*precoM2;
+      const desa=vtab>0?((l.valorAval-vtab)/vtab*100).toFixed(2):'';
+      return [l.quadra,l.lote,l.area,l.fase,l.mes,vtab.toFixed(2).replace('.',','),l.valorAval.toFixed(2).replace('.',','),desa.replace('.',',')];
+    }),
+    [],
+    ['TOTAL','',src.reduce((s,l)=>s+l.area,0),'','',
+     (src.reduce((s,l)=>s+l.area*precoM2,0)).toFixed(2).replace('.',','),
+     (src.reduce((s,l)=>s+l.valorAval,0)).toFixed(2).replace('.',','),''],
+  ];
+  const csv=BOM+rows.map(r=>r.map(c=>{const s=String(c==null?'':c);return s.includes(sep)?'"'+s+'"':s;}).join(sep)).join('\r\n');
+  download(csv,'LoteVia_Permuta_'+dataBR()+'.csv','text/csv;charset=utf-8');
+  showToast('📊 Permuta exportada!','ok');
+}
 
 // ═══════════════════════════════════════════════════════
 // SFO — SIMULADOR DE FINANCIAMENTO DE OBRA
@@ -4555,6 +5267,7 @@ function bootApp() {
         <div class="help-nav-item" onclick="showHelpSection('comparador')"><span class="nav-icon">⚖</span>Comparador</div>
         <div class="help-nav-item" onclick="showHelpSection('reverso')"><span class="nav-icon">🎯</span>Preço Reverso</div>
         <div class="help-nav-item" onclick="showHelpSection('sfo')"><span class="nav-icon">🏦</span>Financiamento (SFO)</div>
+        <div class="help-nav-item" onclick="showHelpSection('permuta')"><span class="nav-icon">🤝</span>Permuta</div>
 
         <div class="help-nav-group">Dados & Exportação</div>
         <div class="help-nav-item" onclick="showHelpSection('projetos')"><span class="nav-icon">📁</span>Meus Projetos</div>
@@ -4987,6 +5700,45 @@ function bootApp() {
           </div>
           <h2>Exportação</h2>
           <p>O botão <strong>📊 Exportar Excel</strong> gera uma planilha com o fluxo mensal base vs SFO, mostrando o impacto em cada mês do projeto.</p>
+        </div>
+
+        <!-- PERMUTA -->
+        <div class="help-section" id="hs-permuta">
+          <h1>🤝 Permuta Físico-Financeira</h1>
+          <p>Módulo completo para modelar o pagamento do terreno com lotes ao proprietário, em vez de dinheiro. Suporta 3 modalidades e gera minuta de cláusula contratual automática.</p>
+          <div class="help-box info">
+            <strong>Como acessar:</strong> Aba <strong>🤝 Permuta</strong> no cabeçalho, ou clique em <strong>🤝 Configurar Permuta Detalhada →</strong> no painel de premissas.
+          </div>
+          <h2>Modalidades de Permuta</h2>
+          <table class="help-kv">
+            <tr><th>Modalidade</th><th>Como funciona</th><th>Quando usar</th></tr>
+            <tr><td>Física</td><td>Lotes específicos são transferidos ao proprietário. Você define quadra, lote, área, fase e valor de avaliação de cada um.</td><td>Quando o proprietário quer lotes determinados — esquina, posição, tamanho específico</td></tr>
+            <tr><td>Financeira</td><td>O proprietário recebe um percentual do VGV em dinheiro, no mês definido.</td><td>Proprietário prefere liquidez; negociação mais simples</td></tr>
+            <tr><td>Mista</td><td>Parte em lotes físicos + parte em dinheiro. Você define o percentual de cada parte.</td><td>Negociações complexas; proprietário quer segurança + liquidez</td></tr>
+          </table>
+          <h2>Campos dos Lotes (Permuta Física)</h2>
+          <table class="help-kv">
+            <tr><th>Campo</th><th>Descrição</th></tr>
+            <tr><td>Quadra / Lote</td><td>Identificação no projeto urbanístico (ex: Q-A, L-01)</td></tr>
+            <tr><td>Área (m²)</td><td>Metragem do lote — usada para calcular o valor de tabela</td></tr>
+            <tr><td>Fase / Mês Entrega</td><td>Em qual fase e mês do cronograma o lote será entregue ao proprietário</td></tr>
+            <tr><td>Valor Avaliação</td><td>Valor acordado para este lote na negociação — pode diferir do valor de tabela</td></tr>
+          </table>
+          <h2>Deságio / Ágio</h2>
+          <p>A tabela compara o <strong>valor de tabela</strong> (área × preço/m²) com o <strong>valor de avaliação</strong> negociado:</p>
+          <ul>
+            <li><strong style="color:var(--grn)">Ágio positivo:</strong> Valor de avaliação maior que tabela — proprietário recebe mais que o mercado (comum em negociações com terrenos estratégicos)</li>
+            <li><strong style="color:var(--red)">Deságio negativo:</strong> Valor de avaliação menor que tabela — loteador negocia desconto</li>
+          </ul>
+          <h2>Cronograma de Entrega</h2>
+          <p>O painel direito exibe automaticamente os lotes agrupados por mês de entrega — essencial para o planejamento contratual e do fluxo de caixa.</p>
+          <h2>Impacto no Projeto</h2>
+          <p>Os lotes da permuta <strong>saem do estoque de vendas</strong> — reduzem o VGV disponível para venda. O painel de impacto mostra, lado a lado, os indicadores com e sem permuta.</p>
+          <h2>Minuta de Cláusula</h2>
+          <p>Gerada automaticamente com nome do proprietário, CPF/CNPJ, lotes, valor de avaliação, prazo de entrega e índice de correção. <strong>Revise sempre com seu advogado antes de usar.</strong></p>
+          <div class="help-box warn">
+            <strong>Sincronização:</strong> O campo "% do VGV" no painel de premissas e a aba Permuta estão sincronizados. Alterar um atualiza o outro automaticamente.
+          </div>
         </div>
 
         <div class="help-section" id="hs-formulas">
