@@ -1290,6 +1290,12 @@ input[type=range]::-webkit-slider-thumb{
 .toast.ok{border-color:rgba(45,212,160,.4);color:var(--grn)}
 .toast.err{border-color:rgba(240,82,79,.4);color:var(--red)}
 </style>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  window.createSupabaseClient = createClient;
+</script>
+
 </head>
 <body>
 
@@ -6462,6 +6468,30 @@ function bootApp() {
         </div>
       </div>
 
+      <div class="save-form" style="margin-top:16px;border-color:rgba(91,133,245,.22)">
+        <div class="save-form-title">☁️ Supabase Cloud Sync</div>
+        <div style="font-size:12px;color:var(--mut);margin-bottom:12px">Autentique-se para salvar e carregar projetos em nuvem.</div>
+        <div id="supabaseLoginBox" class="save-row" style="align-items:end">
+          <div class="save-field">
+            <label>E-mail</label>
+            <input type="email" id="sb-email" placeholder="voce@empresa.com">
+          </div>
+          <div class="save-field">
+            <label>Senha</label>
+            <input type="password" id="sb-password" placeholder="••••••••">
+          </div>
+          <div class="save-field" style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
+            <button class="btn-save" onclick="authSignUp(document.getElementById('sb-email').value, document.getElementById('sb-password').value)">Criar conta</button>
+            <button class="btn-save" style="background:linear-gradient(180deg,#5b85f5,#3f67d9)" onclick="authSignIn(document.getElementById('sb-email').value, document.getElementById('sb-password').value)">Entrar</button>
+          </div>
+        </div>
+        <div id="supabaseUserBox" style="display:none;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;padding:12px 14px;border:1px solid var(--brd);border-radius:10px;background:var(--bg3)">
+          <div style="font-size:12px;color:var(--mut)">Conectado como <strong id="sb-status" style="color:var(--tex)">—</strong></div>
+          <button class="btn-save" onclick="authSignOut()">Sair</button>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:var(--mut)">Status: <span id="sb-status">não autenticado</span></div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -6546,57 +6576,126 @@ window.addEventListener('appinstalled', () => {
 });
 
 // ═══════════════════════════════════════════════════════
-// INDEXEDDB — banco de dados local
+// SUPABASE — banco de dados em nuvem
 // ═══════════════════════════════════════════════════════
-const DB_NAME    = 'ExpandhViaDB';
-const DB_VERSION = 1;
-const STORE      = 'projetos';
-let db = null;
+const SUPABASE_URL = window.SUPABASE_URL || 'https://nkohvjkzpdnpxovqgykt.supabase.co';
+const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5rb2h2amt6cGRucHhvdnFneWt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzYyNDEsImV4cCI6MjA5MzExMjI0MX0.21PiCvWtYLCGhxKW0cAfgITqb5I43oYJMhB2Btw2t3g';
+let sb = null;
 
-function openDB() {
-  return new Promise((resolve, reject) => {
-    if (db) return resolve(db);
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = e => {
-      const d = e.target.result;
-      if (!d.objectStoreNames.contains(STORE)) {
-        const store = d.createObjectStore(STORE, { keyPath: 'id' });
-        store.createIndex('updatedAt', 'updatedAt');
-      }
-    };
-    req.onsuccess = e => { db = e.target.result; resolve(db); };
-    req.onerror   = () => reject(req.error);
-  });
+function getSupabase() {
+  if (sb) return sb;
+  if (!window.createSupabaseClient) throw new Error('Cliente Supabase não carregado');
+  if (SUPABASE_URL.includes('SEU-PROJETO') || SUPABASE_ANON_KEY.includes('SUA_CHAVE_ANON')) {
+    throw new Error('Configure SUPABASE_URL e SUPABASE_ANON_KEY antes de usar');
+  }
+  sb = window.createSupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return sb;
+}
+
+async function getUserOrThrow() {
+  const client = getSupabase();
+  const { data, error } = await client.auth.getUser();
+  if (error) throw error;
+  if (!data.user) throw new Error('Usuário não autenticado');
+  return data.user;
 }
 
 async function dbGetAll() {
-  const d = await openDB();
-  return new Promise((res, rej) => {
-    const tx  = d.transaction(STORE, 'readonly');
-    const req = tx.objectStore(STORE).index('updatedAt').getAll();
-    req.onsuccess = () => res(req.result.reverse()); // mais recente primeiro
-    req.onerror   = () => rej(req.error);
-  });
+  const client = getSupabase();
+  const user = await getUserOrThrow();
+  const { data, error } = await client
+    .from('projects')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return (data || []).map(p => ({
+    id: p.id,
+    nome: p.nome,
+    cidade: p.cidade || '',
+    tipo: p.tipo || 'realista',
+    obs: p.obs || '',
+    createdAt: p.created_at,
+    updatedAt: p.updated_at,
+    snapshot: p.snapshot_json,
+    resultados: p.resultados_json || {}
+  }));
 }
 
 async function dbSave(item) {
-  const d = await openDB();
-  return new Promise((res, rej) => {
-    const tx  = d.transaction(STORE, 'readwrite');
-    const req = tx.objectStore(STORE).put(item);
-    req.onsuccess = () => res(req.result);
-    req.onerror   = () => rej(req.error);
-  });
+  const client = getSupabase();
+  const user = await getUserOrThrow();
+  const payload = {
+    user_id: user.id,
+    nome: item.nome,
+    cidade: item.cidade || null,
+    tipo: item.tipo || 'realista',
+    obs: item.obs || null,
+    snapshot_json: item.snapshot,
+    resultados_json: item.resultados
+  };
+  if (item.id) payload.id = item.id;
+  if (item.createdAt) payload.created_at = item.createdAt;
+  const { data, error } = await client
+    .from('projects')
+    .upsert(payload)
+    .select()
+    .single();
+  if (error) throw error;
+  return data.id;
 }
 
 async function dbDelete(id) {
-  const d = await openDB();
-  return new Promise((res, rej) => {
-    const tx  = d.transaction(STORE, 'readwrite');
-    const req = tx.objectStore(STORE).delete(id);
-    req.onsuccess = () => res();
-    req.onerror   = () => rej(req.error);
-  });
+  const client = getSupabase();
+  const { error } = await client.from('projects').delete().eq('id', id);
+  if (error) throw error;
+}
+
+async function authSignUp(email, password) {
+  const client = getSupabase();
+  const { error } = await client.auth.signUp({ email, password });
+  if (error) throw error;
+  showToast('✅ Conta criada. Verifique seu e-mail.', 'ok');
+}
+
+async function authSignIn(email, password) {
+  const client = getSupabase();
+  const { error } = await client.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  showToast('✅ Login realizado!', 'ok');
+  await updateAuthUi();
+  await loadProjectsList();
+}
+
+async function authSignOut() {
+  const client = getSupabase();
+  const { error } = await client.auth.signOut();
+  if (error) throw error;
+  currentProjectId = null;
+  currentProjectName = '';
+  const hdrel = document.getElementById('hdr-proj-name');
+  if(hdrel) hdrel.textContent = 'Meus Projetos';
+  await updateAuthUi();
+  const list = document.getElementById('projList');
+  if (list) list.innerHTML = '<div class="proj-empty"><div class="proj-empty-icon">🔐</div><div class="proj-empty-text">Faça login para carregar seus projetos em nuvem.</div></div>';
+}
+
+async function updateAuthUi() {
+  const emailEl = document.getElementById('sb-email');
+  const statusEls = document.querySelectorAll('#sb-status');
+  const loginBox = document.getElementById('supabaseLoginBox');
+  const userBox = document.getElementById('supabaseUserBox');
+  try {
+    const client = getSupabase();
+    const { data } = await client.auth.getUser();
+    const user = data.user;
+    statusEls.forEach(el => el.textContent = user ? user.email : 'não autenticado');
+    if (loginBox) loginBox.style.display = user ? 'none' : 'grid';
+    if (userBox) userBox.style.display = user ? 'flex' : 'none';
+    if (emailEl && user?.email) emailEl.value = user.email;
+  } catch (e) {
+    statusEls.forEach(el => el.textContent = 'configure Supabase');
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -6689,48 +6788,52 @@ let currentProjectName = '';
 let currentProjectId   = null;
 
 async function saveProject() {
-  const name = document.getElementById('save-name').value.trim();
-  if (!name) { showToast('⚠ Digite um nome para o projeto', 'err'); return; }
+  try {
+    const name = document.getElementById('save-name').value.trim();
+    if (!name) { showToast('⚠ Digite um nome para o projeto', 'err'); return; }
 
-  const R = calcular();
-  const id = currentProjectId || ('proj_' + Date.now());
+    const R = calcular();
+    let createdAt = undefined;
 
-  const projeto = {
-    id,
-    nome:     name,
-    cidade:   document.getElementById('save-cidade').value.trim(),
-    tipo:     document.getElementById('save-tipo').value,
-    obs:      document.getElementById('save-obs').value.trim(),
-    createdAt: currentProjectId ? undefined : new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    snapshot:  captureSnapshot(),
-    resultados: {
-      vgvBruto:     R.vgvBruto,
-      tirAa:        R.tirAa,
-      lucroLiq:     R.lucroLiq,
-      margemLiq:    R.margemLiq,
-      expMax:       R.expMax,
-      vpl:          R.vpl,
-      qtdLotes:     R.qtdLotes,
-      breakevenMes: R.breakevenMes,
+    if (currentProjectId) {
+      const existing = await dbGetAll();
+      const found = existing.find(p => p.id === currentProjectId);
+      createdAt = found?.createdAt || undefined;
     }
-  };
-  if (!projeto.createdAt) {
-    const existing = await dbGetAll();
-    const found = existing.find(p => p.id === id);
-    projeto.createdAt = found?.createdAt || new Date().toISOString();
+
+    const projeto = {
+      id: currentProjectId || undefined,
+      nome:     name,
+      cidade:   document.getElementById('save-cidade').value.trim(),
+      tipo:     document.getElementById('save-tipo').value,
+      obs:      document.getElementById('save-obs').value.trim(),
+      createdAt,
+      snapshot:  captureSnapshot(),
+      resultados: {
+        vgvBruto:     R.vgvBruto,
+        tirAa:        R.tirAa,
+        lucroLiq:     R.lucroLiq,
+        margemLiq:    R.margemLiq,
+        expMax:       R.expMax,
+        vpl:          R.vpl,
+        qtdLotes:     R.qtdLotes,
+        breakevenMes: R.breakevenMes,
+      }
+    };
+
+    const savedId = await dbSave(projeto);
+    currentProjectName = name;
+    currentProjectId   = savedId;
+
+    const hdrel = document.getElementById('hdr-proj-name');
+    if(hdrel) hdrel.textContent = name;
+
+    await loadProjectsList();
+    showToast('✅ Projeto "'+name+'" salvo!', 'ok');
+  } catch (e) {
+    console.error(e);
+    showToast(e?.message || 'Erro ao salvar no Supabase', 'err');
   }
-
-  await dbSave(projeto);
-  currentProjectName = name;
-  currentProjectId   = id;
-
-  // Update header
-  const hdrel = document.getElementById('hdr-proj-name');
-  if(hdrel) hdrel.textContent = name;
-
-  loadProjectsList();
-  showToast('✅ Projeto "'+name+'" salvo!', 'ok');
 }
 
 // ═══════════════════════════════════════════════════════
