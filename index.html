@@ -6,10 +6,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="LoteVia">
+<meta name="apple-mobile-web-app-title" content="ExpandhVia">
 <meta name="theme-color" content="#e8c547">
 <meta name="description" content="Viabilidade financeira para loteamentos">
-<title>LoteVia PRO</title>
+<title>ExpandhVia PRO</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
@@ -1023,6 +1023,54 @@ input[type=range]::-webkit-slider-thumb{
 .perm-meter{width:100%;height:8px;background:var(--brd);border-radius:4px;overflow:hidden;margin-top:4px}
 .perm-meter-fill{height:100%;border-radius:4px;background:var(--pur);transition:width .3s}
 
+/* ══════════════════════════════════════════════════
+   PDF REPORT MODAL
+══════════════════════════════════════════════════ */
+.pdf-modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.8);
+  backdrop-filter:blur(12px);z-index:7000;
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.pdf-modal-overlay.open{display:flex}
+.pdf-modal-box{
+  background:var(--bg2);border:1px solid var(--brd);border-radius:18px;
+  width:min(520px,96vw);display:flex;flex-direction:column;
+  box-shadow:0 32px 80px rgba(0,0,0,.7);overflow:hidden;
+  animation:fadeUp .2s ease;
+}
+.pdf-modal-header{
+  padding:20px 24px;border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg3);
+}
+.pdf-modal-title{font-family:var(--ff);font-size:16px;font-weight:800}
+.pdf-modal-body{padding:24px;display:flex;flex-direction:column;gap:14px}
+.pdf-field{display:flex;flex-direction:column;gap:5px}
+.pdf-field label{font-size:11px;color:var(--mut);font-weight:500}
+.pdf-field input,.pdf-field select{
+  background:var(--bg3);border:1px solid var(--brd);border-radius:8px;
+  color:var(--tex);font-family:var(--fb);font-size:13px;
+  padding:8px 11px;outline:none;width:100%;
+}
+.pdf-field input:focus{border-color:var(--acc)}
+.pdf-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pdf-section{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut);border-bottom:1px solid var(--brd);padding-bottom:6px}
+.pdf-checkbox-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mut);cursor:pointer}
+.pdf-checkbox-row input[type=checkbox]{width:14px;height:14px;accent-color:var(--acc);cursor:pointer}
+.pdf-generate-btn{
+  width:100%;padding:13px;background:var(--acc);color:#09090f;
+  border:none;border-radius:10px;font-family:var(--ff);font-size:14px;
+  font-weight:800;cursor:pointer;letter-spacing:.5px;transition:all .2s;
+}
+.pdf-generate-btn:hover{background:var(--acc2);box-shadow:0 6px 20px rgba(232,197,71,.3)}
+.pdf-progress{display:none;flex-direction:column;gap:8px;align-items:center;padding:8px}
+.pdf-progress-bar{width:100%;height:4px;background:var(--brd);border-radius:4px;overflow:hidden}
+.pdf-progress-fill{height:100%;background:var(--acc);border-radius:4px;transition:width .3s}
+.pdf-progress-label{font-size:12px;color:var(--mut)}
+
+/* ── The actual printable report (hidden in DOM, cloned to print window) ── */
+#pdfReportTemplate{display:none}
+
 /* ── LOGIN SCREEN ── */
 #loginScreen{
   position:fixed;inset:0;z-index:99999;
@@ -1296,6 +1344,9 @@ input[type=range]::-webkit-slider-thumb{
     </div>
     <button onclick="openProjects()" style="padding:7px 14px;background:var(--bg3);color:var(--tex);border:1px solid var(--brd);border-radius:8px;font-family:var(--fb);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;">
       <span>📁</span><span id="hdr-proj-name" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Meus Projetos</span>
+    </button>
+    <button onclick="openPDFModal()" style="padding:7px 14px;background:var(--bg3);color:var(--mut);border:1px solid var(--brd);border-radius:8px;font-family:var(--fb);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s;" onmouseover="this.style.borderColor='var(--acc)';this.style.color='var(--acc)'" onmouseout="this.style.borderColor='var(--brd)';this.style.color='var(--mut)'">
+      <span>📄</span><span>Relatório</span>
     </button>
     <button onclick="openHelp()" style="padding:7px 14px;background:var(--bg3);color:var(--mut);border:1px solid var(--brd);border-radius:8px;font-family:var(--fb);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s;" onmouseover="this.style.borderColor='var(--acc)';this.style.color='var(--acc)'" onmouseout="this.style.borderColor='var(--brd)';this.style.color='var(--mut)'">
       <span>❓</span><span>Ajuda</span>
@@ -1678,17 +1729,32 @@ input[type=range]::-webkit-slider-thumb{
           <div class="field"><label>Juros (% a.m.)</label><input type="number" id="b3jur" value="0.8" step="0.1" min="0"></div>
           <div class="field">
             <label>Índice de Correção</label>
-            <select id="b3corr"><option value="ipca">IPCA (estimado 0.4% a.m.)</option><option value="igpm">IGP-M (estimado 0.5% a.m.)</option><option value="sem">Sem correção</option></select>
+            <select id="b3corr" onchange="onCorrChange()">
+  <option value="ipca">IPCA — carregando...</option>
+  <option value="igpm">IGP-M — carregando...</option>
+  <option value="sem">Sem correção</option>
+</select>
           </div>
         </div>
       </div>
 
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding:10px 14px;background:var(--bg3);border-radius:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding:10px 14px;background:var(--bg3);border-radius:8px;flex-wrap:wrap;gap:8px">
         <span style="font-size:11px;color:var(--mut)">Total baldes:</span>
         <span id="baldesTotalPct" class="sl-val" style="font-size:16px">100%</span>
         <span class="badge b-grn" id="baldesTotalBadge">✓ OK</span>
         <span style="font-size:11px;color:var(--mut);margin-left:auto;margin-right:8px">Valor presente das parcelas (longo prazo):</span>
         <span id="vpParc" class="sl-val">—</span>
+      </div>
+
+      <!-- BCB Real Inflation Badge -->
+      <div style="margin-top:10px;padding:10px 14px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:11px;color:var(--mut);font-weight:600">📊 Índices Reais (BCB):</span>
+          <span id="inflacao-badge" style="font-size:11px;color:var(--acc)">⏳ Aguardando conexão...</span>
+        </div>
+        <button onclick="fetchBCBInflation()" style="padding:5px 12px;background:rgba(91,133,245,.12);border:1px solid rgba(91,133,245,.3);color:var(--blu);border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--fb)">
+          🔄 Atualizar BCB
+        </button>
       </div>
     </div>
 
@@ -2581,58 +2647,90 @@ function showTab(t) {
 // ═══════════════════════════════════════════════════════
 
 // Valores base do cenário Realista — capturados uma vez
+// ── SCENARIO ENGINE ──────────────────────────────────────
+// baseValues is captured ONCE at boot and ONLY updated when
+// the user manually edits fields (not when a scenario is applied).
+// This guarantees Pessimista→Otimista→Pessimista always uses the same base.
+
 let baseValues = null;
+let currentScenario = 'real'; // track active scenario
 
 function captureBase() {
+  // Called on boot and after the user manually saves/loads a project.
+  // NEVER called when switching scenarios.
   baseValues = {
     precoM2:      +$('precoM2').value,
     custoInfraM2: +$('custoInfraM2').value,
     custoTerreno: +$('custoTerreno').value,
     b1pct: +$('b1pct').value, b2pct: +$('b2pct').value, b3pct: +$('b3pct').value,
-    // Deep-copy dynamic arrays
     phasesData: JSON.parse(JSON.stringify(phasesData)),
     obraData:   JSON.parse(JSON.stringify(obraData)),
   };
 }
 
+function refreshBase() {
+  // Called when user manually edits a field while a scenario is active —
+  // resets to Realista first so we capture clean values.
+  if(currentScenario !== 'real') {
+    // Silently restore realista before capturing
+    _restoreRealista();
+  }
+  captureBase();
+}
+
+function _restoreRealista() {
+  if(!baseValues) return;
+  $('precoM2').value      = baseValues.precoM2;
+  $('custoInfraM2').value = baseValues.custoInfraM2;
+  phasesData = JSON.parse(JSON.stringify(baseValues.phasesData));
+  obraData   = JSON.parse(JSON.stringify(baseValues.obraData));
+  renderPhases(); renderObra();
+}
+
 function applyScenario(s) {
+  // Mark buttons
   document.querySelectorAll('.scen-btn').forEach(b=>b.classList.remove('on'));
   document.querySelector('.scen-btn.'+s).classList.add('on');
+  currentScenario = s;
 
-  // Captura base apenas se ainda não foi capturado (ou se voltando para realista)
-  if(!baseValues || s==='real') captureBase();
+  // Safety: if no base captured yet, capture now
+  if(!baseValues) captureBase();
+
+  // Always restore realista first, then apply multipliers
+  // This ensures Pessimista→Otimista works correctly
+  _restoreRealista();
 
   if(s === 'real') {
-    $('precoM2').value      = baseValues.precoM2;
-    $('custoInfraM2').value = baseValues.custoInfraM2;
-    phasesData = JSON.parse(JSON.stringify(baseValues.phasesData));
-    obraData   = JSON.parse(JSON.stringify(baseValues.obraData));
-    renderPhases(); renderObra();
+    // Already restored above — nothing more to do
 
   } else if(s === 'otim') {
+    // Otimista: +10% preço, -5% infra, fases 30% mais rápidas
     $('precoM2').value      = Math.round(baseValues.precoM2 * 1.10);
     $('custoInfraM2').value = Math.round(baseValues.custoInfraM2 * 0.95);
-    phasesData = JSON.parse(JSON.stringify(baseValues.phasesData)).map((ph,i)=>({
+    phasesData = baseValues.phasesData.map((ph, i) => ({
       ...ph,
       dur: Math.max(1, Math.round(ph.dur * 0.7)),
-      pct: i===0 ? Math.min(60, Math.round(ph.pct*1.3)) : Math.round(ph.pct*0.9),
+      pct: i === 0 ? Math.min(60, Math.round(ph.pct * 1.3)) : Math.round(ph.pct * 0.9),
     }));
     // Rebalance to 100%
-    const tot = phasesData.reduce((s,p)=>s+p.pct,0);
-    if(tot!==100 && phasesData.length) phasesData[phasesData.length-1].pct = Math.max(0, phasesData[phasesData.length-1].pct+(100-tot));
+    const totO = phasesData.reduce((a, p) => a + p.pct, 0);
+    if(totO !== 100 && phasesData.length)
+      phasesData[phasesData.length-1].pct = Math.max(0, phasesData[phasesData.length-1].pct + (100 - totO));
     obraData = JSON.parse(JSON.stringify(baseValues.obraData));
     renderPhases(); renderObra();
 
   } else if(s === 'pess') {
+    // Pessimista: -10% preço, +15% infra, fases 50% mais lentas
     $('precoM2').value      = Math.round(baseValues.precoM2 * 0.90);
     $('custoInfraM2').value = Math.round(baseValues.custoInfraM2 * 1.15);
-    phasesData = JSON.parse(JSON.stringify(baseValues.phasesData)).map((ph,i)=>({
+    phasesData = baseValues.phasesData.map((ph, i) => ({
       ...ph,
       dur: Math.max(1, Math.round(ph.dur * 1.5)),
-      pct: i===0 ? Math.max(10, Math.round(ph.pct*0.7)) : Math.round(ph.pct*1.1),
+      pct: i === 0 ? Math.max(10, Math.round(ph.pct * 0.7)) : Math.round(ph.pct * 1.1),
     }));
-    const tot = phasesData.reduce((s,p)=>s+p.pct,0);
-    if(tot!==100 && phasesData.length) phasesData[phasesData.length-1].pct = Math.max(0, phasesData[phasesData.length-1].pct+(100-tot));
+    const totP = phasesData.reduce((a, p) => a + p.pct, 0);
+    if(totP !== 100 && phasesData.length)
+      phasesData[phasesData.length-1].pct = Math.max(0, phasesData[phasesData.length-1].pct + (100 - totP));
     obraData = JSON.parse(JSON.stringify(baseValues.obraData));
     renderPhases(); renderObra();
   }
@@ -2769,6 +2867,124 @@ function calcVPL(f,tma){return f.reduce((a,v,t)=>a+v/Math.pow(1+tma,t),0);}
 // ═══════════════════════════════════════════════════════
 // MAIN ENGINE — CALCULAR
 // ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// BCB API — ÍNDICES DE INFLAÇÃO REAIS
+// Fonte: api.bcb.gov.br (Banco Central do Brasil)
+// ═══════════════════════════════════════════════════════
+
+// Cache of fetched rates
+const bcbCache = {
+  ipca: null,   // média mensal últimos 12 meses
+  igpm: null,   // média mensal últimos 12 meses
+  lastFetch: null,
+  status: 'idle', // idle | loading | ok | error
+};
+
+// BCB series codes
+const BCB_SERIES = {
+  ipca: 433,   // IPCA mensal %
+  igpm: 189,   // IGP-M mensal %
+};
+
+async function fetchBCBInflation() {
+  if(bcbCache.status === 'loading') return;
+  if(bcbCache.status === 'ok' && bcbCache.lastFetch &&
+     Date.now() - bcbCache.lastFetch < 3600000) return; // cache 1h
+
+  bcbCache.status = 'loading';
+  updateInflacaoUI('loading');
+
+  try {
+    // Fetch last 12 months for both indices in parallel
+    const endDate   = new Date();
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - 13);
+
+    const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    const sd = fmt(startDate), ed = fmt(endDate);
+
+    const [resIPCA, resIGPM] = await Promise.all([
+      fetch(`https://api.bcb.gov.br/dados/serie/bcdata.sgs.${BCB_SERIES.ipca}/dados?formato=json&dataInicial=${sd}&dataFinal=${ed}`),
+      fetch(`https://api.bcb.gov.br/dados/serie/bcdata.sgs.${BCB_SERIES.igpm}/dados?formato=json&dataInicial=${sd}&dataFinal=${ed}`),
+    ]);
+
+    if(!resIPCA.ok || !resIGPM.ok) throw new Error('BCB API error');
+
+    const dataIPCA = await resIPCA.json();
+    const dataIGPM = await resIGPM.json();
+
+    // Calculate trailing 12-month average monthly rate
+    const avg12 = arr => {
+      const last12 = arr.slice(-12);
+      const sum = last12.reduce((s,d) => s + parseFloat(d.valor), 0);
+      return sum / last12.length / 100; // convert % to decimal monthly rate
+    };
+
+    bcbCache.ipca = avg12(dataIPCA);
+    bcbCache.igpm = avg12(dataIGPM);
+    bcbCache.lastFetch = Date.now();
+    bcbCache.status = 'ok';
+
+    updateInflacaoUI('ok');
+    // Trigger recalc with new real rates
+    updateUI();
+    showToast(`📊 Inflação atualizada: IPCA ${(bcbCache.ipca*100).toFixed(2)}%/mês · IGP-M ${(bcbCache.igpm*100).toFixed(2)}%/mês`, 'ok', 5000);
+
+  } catch(e) {
+    bcbCache.status = 'error';
+    // Use safe fallback rates (BCB 12-month average estimates)
+    bcbCache.ipca = 0.004;  // ~4.8% a.a.
+    bcbCache.igpm = 0.005;  // ~6.2% a.a.
+    updateInflacaoUI('error');
+    console.warn('[BCB] API unavailable, using fallback rates:', e.message);
+  }
+}
+
+function getInflacaoMensal(indice) {
+  if(indice === 'sem') return 0;
+  if(indice === 'ipca') return bcbCache.ipca ?? 0.004;
+  if(indice === 'igpm') return bcbCache.igpm ?? 0.005;
+  return 0;
+}
+
+function updateInflacaoUI(status) {
+  const sel = $('b3corr');
+  if(!sel) return;
+
+  const opts = sel.options;
+  const ipcaRate = bcbCache.ipca;
+  const igpmRate = bcbCache.igpm;
+
+  if(status === 'loading') {
+    opts[0].text = 'IPCA — buscando dados BCB...';
+    opts[1].text = 'IGP-M — buscando dados BCB...';
+  } else if(status === 'ok') {
+    opts[0].text = `IPCA — ${(ipcaRate*100).toFixed(2)}%/mês (média 12m real)`;
+    opts[1].text = `IGP-M — ${(igpmRate*100).toFixed(2)}%/mês (média 12m real)`;
+  } else {
+    opts[0].text = `IPCA — ${(bcbCache.ipca*100).toFixed(2)}%/mês (estimativa fallback)`;
+    opts[1].text = `IGP-M — ${(bcbCache.igpm*100).toFixed(2)}%/mês (estimativa fallback)`;
+  }
+
+  // Update the inflacao badge in the recebimento tab
+  const badge = $('inflacao-badge');
+  if(badge) {
+    badge.textContent = status==='ok'
+      ? `✅ BCB: IPCA ${(ipcaRate*100).toFixed(2)}%/mês · IGP-M ${(igpmRate*100).toFixed(2)}%/mês`
+      : status==='loading'
+      ? '⏳ Consultando BCB...'
+      : `⚠ Fallback: IPCA ${(bcbCache.ipca*100).toFixed(2)}% · IGP-M ${(bcbCache.igpm*100).toFixed(2)}%`;
+    badge.style.color = status==='ok'?'var(--grn)':status==='loading'?'var(--acc)':'var(--red)';
+  }
+}
+
+function onCorrChange() {
+  updateUI();
+}
+
+// ═══════════════════════════════════════════════════════
+// MAIN CALCULATION ENGINE
+// ═══════════════════════════════════════════════════════
 function calcular(vsoMult=1.0, precoMult=1.0) {
   // === PRODUTO ===
   const areaTotal = +$('areaTotal').value||200000;
@@ -2869,13 +3085,16 @@ function calcular(vsoMult=1.0, precoMult=1.0) {
         if(m+p<=totalMeses) rec[m+p].cp += pmt2;
       }
 
-      // BALDE 3: LONGO PRAZO
+      // BALDE 3: LONGO PRAZO — usa correção real do BCB se disponível
       const lpValor = valorLotes*bpct3;
       const lpEnt = lpValor*ent3;
       rec[m].lp += lpEnt;
       const lpSaldo = lpValor*(1-ent3);
-      const pmt3 = jur3>0
-        ? lpSaldo*(jur3*Math.pow(1+jur3,parc3))/(Math.pow(1+jur3,parc3)-1)
+      // Taxa efetiva = juros contratuais + correção monetária real (BCB)
+      const corrMes  = getInflacaoMensal($('b3corr')?.value||'sem');
+      const jur3ef   = jur3 + corrMes; // taxa combinada mensal
+      const pmt3 = jur3ef>0
+        ? lpSaldo*(jur3ef*Math.pow(1+jur3ef,parc3))/(Math.pow(1+jur3ef,parc3)-1)
         : lpSaldo/parc3;
       for(let p=1;p<=parc3;p++){
         if(m+p<=totalMeses) rec[m+p].lp += pmt3;
@@ -3429,6 +3648,355 @@ function drawFluxoTable(R) {
 function calcular_wrapper() { updateUI(); }
 
 // ═══════════════════════════════════════════════════════
+// PDF REPORT GENERATOR
+// ═══════════════════════════════════════════════════════
+
+function openPDFModal() {
+  // Pre-fill with project name
+  const nameEl = $('pdf-nome-emp');
+  if(nameEl && !nameEl.value) nameEl.value = currentProjectName || '';
+  const dataEl = $('pdf-data');
+  if(dataEl && !dataEl.value) dataEl.value = new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  $('pdfModal').classList.add('open');
+}
+function closePDFModal() {
+  $('pdfModal').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closePDFModal(); });
+$('pdfModal').addEventListener('click', e => { if(e.target===$('pdfModal')) closePDFModal(); });
+
+async function generatePDFReport() {
+  const btn      = $('pdfGenBtn');
+  const progress = $('pdfProgress');
+  const fill     = $('pdfProgressFill');
+  const label    = $('pdfProgressLabel');
+
+  btn.style.display     = 'none';
+  progress.style.display= 'flex';
+
+  const setProgress = (pct, txt) => {
+    fill.style.width   = pct+'%';
+    label.textContent  = txt;
+  };
+
+  setProgress(10, 'Calculando indicadores...');
+  await sleep(80);
+
+  const R   = calcular();
+  const nome = $('pdf-nome-emp').value || 'Loteamento';
+  const cidade = $('pdf-cidade').value || '';
+  const data   = $('pdf-data').value   || new Date().toLocaleDateString('pt-BR');
+  const autor  = $('pdf-autor').value  || 'Expandh';
+  const conf   = $('pdf-confidencial').value;
+  const confLabel = { confidencial:'🔒 CONFIDENCIAL', restrito:'🔐 USO RESTRITO', publico:'DOCUMENTO PÚBLICO' };
+
+  const secCapa      = $('pdf-sec-capa').checked;
+  const secResumo    = $('pdf-sec-resumo').checked;
+  const secPremissas = $('pdf-sec-premissas').checked;
+  const secGraficos  = $('pdf-sec-graficos').checked;
+  const secSensib    = $('pdf-sec-sensib').checked;
+  const secFluxo     = $('pdf-sec-fluxo').checked;
+
+  // ── Capture charts as images ──
+  setProgress(25, 'Capturando gráficos...');
+  await sleep(80);
+
+  const getChartImg = id => {
+    const c = document.getElementById(id);
+    if(!c) return null;
+    try { return c.toDataURL('image/png'); } catch(e) { return null; }
+  };
+
+  const imgFluxo    = secGraficos ? getChartImg('c-fluxo')   : null;
+  const imgFases    = secGraficos ? getChartImg('c-fases')    : null;
+  const imgPie      = secGraficos ? getChartImg('c-pie')      : null;
+  const imgCurvaS   = secGraficos ? getChartImg('c-curvas')   : null;
+  const imgSens     = secSensib   ? getChartImg('c-curvexp')  : null;
+
+  setProgress(50, 'Montando relatório...');
+  await sleep(60);
+
+  // ── Fluxo table (limited to 36 months for PDF) ──
+  let fluxoTableHtml = '';
+  if(secFluxo) {
+    const aliq  = $('regime').value==='ret'?0.04:$('regime').value==='lp'?0.0673:0;
+    const aliqV = ((+$('comissao').value||0)+(+$('marketing').value||0))/100;
+    const rows  = [];
+    for(let m=1; m<=Math.min(36, R.totalMeses); m++) {
+      const rec = R.rec[m];
+      const rb  = rec.av+rec.cp+rec.lp;
+      const ob  = R.obra[m]||0;
+      const fm  = R.fluxos[m];
+      const ac  = R.fluxoAcum[m];
+      const fase = rec.fase>0&&phasesData[rec.fase-1]?phasesData[rec.fase-1].nome.slice(0,10):'—';
+      rows.push(`<tr style="border-bottom:1px solid #e5e7eb${R.breakevenMes===m?';background:#f0fdf4':''}" >
+        <td style="padding:4px 8px;font-size:10px;color:#6b7280">M${m}${R.breakevenMes===m?' ★':''}</td>
+        <td style="padding:4px 8px;font-size:10px;color:#6b7280">${fase}</td>
+        <td style="padding:4px 8px;font-size:10px;text-align:right">${rb>0?fmt(rb):'—'}</td>
+        <td style="padding:4px 8px;font-size:10px;text-align:right;color:#dc2626">${ob>0?fmt(-ob):'—'}</td>
+        <td style="padding:4px 8px;font-size:10px;text-align:right;font-weight:600;color:${fm>=0?'#059669':'#dc2626'}">${fmt(fm)}</td>
+        <td style="padding:4px 8px;font-size:10px;text-align:right;font-weight:700;color:${ac>=0?'#059669':'#dc2626'}">${fmt(ac)}</td>
+      </tr>`);
+    }
+    fluxoTableHtml = `
+      <div style="margin-top:32px;break-before:page">
+        <h2 style="font-size:16px;font-weight:700;color:#111827;margin-bottom:12px;border-bottom:2px solid #e5e7eb;padding-bottom:8px">Fluxo de Caixa Mensal (primeiros 36 meses)</h2>
+        <table style="width:100%;border-collapse:collapse;font-family:monospace">
+          <thead><tr style="background:#f9fafb">
+            <th style="padding:6px 8px;font-size:10px;text-align:left;color:#6b7280;font-weight:600">MÊS</th>
+            <th style="padding:6px 8px;font-size:10px;text-align:left;color:#6b7280;font-weight:600">FASE</th>
+            <th style="padding:6px 8px;font-size:10px;text-align:right;color:#6b7280;font-weight:600">REC. BRUTA</th>
+            <th style="padding:6px 8px;font-size:10px;text-align:right;color:#6b7280;font-weight:600">CUSTO OBRA</th>
+            <th style="padding:6px 8px;font-size:10px;text-align:right;color:#6b7280;font-weight:600">FLUXO MÊS</th>
+            <th style="padding:6px 8px;font-size:10px;text-align:right;color:#6b7280;font-weight:600">FLUXO ACUM.</th>
+          </tr></thead>
+          <tbody>${rows.join('')}</tbody>
+        </table>
+        <p style="font-size:9px;color:#9ca3af;margin-top:6px">★ Mês de break-even · Tabela limitada a 36 meses para o relatório PDF</p>
+      </div>`;
+  }
+
+  // ── Sensib table ──
+  let sensibHtml = '';
+  if(secSensib) {
+    const basePreco = +$('precoM2').value||420;
+    const mults = [0.7,0.8,0.9,1.0,1.1,1.2,1.3];
+    const vsoMults = [0.5,0.7,1.0,1.3,1.5];
+    sensibHtml = `
+      <div style="margin-top:32px">
+        <h2 style="font-size:16px;font-weight:700;color:#111827;margin-bottom:8px;border-bottom:2px solid #e5e7eb;padding-bottom:8px">Análise de Sensibilidade — TIR (% a.a.)</h2>
+        <p style="font-size:11px;color:#6b7280;margin-bottom:10px">Linhas = Preço/m² · Colunas = Velocidade de Vendas</p>
+        <table style="width:100%;border-collapse:collapse;font-size:11px">
+          <thead><tr style="background:#f9fafb">
+            <th style="padding:6px 10px;text-align:left;color:#6b7280;font-weight:600">Preço/m²</th>
+            ${vsoMults.map(v=>`<th style="padding:6px 10px;text-align:center;color:#6b7280;font-weight:600">VSO ${Math.round(v*100)}%</th>`).join('')}
+          </tr></thead>
+          <tbody>
+            ${mults.map(pm=>{
+              const preco = Math.round(basePreco*pm);
+              const isBase = pm===1.0;
+              return `<tr style="background:${isBase?'#fef9c3':'white'};border-bottom:1px solid #e5e7eb">
+                <td style="padding:6px 10px;font-weight:${isBase?'700':'400'};color:${isBase?'#92400e':'#374151'}">R$${preco}/m²${isBase?' ★':''}</td>
+                ${vsoMults.map(vm=>{
+                  const r = calcular(vm, pm);
+                  const tir = r.tirAa;
+                  const bg = tir>=25?'#d1fae5':tir>=20?'#ecfdf5':tir>=15?'#fef9c3':tir>=10?'#fee2e2':'#fecaca';
+                  return `<td style="padding:6px 10px;text-align:center;background:${bg};color:#111827;font-weight:600">${tir.toFixed(1)}%</td>`;
+                }).join('')}
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+        ${imgSens?`<img src="${imgSens}" style="width:100%;margin-top:16px;border-radius:8px">`:'' }
+      </div>`;
+  }
+
+  setProgress(70, 'Abrindo janela de impressão...');
+  await sleep(60);
+
+  // ── Build full HTML ──
+  const reportHtml = `<!DOCTYPE html><html lang="pt-BR"><head>
+  <meta charset="UTF-8">
+  <title>Relatório — ${nome}</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',Arial,sans-serif;color:#111827;background:#fff;font-size:12px}
+    @page{margin:20mm 18mm;size:A4}
+    @media print{.no-print{display:none!important}.page-break{break-before:page}}
+    h1{font-size:28px;font-weight:800;letter-spacing:-1px}
+    h2{font-size:16px;font-weight:700}
+    .accent{color:#b45309}
+    .tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:.5px}
+  </style>
+</head><body>
+
+  ${secCapa ? `
+  <!-- CAPA -->
+  <div style="min-height:100vh;display:flex;flex-direction:column;justify-content:space-between;padding:20px 0 40px">
+    <div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:60px">
+        <div style="width:44px;height:44px;background:#d97706;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:900">L</div>
+        <div>
+          <div style="font-size:18px;font-weight:800;color:#111827">ExpandhVia <span style="color:#d97706">PRO</span></div>
+          <div style="font-size:10px;color:#6b7280">Desenvolvido por ${autor}</div>
+        </div>
+      </div>
+      <div style="border-left:5px solid #d97706;padding-left:24px;margin-bottom:40px">
+        <div style="font-size:11px;color:#6b7280;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Relatório Executivo de Viabilidade</div>
+        <h1 style="font-size:36px;color:#111827;margin-bottom:8px">${nome}</h1>
+        ${cidade?`<div style="font-size:16px;color:#6b7280">${cidade}</div>`:''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:32px">
+        ${[
+          ['VGV Bruto',fmt(R.vgvBruto),'#1d4ed8'],
+          ['TIR (a.a.)',R.tirAa.toFixed(1)+'%','#059669'],
+          ['Lucro Líquido',fmt(R.lucroLiq),'#d97706'],
+          ['Margem',R.margemLiq.toFixed(1)+'%','#7c3aed'],
+        ].map(([l,v,c])=>`
+          <div style="border:1px solid #e5e7eb;border-top:3px solid ${c};border-radius:10px;padding:14px">
+            <div style="font-size:9px;color:#6b7280;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px">${l}</div>
+            <div style="font-size:20px;font-weight:800;color:${c}">${v}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div style="border-top:1px solid #e5e7eb;padding-top:16px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:10px;color:#9ca3af">${data} · ${confLabel[conf]}</div>
+      <div style="font-size:10px;color:#9ca3af">Preparado por ${autor}</div>
+    </div>
+  </div>` : ''}
+
+  ${secResumo ? `
+  <!-- RESUMO EXECUTIVO -->
+  <div style="break-before:${secCapa?'page':'auto'};padding-top:${secCapa?'0':'0'}px">
+    <h2 style="font-size:20px;font-weight:800;color:#111827;margin-bottom:4px">Resumo Executivo</h2>
+    <div style="font-size:11px;color:#6b7280;margin-bottom:24px">${nome} · ${cidade} · ${data}</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+      <!-- Indicadores financeiros -->
+      <div>
+        <h3 style="font-size:12px;font-weight:700;color:#d97706;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">Indicadores Financeiros</h3>
+        ${[
+          ['VGV Bruto', fmt(R.vgvBruto)],
+          ['Lucro Líquido', fmt(R.lucroLiq)],
+          ['Margem Líquida', R.margemLiq.toFixed(1)+'%'],
+          ['TIR (a.a.)', R.tirAa.toFixed(1)+'%'],
+          ['VPL', fmt(R.vpl)],
+          ['ROI', R.roi.toFixed(1)+'%'],
+          ['Break-even', R.breakevenMes?'Mês '+R.breakevenMes:'—'],
+          ['Exposição Máx.', fmt(Math.abs(R.expMax))],
+        ].map(([l,v])=>`
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6">
+            <span style="color:#6b7280">${l}</span>
+            <span style="font-weight:600">${v}</span>
+          </div>`).join('')}
+      </div>
+      <!-- Premissas do produto -->
+      <div>
+        <h3 style="font-size:12px;font-weight:700;color:#d97706;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">Dados do Produto</h3>
+        ${[
+          ['Área Total', (+$('areaTotal').value||0).toLocaleString('pt-BR')+' m²'],
+          ['Eficiência', $('efSlider').value+'%'],
+          ['Qtd. Lotes', R.qtdLotes.toLocaleString('pt-BR')],
+          ['Tamanho médio', (+$('tamLote').value||0)+' m²'],
+          ['Preço/m²', 'R$ '+$('precoM2').value],
+          ['Preço médio lote', fmt(R.precoLote)],
+          ['Custo Infra/m²', 'R$ '+$('custoInfraM2').value],
+          ['Regime Tributário', {ret:'RET 4%',lp:'Lucro Presumido',lu:'Lucro Real'}[$('regime').value]],
+        ].map(([l,v])=>`
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6">
+            <span style="color:#6b7280">${l}</span>
+            <span style="font-weight:600">${v}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Avaliação -->
+    <div style="background:${R.tirAa>=20&&R.margemLiq>=15?'#ecfdf5':R.tirAa>=12?'#fef9c3':'#fef2f2'};border:1px solid ${R.tirAa>=20&&R.margemLiq>=15?'#a7f3d0':R.tirAa>=12?'#fde68a':'#fecaca'};border-radius:10px;padding:14px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:${R.tirAa>=20&&R.margemLiq>=15?'#065f46':R.tirAa>=12?'#78350f':'#991b1b'}">
+        ${R.tirAa>=20&&R.margemLiq>=15?'✓ PROJETO VIÁVEL — Alta Rentabilidade':R.tirAa>=12&&R.margemLiq>=8?'◈ PROJETO VIÁVEL — Rentabilidade Moderada':'✕ PROJETO REQUER REVISÃO DE PREMISSAS'}
+      </div>
+      <div style="font-size:10px;color:#6b7280;margin-top:4px">TIR de ${R.tirAa.toFixed(1)}% a.a. com margem de ${R.margemLiq.toFixed(1)}% · ${R.qtdLotes} lotes · Horizonte ${Math.round(R.totalMeses/12*10)/10} anos</div>
+    </div>
+
+    <!-- Fases de venda -->
+    ${secPremissas?`
+    <h3 style="font-size:12px;font-weight:700;color:#d97706;letter-spacing:.5px;text-transform:uppercase;margin:16px 0 8px">Fases de Venda</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:11px">
+      <thead><tr style="background:#f9fafb">
+        <th style="padding:6px 10px;text-align:left;color:#6b7280;font-weight:600">Fase</th>
+        <th style="padding:6px 10px;text-align:center;color:#6b7280;font-weight:600">% VGV</th>
+        <th style="padding:6px 10px;text-align:center;color:#6b7280;font-weight:600">Início</th>
+        <th style="padding:6px 10px;text-align:center;color:#6b7280;font-weight:600">Duração</th>
+        <th style="padding:6px 10px;text-align:right;color:#6b7280;font-weight:600">Lotes</th>
+        <th style="padding:6px 10px;text-align:right;color:#6b7280;font-weight:600">VSO/mês</th>
+      </thead>
+      <tbody>
+        ${phasesData.map(ph=>{
+          const lotes = Math.round(R.qtdLotes*ph.pct/100);
+          return `<tr style="border-bottom:1px solid #e5e7eb">
+            <td style="padding:6px 10px">${ph.nome}</td>
+            <td style="padding:6px 10px;text-align:center">${ph.pct}%</td>
+            <td style="padding:6px 10px;text-align:center">Mês ${ph.ini}</td>
+            <td style="padding:6px 10px;text-align:center">${ph.dur} meses</td>
+            <td style="padding:6px 10px;text-align:right">${lotes}</td>
+            <td style="padding:6px 10px;text-align:right">${(ph.pct/ph.dur).toFixed(1)}%</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`:''}
+  </div>` : ''}
+
+  ${secGraficos && (imgFluxo||imgFases||imgPie||imgCurvaS) ? `
+  <!-- GRÁFICOS -->
+  <div style="break-before:page">
+    <h2 style="font-size:20px;font-weight:800;margin-bottom:20px;border-bottom:2px solid #e5e7eb;padding-bottom:8px">Gráficos e Análises</h2>
+    ${imgFluxo?`
+    <div style="margin-bottom:24px">
+      <h3 style="font-size:12px;font-weight:700;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">Fluxo de Caixa Acumulado</h3>
+      <img src="${imgFluxo}" style="width:100%;border:1px solid #e5e7eb;border-radius:8px">
+    </div>`:''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+      ${imgPie?`
+      <div>
+        <h3 style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">Composição do VGV</h3>
+        <img src="${imgPie}" style="width:100%;border:1px solid #e5e7eb;border-radius:8px">
+      </div>`:''}
+      ${imgCurvaS?`
+      <div>
+        <h3 style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">Curva S — Desembolso de Obra</h3>
+        <img src="${imgCurvaS}" style="width:100%;border:1px solid #e5e7eb;border-radius:8px">
+      </div>`:''}
+    </div>
+    ${imgFases?`
+    <div>
+      <h3 style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">Receita Mensal por Fase de Venda</h3>
+      <img src="${imgFases}" style="width:100%;border:1px solid #e5e7eb;border-radius:8px">
+    </div>`:''}
+  </div>` : ''}
+
+  ${sensibHtml}
+  ${fluxoTableHtml}
+
+  <!-- RODAPÉ -->
+  <div style="margin-top:40px;border-top:1px solid #e5e7eb;padding-top:12px;display:flex;justify-content:space-between;font-size:9px;color:#9ca3af">
+    <span>${nome} · ${cidade}</span>
+    <span>${confLabel[conf]} · Gerado por ExpandhVia PRO · ${autor}</span>
+    <span>${data}</span>
+  </div>
+
+</body></html>`;
+
+  setProgress(90, 'Abrindo PDF...');
+  await sleep(60);
+
+  // Open in new window for printing
+  const win = window.open('','_blank','width=900,height=700');
+  if(!win) {
+    showToast('⚠ Popup bloqueado. Permita popups para este site.','err',5000);
+    btn.style.display='';
+    progress.style.display='none';
+    return;
+  }
+  win.document.write(reportHtml);
+  win.document.close();
+  win.focus();
+  setTimeout(()=>{
+    win.print();
+  }, 800);
+
+  setProgress(100, 'Concluído!');
+  await sleep(500);
+
+  btn.style.display='';
+  progress.style.display='none';
+  fill.style.width='0%';
+  closePDFModal();
+  showToast('📄 Relatório gerado! Use Ctrl+P → Salvar como PDF','ok',5000);
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+// ═══════════════════════════════════════════════════════
 // PERMUTA FÍSICO-FINANCEIRA
 // ═══════════════════════════════════════════════════════
 
@@ -3852,7 +4420,7 @@ function exportPermutaExcel() {
      (src.reduce((s,l)=>s+l.valorAval,0)).toFixed(2).replace('.',','),''],
   ];
   const csv=BOM+rows.map(r=>r.map(c=>{const s=String(c==null?'':c);return s.includes(sep)?'"'+s+'"':s;}).join(sep)).join('\r\n');
-  download(csv,'LoteVia_Permuta_'+dataBR()+'.csv','text/csv;charset=utf-8');
+  download(csv,'ExpandhVia_Permuta_'+dataBR()+'.csv','text/csv;charset=utf-8');
   showToast('📊 Permuta exportada!','ok');
 }
 
@@ -4321,7 +4889,7 @@ function exportSFOExcel() {
     const s=String(c==null?'':c);
     return s.includes(sep)?'"'+s+'"':s;
   }).join(sep)).join('\r\n');
-  download(csv,'LoteVia_SFO_'+dataBR()+'.csv','text/csv;charset=utf-8');
+  download(csv,'ExpandhVia_SFO_'+dataBR()+'.csv','text/csv;charset=utf-8');
   showToast('📊 SFO exportado!','ok');
 }
 
@@ -4607,7 +5175,7 @@ function exportReverseExcel() {
     return s.includes(sep)?'"'+s+'"':s;
   }).join(sep)).join('\r\n');
 
-  download(csv,'LoteVia_PrecoReverso_'+dataBR()+'.csv','text/csv;charset=utf-8');
+  download(csv,'ExpandhVia_PrecoReverso_'+dataBR()+'.csv','text/csv;charset=utf-8');
   showToast('📊 Análise exportada!','ok');
 }
 
@@ -4871,7 +5439,7 @@ function exportMatrixExcel() {
     return (s.includes(sep)||s.includes('"'))?'"'+s.replace(/"/g,'""')+'"':s;
   }).join(sep)).join('\r\n');
 
-  download(csv,'LoteVia_Matriz2D_'+dataBR()+'.csv','text/csv;charset=utf-8');
+  download(csv,'ExpandhVia_Matriz2D_'+dataBR()+'.csv','text/csv;charset=utf-8');
   showToast('📊 Matriz exportada para Excel!','ok');
 }
 
@@ -4889,8 +5457,8 @@ function dataBR() {
   return new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
 }
 function projectLabel() {
-  const name = document.getElementById('hdr-proj-name')?.textContent||'LoteVia';
-  return name==='Meus Projetos'?'LoteVia-PRO':name.replace(/[^a-zA-Z0-9À-ú ]/g,'').trim().replace(/ /g,'_');
+  const name = document.getElementById('hdr-proj-name')?.textContent||'ExpandhVia';
+  return name==='Meus Projetos'?'ExpandhVia-PRO':name.replace(/[^a-zA-Z0-9À-ú ]/g,'').trim().replace(/ /g,'_');
 }
 
 // ── EXCEL (via CSV with BOM — opens natively in Excel/LibreOffice) ──
@@ -5045,7 +5613,7 @@ function exportJSON() {
   const R = calcular();
   const data = {
     meta: {
-      app: 'LoteVia PRO',
+      app: 'ExpandhVia PRO',
       versao: '2.0',
       projeto: projectLabel(),
       exportadoEm: new Date().toISOString(),
@@ -5160,7 +5728,7 @@ async function sha256(str) {
 }
 
 function checkLogin() {
-  const ok = sessionStorage.getItem('lotevia_auth') === '1';
+  const ok = sessionStorage.getItem('expandhvia_auth') === '1';
   if (ok) {
     bootApp();
   } else {
@@ -5188,7 +5756,7 @@ async function doLogin() {
   const HASH_EXPANDH = await sha256('Expandh');
 
   if (hash === HASH_EXPANDH) {
-    sessionStorage.setItem('lotevia_auth', '1');
+    sessionStorage.setItem('expandhvia_auth', '1');
     const screen = document.getElementById('loginScreen');
     screen.style.opacity = '0';
     screen.style.transition = 'opacity .3s ease';
@@ -5229,6 +5797,53 @@ function bootApp() {
 }
 </script>
 
+<!-- ══════════════ PDF REPORT MODAL ══════════════ -->
+<div class="pdf-modal-overlay" id="pdfModal">
+  <div class="pdf-modal-box">
+    <div class="pdf-modal-header">
+      <div class="pdf-modal-title">📄 Gerar Relatório Executivo</div>
+      <button class="modal-close" onclick="closePDFModal()">✕</button>
+    </div>
+    <div class="pdf-modal-body">
+      <div class="pdf-section">Identidade do Relatório</div>
+      <div class="pdf-field"><label>Nome do Empreendimento</label>
+        <input type="text" id="pdf-nome-emp" placeholder="Ex: Loteamento Vila Verde"></div>
+      <div class="pdf-2col">
+        <div class="pdf-field"><label>Cidade / UF</label>
+          <input type="text" id="pdf-cidade" placeholder="Ex: Campinas - SP"></div>
+        <div class="pdf-field"><label>Data do Relatório</label>
+          <input type="text" id="pdf-data" placeholder="Ex: Maio 2025"></div>
+      </div>
+      <div class="pdf-field"><label>Preparado por</label>
+        <input type="text" id="pdf-autor" value="Expandh" placeholder="Nome ou empresa"></div>
+      <div class="pdf-field"><label>Confidencialidade</label>
+        <select id="pdf-confidencial">
+          <option value="confidencial">🔒 Confidencial</option>
+          <option value="restrito">🔐 Uso Restrito</option>
+          <option value="publico">📄 Documento Público</option>
+        </select>
+      </div>
+
+      <div class="pdf-section">Seções do Relatório</div>
+      <label class="pdf-checkbox-row"><input type="checkbox" id="pdf-sec-capa" checked> Capa com logo e dados do projeto</label>
+      <label class="pdf-checkbox-row"><input type="checkbox" id="pdf-sec-resumo" checked> Resumo executivo (KPIs principais)</label>
+      <label class="pdf-checkbox-row"><input type="checkbox" id="pdf-sec-premissas" checked> Premissas do projeto</label>
+      <label class="pdf-checkbox-row"><input type="checkbox" id="pdf-sec-graficos" checked> Gráficos (Fluxo, Composição VGV, Curva S, Fases)</label>
+      <label class="pdf-checkbox-row"><input type="checkbox" id="pdf-sec-sensib"> Análise de Sensibilidade</label>
+      <label class="pdf-checkbox-row"><input type="checkbox" id="pdf-sec-fluxo"> Fluxo de Caixa completo (tabela)</label>
+
+      <div class="pdf-progress" id="pdfProgress">
+        <div class="pdf-progress-bar"><div class="pdf-progress-fill" id="pdfProgressFill" style="width:0%"></div></div>
+        <div class="pdf-progress-label" id="pdfProgressLabel">Preparando...</div>
+      </div>
+
+      <button class="pdf-generate-btn" id="pdfGenBtn" onclick="generatePDFReport()">
+        📄 Gerar PDF
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════ HELP MANUAL MODAL ══════════════ -->
 <div class="help-overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()">
   <div class="help-modal">
@@ -5237,7 +5852,7 @@ function bootApp() {
       <div class="help-header-left">
         <div class="help-logo">L</div>
         <div>
-          <div class="help-title">LoteVia PRO — Manual</div>
+          <div class="help-title">ExpandhVia PRO — Manual</div>
           <div style="display:flex;align-items:center;gap:8px;margin-top:3px">
             <span class="help-version">v2.0</span>
             <span style="font-size:11px;color:var(--mut)">Desenvolvido por Expandh</span>
@@ -5284,7 +5899,7 @@ function bootApp() {
 
         <!-- INTRO -->
         <div class="help-section active" id="hs-intro">
-          <h1>🏘 LoteVia PRO</h1>
+          <h1>🏘 ExpandhVia PRO</h1>
           <p>Ferramenta profissional de <strong>análise de viabilidade financeira para loteamentos</strong>, desenvolvida pela Expandh. Simula o fluxo de caixa completo do empreendimento, do desembolso de obra até o recebimento das últimas parcelas.</p>
           <div class="help-box info">
             <strong>Como usar:</strong> Preencha as premissas nas abas laterais, clique em <strong>⟳ Recalcular</strong> e analise os resultados no Dashboard. O sistema recalcula automaticamente ao alterar qualquer campo.
@@ -5314,7 +5929,7 @@ function bootApp() {
         <!-- LOGIN -->
         <div class="help-section" id="hs-login">
           <h1>🔐 Acesso & Senha</h1>
-          <p>O LoteVia PRO é protegido por senha para garantir uso exclusivo da equipe Expandh.</p>
+          <p>O ExpandhVia PRO é protegido por senha para garantir uso exclusivo da equipe Expandh.</p>
           <h2>Informações de acesso</h2>
           <div class="help-box warn">
             <strong>Senha atual:</strong> Expandh (com E maiúsculo)<br>
@@ -5450,6 +6065,19 @@ function bootApp() {
           <p>O gráfico mostra uma venda hipotética realizada no Mês 1 — como o caixa recebe esse valor ao longo dos 60 meses seguintes, separado por modalidade. É a "escada" de recebimentos futuros.</p>
           <h2>Valor Presente das Parcelas</h2>
           <p>O sistema calcula o VPL das parcelas do longo prazo usando a TMA configurada. Um lote de R$100K parcelado em 120x pode ter VPL de R$70K — relevante para comparações.</p>
+          <h2>Indexação Real — API do Banco Central</h2>
+          <p>Ao invés de usar taxas estimadas fixas, o sistema consulta automaticamente a <strong>API pública do Banco Central do Brasil (BCB)</strong> para obter as médias mensais reais dos últimos 12 meses.</p>
+          <table class="help-kv">
+            <tr><th>Índice</th><th>Série BCB</th><th>O que é</th></tr>
+            <tr><td>IPCA</td><td>Série 433</td><td>Índice Nacional de Preços ao Consumidor Amplo — inflação oficial do Brasil</td></tr>
+            <tr><td>IGP-M</td><td>Série 189</td><td>Índice Geral de Preços do Mercado — mais usado em contratos imobiliários</td></tr>
+          </table>
+          <div class="help-box tip">
+            <strong>Como funciona:</strong> O sistema busca os dados automaticamente ao carregar (requer internet). A taxa é adicionada aos juros contratuais do Longo Prazo: <strong>taxa efetiva = juros + correção monetária real</strong>. O badge na aba Recebimento mostra o status da conexão e as taxas em uso.
+          </div>
+          <div class="help-box warn">
+            <strong>Fallback:</strong> Se a API do BCB estiver indisponível (modo offline ou firewall), o sistema usa estimativas conservadoras (IPCA 0.40%/mês, IGP-M 0.50%/mês) e exibe um aviso amarelo.
+          </div>
         </div>
 
         <!-- SENSIBILIDADE -->
@@ -5842,7 +6470,7 @@ function bootApp() {
 <div class="pwa-banner hidden" id="pwaBanner">
   <div style="font-size:28px">📲</div>
   <div class="pwa-banner-text">
-    <strong>Instalar LoteVia PRO</strong><br>
+    <strong>Instalar ExpandhVia PRO</strong><br>
     <span style="font-size:11px;color:var(--mut)">Adicione à tela inicial para usar como app</span>
   </div>
   <button class="pwa-install-btn" onclick="installPWA()">Instalar</button>
@@ -5903,7 +6531,7 @@ async function installPWA() {
   const { outcome } = await deferredPrompt.userChoice;
   deferredPrompt = null;
   dismissBanner();
-  if (outcome === 'accepted') showToast('✅ LoteVia instalado com sucesso!', 'ok');
+  if (outcome === 'accepted') showToast('✅ ExpandhVia instalado com sucesso!', 'ok');
 }
 
 function dismissBanner() {
@@ -5920,7 +6548,7 @@ window.addEventListener('appinstalled', () => {
 // ═══════════════════════════════════════════════════════
 // INDEXEDDB — banco de dados local
 // ═══════════════════════════════════════════════════════
-const DB_NAME    = 'LoteViaDB';
+const DB_NAME    = 'ExpandhViaDB';
 const DB_VERSION = 1;
 const STORE      = 'projetos';
 let db = null;
@@ -6722,7 +7350,7 @@ function exportCompExcel() {
     return (s.includes(sep)||s.includes('"'))?'"'+s.replace(/"/g,'""')+'"':s;
   }).join(sep)).join('\r\n');
 
-  download(csv,'LoteVia_Comparativo_'+dataBR()+'.csv','text/csv;charset=utf-8');
+  download(csv,'ExpandhVia_Comparativo_'+dataBR()+'.csv','text/csv;charset=utf-8');
   showToast('📊 Comparativo exportado!','ok');
 }
 
