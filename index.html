@@ -11,6 +11,8 @@
 <meta name="description" content="Viabilidade financeira para loteamentos">
 <title>ExpandhVia PRO</title>
 <link rel="manifest" href="manifest.json">
+<!-- Inline favicon — evita 404 quando icons/ não está no servidor -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23e8c547'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='20' font-weight='900' font-family='Arial' fill='%2309090f'%3EL%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
@@ -1346,6 +1348,9 @@ input[type=range]::-webkit-slider-thumb{
     </button>
     <button onclick="openPDFModal()" style="padding:7px 14px;background:var(--bg3);color:var(--mut);border:1px solid var(--brd);border-radius:8px;font-family:var(--fb);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s;" onmouseover="this.style.borderColor='var(--acc)';this.style.color='var(--acc)'" onmouseout="this.style.borderColor='var(--brd)';this.style.color='var(--mut)'">
       <span>📄</span><span>Relatório</span>
+    </button>
+    <button id="pwaInstallBtn" onclick="installPWA()" style="display:none;padding:7px 14px;background:rgba(232,197,71,.12);color:var(--acc);border:1px solid rgba(232,197,71,.3);border-radius:8px;font-family:var(--fb);font-size:12px;cursor:pointer;gap:6px;align-items:center;transition:all .18s;" title="Instalar como app">
+      📲 Instalar
     </button>
     <button onclick="openHelp()" style="padding:7px 14px;background:var(--bg3);color:var(--mut);border:1px solid var(--brd);border-radius:8px;font-family:var(--fb);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s;" onmouseover="this.style.borderColor='var(--acc)';this.style.color='var(--acc)'" onmouseout="this.style.borderColor='var(--brd)';this.style.color='var(--mut)'">
       <span>❓</span><span>Ajuda</span>
@@ -6494,7 +6499,22 @@ function bootApp() {
             <button onclick="testSupabaseConnection()" style="padding:6px 14px;background:var(--bg);border:1px solid var(--brd);color:var(--mut);border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--fb)">🔌 Testar</button>
           </div>
           <div style="font-size:10px;color:var(--mut);line-height:1.6;margin-top:4px">
-            📋 No Supabase: crie uma tabela <code style="background:var(--bg3);padding:1px 5px;border-radius:4px">lotevia_projects</code> com campos <code style="background:var(--bg3);padding:1px 5px;border-radius:4px">id, nome, dados (jsonb), updated_at</code>
+            📋 <strong style="color:var(--tex)">Setup Supabase:</strong><br>
+          <span style="font-family:var(--fm);font-size:10px;background:var(--bg);padding:4px 8px;border-radius:6px;display:block;margin-top:6px;line-height:1.8;color:var(--grn)">
+            -- 1. Criar tabela<br>
+            CREATE TABLE lotevia_projects (<br>
+            &nbsp;&nbsp;id TEXT PRIMARY KEY,<br>
+            &nbsp;&nbsp;nome TEXT,<br>
+            &nbsp;&nbsp;dados JSONB,<br>
+            &nbsp;&nbsp;updated_at TIMESTAMPTZ DEFAULT NOW()<br>
+            );<br><br>
+            -- 2. Desabilitar RLS (acesso pela anon key)<br>
+            ALTER TABLE lotevia_projects DISABLE ROW LEVEL SECURITY;<br><br>
+            -- OU criar policy pública:<br>
+            ALTER TABLE lotevia_projects ENABLE ROW LEVEL SECURITY;<br>
+            CREATE POLICY "anon_all" ON lotevia_projects<br>
+            &nbsp;&nbsp;FOR ALL TO anon USING (true) WITH CHECK (true);
+          </span>
           </div>
         </div>
       </div>
@@ -6566,12 +6586,10 @@ window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPrompt = e;
   // Mostra banner após 3s se ainda não instalado
-  if (!localStorage.getItem('pwa-dismissed')) {
-    setTimeout(() => {
-      const b = document.getElementById('pwaBanner');
-      if(b) b.classList.remove('hidden');
-    }, 3000);
-  }
+  // Don't auto-show banner — only show when user explicitly wants to install
+  // Chrome already shows its own install prompt in the address bar
+  // We store the event for when user clicks our install button
+  console.log('[PWA] Install prompt captured — available via install button');
 });
 
 async function installPWA() {
@@ -6591,7 +6609,10 @@ function dismissBanner() {
 
 window.addEventListener('appinstalled', () => {
   dismissBanner();
-  showToast('✅ App instalado!', 'ok');
+  const btn = document.getElementById('pwaInstallBtn');
+  if(btn) btn.style.display = 'none';
+  deferredPrompt = null;
+  showToast('✅ App instalado com sucesso!', 'ok');
 });
 
 // ═══════════════════════════════════════════════════════
