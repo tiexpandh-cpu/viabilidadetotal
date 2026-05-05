@@ -282,7 +282,6 @@ input[type=range]::-webkit-slider-thumb{
 .ch-wrap-md{position:relative;height:260px}
 
 /* ── FLUXO TABLE ── */
-.ftbl-wrap{overflow-x:auto;max-height:320px;overflow-y:auto}
 .ftbl-wrap::-webkit-scrollbar{width:4px;height:4px}
 .ftbl-wrap::-webkit-scrollbar-thumb{background:var(--brd);border-radius:4px}/* ── SENSITIVITY MATRIX 2D ── */
 .matrix-wrap{overflow-x:auto;overflow-y:auto;max-height:520px;border-radius:10px;border:1px solid var(--brd)}
@@ -1290,12 +1289,6 @@ input[type=range]::-webkit-slider-thumb{
 .toast.ok{border-color:rgba(45,212,160,.4);color:var(--grn)}
 .toast.err{border-color:rgba(240,82,79,.4);color:var(--red)}
 </style>
-
-<script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-  window.createSupabaseClient = createClient;
-</script>
-
 </head>
 <body>
 
@@ -1925,7 +1918,7 @@ input[type=range]::-webkit-slider-thumb{
         </button>
       </div>
     </div>
-    <div class="ftbl-wrap">
+    <div class="ftbl-wrap" style="margin-top:0;border-radius:0 0 12px 12px">
       <table class="ftbl">
         <thead>
           <tr>
@@ -3669,7 +3662,7 @@ function closePDFModal() {
   $('pdfModal').classList.remove('open');
 }
 document.addEventListener('keydown', e => { if(e.key==='Escape') closePDFModal(); });
-$('pdfModal').addEventListener('click', e => { if(e.target===$('pdfModal')) closePDFModal(); });
+// pdfModal click-outside: attached after DOM is ready (in load event below)
 
 async function generatePDFReport() {
   const btn      = $('pdfGenBtn');
@@ -5189,9 +5182,9 @@ function exportReverseExcel() {
 // SENSITIVITY MATRIX 2D
 // ═══════════════════════════════════════════════════════
 
-let matrixMetric     = 'tirAa';
-let matrixMetricLabel = 'TIR a.a. (%)';
-let matrixData       = null; // { precos[], vsos[], cells[][] }
+var matrixMetric     = 'tirAa';
+var matrixMetricLabel = 'TIR a.a. (%)';
+var matrixData       = null; // { precos[], vsos[], cells[][] }
 
 const MATRIX_METRICS = {
   tirAa:       { label:'TIR a.a. (%)',     fmt: v => v!=null ? v.toFixed(1)+'%' : '—',  higher:true,  thresholds:[0,8,15,20,30] },
@@ -5273,9 +5266,10 @@ function buildMatrix() {
   const precos = Array.from({length:N_PRECO}, (_,i) => Math.round(precoMin + (precoMax-precoMin)*i/(N_PRECO-1)));
   const vsos   = Array.from({length:N_VSO},   (_,i) => +(vsoMin + (vsoMax-vsoMin)*i/(N_VSO-1)).toFixed(2));
 
-  // Show loading state
+  // Show loading state — use setTimeout so browser paints the loading message first
   $('matrixWrap').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--mut);font-size:13px">⏳ Calculando '+N_PRECO*N_VSO+' cenários...</div>';
 
+  setTimeout(() => {
   // Get base preco for VSO mult calculation
   const basePreco = +$('precoM2').value || 420;
 
@@ -5308,6 +5302,7 @@ function buildMatrix() {
   matrixData = { precos, vsos, cells };
   renderMatrix();
   buildCurvaExposicao(); // refresh the curve chart too
+  }, 50); // end setTimeout — gives browser time to paint loading state
 }
 
 function renderMatrix() {
@@ -6420,7 +6415,16 @@ function bootApp() {
         <div class="modal-title">📁 Meus Projetos</div>
         <div style="font-size:11px;color:var(--mut);margin-top:2px">Salvo localmente no dispositivo</div>
       </div>
-      <button class="modal-close" onclick="closeProjects()">✕</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="newProject()" style="padding:6px 14px;background:rgba(45,212,160,.12);border:1px solid rgba(45,212,160,.3);color:var(--grn);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff)">
+          ✨ Novo Projeto
+        </button>
+        <button onclick="triggerImportJSON()" style="padding:6px 14px;background:rgba(91,133,245,.12);border:1px solid rgba(91,133,245,.3);color:var(--blu);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff)">
+          📥 Importar
+        </button>
+        <input type="file" id="importJSONInput" accept=".json" style="display:none" onchange="importProjectJSON(event)">
+        <button class="modal-close" onclick="closeProjects()">✕</button>
+      </div>
     </div>
     <div class="modal-body">
 
@@ -6456,6 +6460,45 @@ function bootApp() {
         </div>
       </div>
 
+      <!-- Supabase Sync Section -->
+      <div id="supabaseSyncSection" style="background:var(--bg3);border:1px solid var(--brd);border-radius:12px;padding:14px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:14px">☁️</span>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--tex)">Supabase Sync</div>
+              <div style="font-size:10px;color:var(--mut)" id="supabase-status-label">Não configurado</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button onclick="toggleSupabaseConfig()" style="padding:5px 12px;background:var(--bg);border:1px solid var(--brd);color:var(--mut);border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--fb)">⚙️ Config</button>
+            <button onclick="loadFromSupabase()" style="padding:5px 12px;background:rgba(45,212,160,.12);border:1px solid rgba(45,212,160,.3);color:var(--grn);border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--fb);display:none" id="supabase-load-btn">📥 Baixar</button>
+            <button onclick="syncToSupabase()" id="supabase-sync-btn" style="padding:5px 12px;background:rgba(91,133,245,.12);border:1px solid rgba(91,133,245,.3);color:var(--blu);border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--fb);display:none">☁️ Sincronizar</button>
+          </div>
+        </div>
+        <div id="supabaseConfigPanel" style="display:none;flex-direction:column;gap:8px;margin-top:8px;padding-top:10px;border-top:1px solid var(--brd)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:10px;color:var(--mut)">Supabase URL</label>
+              <input type="text" id="supabase-url" placeholder="https://xxx.supabase.co"
+                style="background:var(--bg);border:1px solid var(--brd);border-radius:7px;color:var(--tex);font-family:var(--fm);font-size:11px;padding:7px 10px;outline:none;width:100%">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:10px;color:var(--mut)">Anon Key</label>
+              <input type="password" id="supabase-key" placeholder="eyJhbGciOiJIUzI1..."
+                style="background:var(--bg);border:1px solid var(--brd);border-radius:7px;color:var(--tex);font-family:var(--fm);font-size:11px;padding:7px 10px;outline:none;width:100%">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button onclick="saveSupabaseConfig()" style="padding:6px 14px;background:var(--acc);color:#09090f;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--ff)">💾 Salvar Config</button>
+            <button onclick="testSupabaseConnection()" style="padding:6px 14px;background:var(--bg);border:1px solid var(--brd);color:var(--mut);border-radius:7px;font-size:12px;cursor:pointer;font-family:var(--fb)">🔌 Testar</button>
+          </div>
+          <div style="font-size:10px;color:var(--mut);line-height:1.6;margin-top:4px">
+            📋 No Supabase: crie uma tabela <code style="background:var(--bg3);padding:1px 5px;border-radius:4px">lotevia_projects</code> com campos <code style="background:var(--bg3);padding:1px 5px;border-radius:4px">id, nome, dados (jsonb), updated_at</code>
+          </div>
+        </div>
+      </div>
+
       <!-- Lista de projetos -->
       <div style="font-family:var(--ff);font-size:11px;font-weight:700;color:var(--mut);
                   letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">
@@ -6466,30 +6509,6 @@ function bootApp() {
           <div class="proj-empty-icon">🏗</div>
           <div class="proj-empty-text">Nenhuma análise salva ainda.<br>Preencha as premissas e clique em Salvar.</div>
         </div>
-      </div>
-
-      <div class="save-form" style="margin-top:16px;border-color:rgba(91,133,245,.22)">
-        <div class="save-form-title">☁️ Supabase Cloud Sync</div>
-        <div style="font-size:12px;color:var(--mut);margin-bottom:12px">Autentique-se para salvar e carregar projetos em nuvem.</div>
-        <div id="supabaseLoginBox" class="save-row" style="align-items:end">
-          <div class="save-field">
-            <label>E-mail</label>
-            <input type="email" id="sb-email" placeholder="voce@empresa.com">
-          </div>
-          <div class="save-field">
-            <label>Senha</label>
-            <input type="password" id="sb-password" placeholder="••••••••">
-          </div>
-          <div class="save-field" style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
-            <button class="btn-save" onclick="authSignUp(document.getElementById('sb-email').value, document.getElementById('sb-password').value)">Criar conta</button>
-            <button class="btn-save" style="background:linear-gradient(180deg,#5b85f5,#3f67d9)" onclick="authSignIn(document.getElementById('sb-email').value, document.getElementById('sb-password').value)">Entrar</button>
-          </div>
-        </div>
-        <div id="supabaseUserBox" style="display:none;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;padding:12px 14px;border:1px solid var(--brd);border-radius:10px;background:var(--bg3)">
-          <div style="font-size:12px;color:var(--mut)">Conectado como <strong id="sb-status" style="color:var(--tex)">—</strong></div>
-          <button class="btn-save" onclick="authSignOut()">Sair</button>
-        </div>
-        <div style="margin-top:10px;font-size:11px;color:var(--mut)">Status: <span id="sb-status">não autenticado</span></div>
       </div>
 
     </div>
@@ -6576,126 +6595,57 @@ window.addEventListener('appinstalled', () => {
 });
 
 // ═══════════════════════════════════════════════════════
-// SUPABASE — banco de dados em nuvem
+// INDEXEDDB — banco de dados local
 // ═══════════════════════════════════════════════════════
-const SUPABASE_URL = window.SUPABASE_URL || 'https://nkohvjkzpdnpxovqgykt.supabase.co';
-const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5rb2h2amt6cGRucHhvdnFneWt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzYyNDEsImV4cCI6MjA5MzExMjI0MX0.21PiCvWtYLCGhxKW0cAfgITqb5I43oYJMhB2Btw2t3g';
-let sb = null;
+const DB_NAME    = 'ExpandhViaDB';
+const DB_VERSION = 1;
+const STORE      = 'projetos';
+let db = null;
 
-function getSupabase() {
-  if (sb) return sb;
-  if (!window.createSupabaseClient) throw new Error('Cliente Supabase não carregado');
-  if (SUPABASE_URL.includes('SEU-PROJETO') || SUPABASE_ANON_KEY.includes('SUA_CHAVE_ANON')) {
-    throw new Error('Configure SUPABASE_URL e SUPABASE_ANON_KEY antes de usar');
-  }
-  sb = window.createSupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  return sb;
-}
-
-async function getUserOrThrow() {
-  const client = getSupabase();
-  const { data, error } = await client.auth.getUser();
-  if (error) throw error;
-  if (!data.user) throw new Error('Usuário não autenticado');
-  return data.user;
+function openDB() {
+  return new Promise((resolve, reject) => {
+    if (db) return resolve(db);
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(STORE)) {
+        const store = d.createObjectStore(STORE, { keyPath: 'id' });
+        store.createIndex('updatedAt', 'updatedAt');
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror   = () => reject(req.error);
+  });
 }
 
 async function dbGetAll() {
-  const client = getSupabase();
-  const user = await getUserOrThrow();
-  const { data, error } = await client
-    .from('projects')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('updated_at', { ascending: false });
-  if (error) throw error;
-  return (data || []).map(p => ({
-    id: p.id,
-    nome: p.nome,
-    cidade: p.cidade || '',
-    tipo: p.tipo || 'realista',
-    obs: p.obs || '',
-    createdAt: p.created_at,
-    updatedAt: p.updated_at,
-    snapshot: p.snapshot_json,
-    resultados: p.resultados_json || {}
-  }));
+  const d = await openDB();
+  return new Promise((res, rej) => {
+    const tx  = d.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).index('updatedAt').getAll();
+    req.onsuccess = () => res(req.result.reverse()); // mais recente primeiro
+    req.onerror   = () => rej(req.error);
+  });
 }
 
 async function dbSave(item) {
-  const client = getSupabase();
-  const user = await getUserOrThrow();
-  const payload = {
-    user_id: user.id,
-    nome: item.nome,
-    cidade: item.cidade || null,
-    tipo: item.tipo || 'realista',
-    obs: item.obs || null,
-    snapshot_json: item.snapshot,
-    resultados_json: item.resultados
-  };
-  if (item.id) payload.id = item.id;
-  if (item.createdAt) payload.created_at = item.createdAt;
-  const { data, error } = await client
-    .from('projects')
-    .upsert(payload)
-    .select()
-    .single();
-  if (error) throw error;
-  return data.id;
+  const d = await openDB();
+  return new Promise((res, rej) => {
+    const tx  = d.transaction(STORE, 'readwrite');
+    const req = tx.objectStore(STORE).put(item);
+    req.onsuccess = () => res(req.result);
+    req.onerror   = () => rej(req.error);
+  });
 }
 
 async function dbDelete(id) {
-  const client = getSupabase();
-  const { error } = await client.from('projects').delete().eq('id', id);
-  if (error) throw error;
-}
-
-async function authSignUp(email, password) {
-  const client = getSupabase();
-  const { error } = await client.auth.signUp({ email, password });
-  if (error) throw error;
-  showToast('✅ Conta criada. Verifique seu e-mail.', 'ok');
-}
-
-async function authSignIn(email, password) {
-  const client = getSupabase();
-  const { error } = await client.auth.signInWithPassword({ email, password });
-  if (error) throw error;
-  showToast('✅ Login realizado!', 'ok');
-  await updateAuthUi();
-  await loadProjectsList();
-}
-
-async function authSignOut() {
-  const client = getSupabase();
-  const { error } = await client.auth.signOut();
-  if (error) throw error;
-  currentProjectId = null;
-  currentProjectName = '';
-  const hdrel = document.getElementById('hdr-proj-name');
-  if(hdrel) hdrel.textContent = 'Meus Projetos';
-  await updateAuthUi();
-  const list = document.getElementById('projList');
-  if (list) list.innerHTML = '<div class="proj-empty"><div class="proj-empty-icon">🔐</div><div class="proj-empty-text">Faça login para carregar seus projetos em nuvem.</div></div>';
-}
-
-async function updateAuthUi() {
-  const emailEl = document.getElementById('sb-email');
-  const statusEls = document.querySelectorAll('#sb-status');
-  const loginBox = document.getElementById('supabaseLoginBox');
-  const userBox = document.getElementById('supabaseUserBox');
-  try {
-    const client = getSupabase();
-    const { data } = await client.auth.getUser();
-    const user = data.user;
-    statusEls.forEach(el => el.textContent = user ? user.email : 'não autenticado');
-    if (loginBox) loginBox.style.display = user ? 'none' : 'grid';
-    if (userBox) userBox.style.display = user ? 'flex' : 'none';
-    if (emailEl && user?.email) emailEl.value = user.email;
-  } catch (e) {
-    statusEls.forEach(el => el.textContent = 'configure Supabase');
-  }
+  const d = await openDB();
+  return new Promise((res, rej) => {
+    const tx  = d.transaction(STORE, 'readwrite');
+    const req = tx.objectStore(STORE).delete(id);
+    req.onsuccess = () => res();
+    req.onerror   = () => rej(req.error);
+  });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -6767,6 +6717,7 @@ function restoreSnapshot(snap) {
 function openProjects() {
   document.getElementById('projectsModal').classList.add('open');
   loadProjectsList();
+  initSupabaseUI();
   // Sugestão de nome
   const nameEl = document.getElementById('save-name');
   if(nameEl && !nameEl.value) nameEl.value = currentProjectName || '';
@@ -6777,9 +6728,93 @@ function closeProjects() {
 }
 
 // Fecha modal ao clicar fora
-document.getElementById('projectsModal').addEventListener('click', e => {
+// projectsModal click-outside — safe with optional chaining
+document.getElementById('projectsModal')?.addEventListener('click', e => {
   if(e.target === document.getElementById('projectsModal')) closeProjects();
 });
+
+// ═══════════════════════════════════════════════════════
+// NEW PROJECT — reset all inputs to defaults
+// ═══════════════════════════════════════════════════════
+function newProject() {
+  if(!confirm('Começar um novo projeto? As premissas atuais não salvas serão perdidas.')) return;
+
+  // Reset all inputs to default values
+  const sv = (id,v) => { const el=$(id); if(el) el.value=v; };
+  sv('areaTotal',200000); sv('efSlider',50); sv('tamLote',250); sv('precoM2',420);
+  sv('custoInfraM2',85); sv('custoTerreno',8000000);
+  sv('regime','ret'); sv('comissao',5); sv('marketing',1.5);
+  sv('outrasDespesas',500000); sv('tma',1.0);
+  sv('b1pct',20); sv('b1desc',5);
+  sv('b2pct',30); sv('b2ent',20); sv('b2parc',24); sv('b2jur',0);
+  sv('b3pct',50); sv('b3ent',20); sv('b3parc',120); sv('b3jur',0.8);
+  if($('permTog')) { $('permTog').checked=false; togglePerm(); }
+  if($('efVal')) $('efVal').textContent='50%';
+
+  // Reset dynamic arrays
+  phasesData = PHASE_PRESETS.map(p=>({...p}));
+  obraData   = OBRA_PRESETS.map(o=>({...o}));
+  renderPhases(); renderObra();
+  updateBaldes();
+  captureBase();
+  updateUI();
+
+  // Clear project identity
+  currentProjectName = '';
+  currentProjectId   = null;
+  const hdrel = $('hdr-proj-name');
+  if(hdrel) hdrel.textContent = 'Meus Projetos';
+
+  // Reset save form
+  ['save-name','save-cidade','save-obs'].forEach(id => { const el=$(id); if(el) el.value=''; });
+
+  closeProjects();
+  showToast('✨ Novo projeto iniciado!', 'ok');
+}
+
+// ── IMPORT project from JSON backup ──
+function triggerImportJSON() {
+  $('importJSONInput').click();
+}
+
+async function importProjectJSON(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+
+    // Validate it's a ExpandhVia backup
+    if(!data.meta || !data.premissas) {
+      showToast('⚠ Arquivo inválido — não é um backup ExpandhVia', 'err'); return;
+    }
+
+    const snap = data.premissas;
+    restoreSnapshot(snap);
+
+    // Save as new project
+    const nome = data.meta.projeto || file.name.replace('.json','');
+    const proj = {
+      id: 'proj_'+Date.now(),
+      nome, cidade:'', tipo:'realista', obs:'Importado de backup JSON',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      snapshot: snap,
+      resultados: data.resultados || {},
+    };
+    await dbSave(proj);
+    currentProjectName = nome;
+    currentProjectId   = proj.id;
+    const hdrel = $('hdr-proj-name');
+    if(hdrel) hdrel.textContent = nome;
+
+    loadProjectsList();
+    showToast('📥 Projeto "'+nome+'" importado com sucesso!', 'ok');
+  } catch(e) {
+    showToast('❌ Erro ao importar: '+e.message, 'err');
+  }
+  event.target.value = ''; // reset input
+}
 
 // ═══════════════════════════════════════════════════════
 // SAVE PROJECT
@@ -6788,52 +6823,48 @@ let currentProjectName = '';
 let currentProjectId   = null;
 
 async function saveProject() {
-  try {
-    const name = document.getElementById('save-name').value.trim();
-    if (!name) { showToast('⚠ Digite um nome para o projeto', 'err'); return; }
+  const name = document.getElementById('save-name').value.trim();
+  if (!name) { showToast('⚠ Digite um nome para o projeto', 'err'); return; }
 
-    const R = calcular();
-    let createdAt = undefined;
+  const R = calcular();
+  const id = currentProjectId || ('proj_' + Date.now());
 
-    if (currentProjectId) {
-      const existing = await dbGetAll();
-      const found = existing.find(p => p.id === currentProjectId);
-      createdAt = found?.createdAt || undefined;
+  const projeto = {
+    id,
+    nome:     name,
+    cidade:   document.getElementById('save-cidade').value.trim(),
+    tipo:     document.getElementById('save-tipo').value,
+    obs:      document.getElementById('save-obs').value.trim(),
+    createdAt: currentProjectId ? undefined : new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    snapshot:  captureSnapshot(),
+    resultados: {
+      vgvBruto:     R.vgvBruto,
+      tirAa:        R.tirAa,
+      lucroLiq:     R.lucroLiq,
+      margemLiq:    R.margemLiq,
+      expMax:       R.expMax,
+      vpl:          R.vpl,
+      qtdLotes:     R.qtdLotes,
+      breakevenMes: R.breakevenMes,
     }
-
-    const projeto = {
-      id: currentProjectId || undefined,
-      nome:     name,
-      cidade:   document.getElementById('save-cidade').value.trim(),
-      tipo:     document.getElementById('save-tipo').value,
-      obs:      document.getElementById('save-obs').value.trim(),
-      createdAt,
-      snapshot:  captureSnapshot(),
-      resultados: {
-        vgvBruto:     R.vgvBruto,
-        tirAa:        R.tirAa,
-        lucroLiq:     R.lucroLiq,
-        margemLiq:    R.margemLiq,
-        expMax:       R.expMax,
-        vpl:          R.vpl,
-        qtdLotes:     R.qtdLotes,
-        breakevenMes: R.breakevenMes,
-      }
-    };
-
-    const savedId = await dbSave(projeto);
-    currentProjectName = name;
-    currentProjectId   = savedId;
-
-    const hdrel = document.getElementById('hdr-proj-name');
-    if(hdrel) hdrel.textContent = name;
-
-    await loadProjectsList();
-    showToast('✅ Projeto "'+name+'" salvo!', 'ok');
-  } catch (e) {
-    console.error(e);
-    showToast(e?.message || 'Erro ao salvar no Supabase', 'err');
+  };
+  if (!projeto.createdAt) {
+    const existing = await dbGetAll();
+    const found = existing.find(p => p.id === id);
+    projeto.createdAt = found?.createdAt || new Date().toISOString();
   }
+
+  await dbSave(projeto);
+  currentProjectName = name;
+  currentProjectId   = id;
+
+  // Update header
+  const hdrel = document.getElementById('hdr-proj-name');
+  if(hdrel) hdrel.textContent = name;
+
+  loadProjectsList();
+  showToast('✅ Projeto "'+name+'" salvo!', 'ok');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -6953,6 +6984,139 @@ async function deleteProject(id, nome) {
   }
   loadProjectsList();
   showToast('🗑 Projeto deletado', 'err');
+}
+
+// ═══════════════════════════════════════════════════════
+// SUPABASE SYNC
+// ═══════════════════════════════════════════════════════
+
+let supabaseConfig = JSON.parse(localStorage.getItem('lotevia_supabase') || 'null');
+
+function initSupabaseUI() {
+  if(supabaseConfig) {
+    $('supabase-url').value = supabaseConfig.url || '';
+    $('supabase-key').value = supabaseConfig.key || '';
+    $('supabase-status-label').textContent = '✅ Configurado — ' + (supabaseConfig.url||'').replace('https://','').split('.')[0];
+    $('supabase-sync-btn').style.display = '';
+    const lbtn=$('supabase-load-btn'); if(lbtn) lbtn.style.display='';
+  }
+}
+
+function toggleSupabaseConfig() {
+  const panel = $('supabaseConfigPanel');
+  panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+  if(supabaseConfig) {
+    $('supabase-url').value = supabaseConfig.url || '';
+    $('supabase-key').value = supabaseConfig.key || '';
+  }
+}
+
+function saveSupabaseConfig() {
+  const url = $('supabase-url').value.trim();
+  const key = $('supabase-key').value.trim();
+  if(!url || !key) { showToast('⚠ Preencha URL e Key do Supabase', 'err'); return; }
+  supabaseConfig = { url, key };
+  localStorage.setItem('lotevia_supabase', JSON.stringify(supabaseConfig));
+  $('supabase-status-label').textContent = '✅ Configurado — ' + url.replace('https://','').split('.')[0];
+  $('supabase-sync-btn').style.display = '';
+    const lbtn=$('supabase-load-btn'); if(lbtn) lbtn.style.display='';
+  $('supabaseConfigPanel').style.display = 'none';
+  showToast('✅ Configuração Supabase salva!', 'ok');
+}
+
+async function testSupabaseConnection() {
+  const url = $('supabase-url').value.trim();
+  const key = $('supabase-key').value.trim();
+  if(!url||!key) { showToast('⚠ Preencha URL e Key primeiro','err'); return; }
+  try {
+    const res = await fetch(`${url}/rest/v1/lotevia_projects?limit=1`, {
+      headers: {
+        'apikey': key,
+        'Authorization': 'Bearer '+key,
+        'Content-Type': 'application/json'
+      }
+    });
+    if(res.ok) {
+      showToast('✅ Conexão com Supabase OK!', 'ok');
+    } else if(res.status === 401) {
+      showToast('⚠ 401 — Key inválida ou expirada. Use a Anon Key pública.', 'err', 6000);
+    } else if(res.status === 404) {
+      showToast('⚠ 404 — Tabela não encontrada. Crie a tabela lotevia_projects.', 'err', 6000);
+    } else if(res.status === 406) {
+      showToast('✅ Conexão OK (tabela existe, sem rows).', 'ok');
+    } else {
+      showToast('⚠ Erro HTTP '+res.status+' — verifique as configurações', 'err');
+    }
+  } catch(e) {
+    if(e.message.includes('fetch')) {
+      showToast('❌ URL inválida ou sem internet', 'err');
+    } else {
+      showToast('❌ Erro: '+e.message, 'err');
+    }
+  }
+}
+
+async function syncToSupabase() {
+  if(!supabaseConfig) { showToast('⚠ Configure o Supabase primeiro', 'err'); return; }
+  const { url, key } = supabaseConfig;
+  const projects = await dbGetAll();
+  if(!projects.length) { showToast('⚠ Nenhum projeto para sincronizar', 'err'); return; }
+
+  showToast('☁️ Sincronizando '+projects.length+' projeto(s)...', 'ok', 8000);
+  let ok=0, errs=0;
+
+  for(const proj of projects) {
+    try {
+      const res = await fetch(`${url}/rest/v1/lotevia_projects`, {
+        method: 'POST',
+        headers: {
+          'apikey': key,
+          'Authorization': 'Bearer '+key,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates',
+        },
+        body: JSON.stringify({
+          id: proj.id,
+          nome: proj.nome,
+          dados: proj,
+          updated_at: proj.updatedAt || new Date().toISOString(),
+        })
+      });
+      if(res.ok || res.status===201||res.status===200) ok++;
+      else errs++;
+    } catch(e) { errs++; }
+  }
+
+  showToast(
+    errs===0
+      ? '✅ '+ok+' projeto(s) sincronizados com Supabase!'
+      : '⚠ '+ok+' OK · '+errs+' erro(s)',
+    errs===0?'ok':'err'
+  );
+}
+
+async function loadFromSupabase() {
+  if(!supabaseConfig) { showToast('⚠ Configure o Supabase primeiro','err'); return; }
+  const { url, key } = supabaseConfig;
+  try {
+    const res = await fetch(`${url}/rest/v1/lotevia_projects?order=updated_at.desc`, {
+      headers: { 'apikey': key, 'Authorization': 'Bearer '+key }
+    });
+    if(!res.ok) throw new Error('Status '+res.status);
+    const rows = await res.json();
+    let imported=0;
+    for(const row of rows) {
+      const proj = row.dados;
+      if(proj && proj.id) {
+        await dbSave(proj);
+        imported++;
+      }
+    }
+    loadProjectsList();
+    showToast('☁️ '+imported+' projeto(s) importados do Supabase!', 'ok');
+  } catch(e) {
+    showToast('❌ Erro ao carregar do Supabase: '+e.message, 'err');
+  }
 }
 
 // ═══════════════════════════════════════════════════════
