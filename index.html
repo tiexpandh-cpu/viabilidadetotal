@@ -1072,6 +1072,10 @@ input[type=range]::-webkit-slider-thumb{
 /* ── The actual printable report (hidden in DOM, cloned to print window) ── */
 #pdfReportTemplate{display:none}
 
+@keyframes pulse-sync{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.5;transform:scale(1.3)}
+}
 /* ── LOGIN SCREEN ── */
 #loginScreen{
   position:fixed;inset:0;z-index:99999;
@@ -1343,8 +1347,10 @@ input[type=range]::-webkit-slider-thumb{
       <button class="scen-btn real on" onclick="applyScenario('real')">◈ Realista</button>
       <button class="scen-btn otim" onclick="applyScenario('otim')">▴ Otimista</button>
     </div>
-    <button onclick="openProjects()" style="padding:7px 14px;background:var(--bg3);color:var(--tex);border:1px solid var(--brd);border-radius:8px;font-family:var(--fb);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;">
-      <span>📁</span><span id="hdr-proj-name" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Meus Projetos</span>
+    <button onclick="openProjects()" style="padding:7px 14px;background:var(--bg3);color:var(--tex);border:1px solid var(--brd);border-radius:8px;font-family:var(--fb);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;position:relative;">
+      <span>📁</span>
+      <span id="hdr-proj-name" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Meus Projetos</span>
+      <span id="sync-indicator" title="Supabase conectado" style="display:none;width:7px;height:7px;background:var(--grn);border-radius:50%;flex-shrink:0;animation:pulse-sync 2s infinite"></span>
     </button>
     <button onclick="openPDFModal()" style="padding:7px 14px;background:var(--bg3);color:var(--mut);border:1px solid var(--brd);border-radius:8px;font-family:var(--fb);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s;" onmouseover="this.style.borderColor='var(--acc)';this.style.color='var(--acc)'" onmouseout="this.style.borderColor='var(--brd)';this.style.color='var(--mut)'">
       <span>📄</span><span>Relatório</span>
@@ -3743,8 +3749,8 @@ async function generatePDFReport() {
       </tr>`);
     }
     fluxoTableHtml = `
-      <div style="margin-top:32px;break-before:page">
-        <h2 style="font-size:16px;font-weight:700;color:#111827;margin-bottom:12px;border-bottom:2px solid #e5e7eb;padding-bottom:8px">Fluxo de Caixa Mensal (primeiros 36 meses)</h2>
+      <div class="page-break">
+        <h2>Fluxo de Caixa Mensal (primeiros 36 meses)</h2>
         <table style="width:100%;border-collapse:collapse;font-family:monospace">
           <thead><tr style="background:#f9fafb">
             <th style="padding:6px 8px;font-size:10px;text-align:left;color:#6b7280;font-weight:600">MÊS</th>
@@ -3764,34 +3770,58 @@ async function generatePDFReport() {
   let sensibHtml = '';
   if(secSensib) {
     const basePreco = +$('precoM2').value||420;
-    const mults = [0.7,0.8,0.9,1.0,1.1,1.2,1.3];
+    // 8 price rows x 7 VSO cols = comprehensive but fits on one page
+    const mults    = [0.7,0.8,0.9,1.0,1.1,1.2,1.3];
     const vsoMults = [0.5,0.7,1.0,1.3,1.5];
+    // Also compute all 6 metrics for a compact multi-metric summary
+    const allMetrics = [
+      { key:'tirAa',    label:'TIR a.a. (%)',  fmt: v=>v.toFixed(1)+'%', good: v=>v>=20 },
+      { key:'margemLiq',label:'Margem (%)',     fmt: v=>v.toFixed(1)+'%', good: v=>v>=15 },
+    ];
     sensibHtml = `
-      <div style="margin-top:32px">
-        <h2 style="font-size:16px;font-weight:700;color:#111827;margin-bottom:8px;border-bottom:2px solid #e5e7eb;padding-bottom:8px">Análise de Sensibilidade — TIR (% a.a.)</h2>
-        <p style="font-size:11px;color:#6b7280;margin-bottom:10px">Linhas = Preço/m² · Colunas = Velocidade de Vendas</p>
-        <table style="width:100%;border-collapse:collapse;font-size:11px">
-          <thead><tr style="background:#f9fafb">
-            <th style="padding:6px 10px;text-align:left;color:#6b7280;font-weight:600">Preço/m²</th>
-            ${vsoMults.map(v=>`<th style="padding:6px 10px;text-align:center;color:#6b7280;font-weight:600">VSO ${Math.round(v*100)}%</th>`).join('')}
-          </tr></thead>
-          <tbody>
-            ${mults.map(pm=>{
-              const preco = Math.round(basePreco*pm);
-              const isBase = pm===1.0;
-              return `<tr style="background:${isBase?'#fef9c3':'white'};border-bottom:1px solid #e5e7eb">
-                <td style="padding:6px 10px;font-weight:${isBase?'700':'400'};color:${isBase?'#92400e':'#374151'}">R$${preco}/m²${isBase?' ★':''}</td>
-                ${vsoMults.map(vm=>{
-                  const r = calcular(vm, pm);
-                  const tir = r.tirAa;
-                  const bg = tir>=25?'#d1fae5':tir>=20?'#ecfdf5':tir>=15?'#fef9c3':tir>=10?'#fee2e2':'#fecaca';
-                  return `<td style="padding:6px 10px;text-align:center;background:${bg};color:#111827;font-weight:600">${tir.toFixed(1)}%</td>`;
-                }).join('')}
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>
-        ${imgSens?`<img src="${imgSens}" style="width:100%;margin-top:16px;border-radius:8px">`:'' }
+      <div style="margin-top:20px;break-inside:avoid">
+        <h2 style="margin-bottom:4px">Análise de Sensibilidade</h2>
+        <p style="font-size:10px;color:#6b7280;margin-bottom:12px">
+          Linhas = Preço/m² · Colunas = Velocidade de Vendas (VSO) · ★ = cenário atual
+        </p>
+        ${allMetrics.map(metric=>`
+        <div style="margin-bottom:16px;break-inside:avoid">
+          <div style="font-size:10px;font-weight:700;color:#374151;letter-spacing:.5px;
+                      text-transform:uppercase;margin-bottom:6px;padding:4px 0;
+                      border-bottom:1px solid #e5e7eb">${metric.label}</div>
+          <table style="width:100%;border-collapse:collapse;font-size:10.5px">
+            <thead>
+              <tr style="background:#f9fafb">
+                <th style="padding:5px 10px;text-align:left;color:#6b7280;font-weight:600;font-size:10px">Preço/m²</th>
+                ${vsoMults.map(v=>`<th style="padding:5px 10px;text-align:center;color:#6b7280;font-weight:600;font-size:10px">VSO ${Math.round(v*100)}%</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${mults.map(pm=>{
+                const preco  = Math.round(basePreco*pm);
+                const isBase = pm===1.0;
+                return `<tr style="background:${isBase?'#fef9c3':'white'};border-bottom:1px solid #f3f4f6">
+                  <td style="padding:5px 10px;font-weight:${isBase?'700':'400'};
+                      color:${isBase?'#92400e':'#374151'}">
+                    R$${preco}/m²${isBase?' ★':''}
+                  </td>
+                  ${vsoMults.map(vm=>{
+                    const r   = calcular(vm, pm);
+                    const val = r[metric.key];
+                    const isGood = metric.good(val);
+                    const isBaseCell = pm===1.0 && vm===1.0;
+                    const bg = isGood ? '#d1fae5' : val>=(metric.key==='tirAa'?15:10) ? '#fef9c3' : '#fee2e2';
+                    return `<td style="padding:5px 10px;text-align:center;
+                        background:${bg};font-weight:${isBaseCell?'800':'600'};
+                        color:#111827;font-size:10.5px">
+                      ${metric.fmt(val)}
+                    </td>`;
+                  }).join('')}
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`).join('')}
       </div>`;
   }
 
@@ -3799,171 +3829,173 @@ async function generatePDFReport() {
   await sleep(60);
 
   // ── Build full HTML ──
+  // Helper: row for tables
+  const tr = (l,v) => `<tr><td style="padding:5px 8px;color:#6b7280;border-bottom:1px solid #f3f4f6;font-size:11px">${l}</td><td style="padding:5px 8px;font-weight:600;text-align:right;border-bottom:1px solid #f3f4f6;font-size:11px">${v}</td></tr>`;
+
   const reportHtml = `<!DOCTYPE html><html lang="pt-BR"><head>
   <meta charset="UTF-8">
   <title>Relatório — ${nome}</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI',Arial,sans-serif;color:#111827;background:#fff;font-size:12px}
-    @page{margin:20mm 18mm;size:A4}
-    @media print{.no-print{display:none!important}.page-break{break-before:page}}
-    h1{font-size:28px;font-weight:800;letter-spacing:-1px}
-    h2{font-size:16px;font-weight:700}
-    .accent{color:#b45309}
-    .tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:.5px}
+    body{font-family:'Segoe UI',Arial,sans-serif;color:#111827;background:#fff;font-size:11px;line-height:1.5}
+    @page{margin:12mm 15mm 12mm 15mm;size:A4}
+    @media print{
+      .no-print{display:none!important}
+      .page-break{break-before:page;padding-top:0}
+      table{break-inside:auto}
+      tr{break-inside:avoid}
+      img{break-inside:avoid;page-break-inside:avoid}
+      .avoid-break{break-inside:avoid;page-break-inside:avoid}
+    }
+    h1{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1.1}
+    h2{font-size:15px;font-weight:800;color:#111827;border-bottom:2px solid #e5e7eb;padding-bottom:6px;margin-bottom:14px}
+    h3{font-size:10px;font-weight:700;color:#9ca3af;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
+    table{width:100%;border-collapse:collapse}
+    /* Running footer on every page */
+    @page{
+      @bottom-left{content:"${nome} · ${cidade}";font-size:8px;color:#9ca3af}
+      @bottom-center{content:"${confLabel[conf]} · ExpandhVia PRO";font-size:8px;color:#9ca3af}
+      @bottom-right{content:"${data}";font-size:8px;color:#9ca3af}
+    }
   </style>
 </head><body>
 
   ${secCapa ? `
-  <!-- CAPA -->
-  <div style="min-height:100vh;display:flex;flex-direction:column;justify-content:space-between;padding:20px 0 40px">
+  <!-- ══ CAPA ══ -->
+  <div style="height:100vh;display:flex;flex-direction:column;justify-content:space-between">
     <div>
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:60px">
-        <div style="width:44px;height:44px;background:#d97706;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:900">L</div>
+      <!-- Logo -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:56px">
+        <div style="width:38px;height:38px;background:#d97706;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:900;font-family:Arial">L</div>
         <div>
-          <div style="font-size:18px;font-weight:800;color:#111827">ExpandhVia <span style="color:#d97706">PRO</span></div>
-          <div style="font-size:10px;color:#6b7280">Desenvolvido por ${autor}</div>
+          <div style="font-size:16px;font-weight:800;color:#111827">ExpandhVia <span style="color:#d97706">PRO</span></div>
+          <div style="font-size:9px;color:#9ca3af;margin-top:1px">Desenvolvido por ${autor}</div>
         </div>
       </div>
-      <div style="border-left:5px solid #d97706;padding-left:24px;margin-bottom:40px">
-        <div style="font-size:11px;color:#6b7280;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Relatório Executivo de Viabilidade</div>
-        <h1 style="font-size:36px;color:#111827;margin-bottom:8px">${nome}</h1>
-        ${cidade?`<div style="font-size:16px;color:#6b7280">${cidade}</div>`:''}
+      <!-- Título -->
+      <div style="border-left:5px solid #d97706;padding-left:20px;margin-bottom:36px">
+        <div style="font-size:10px;color:#9ca3af;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Relatório Executivo de Viabilidade</div>
+        <h1>${nome}</h1>
+        ${cidade?`<div style="font-size:15px;color:#6b7280;margin-top:6px">${cidade}</div>`:''}
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:32px">
-        ${[
-          ['VGV Bruto',fmt(R.vgvBruto),'#1d4ed8'],
-          ['TIR (a.a.)',R.tirAa.toFixed(1)+'%','#059669'],
-          ['Lucro Líquido',fmt(R.lucroLiq),'#d97706'],
-          ['Margem',R.margemLiq.toFixed(1)+'%','#7c3aed'],
-        ].map(([l,v,c])=>`
-          <div style="border:1px solid #e5e7eb;border-top:3px solid ${c};border-radius:10px;padding:14px">
-            <div style="font-size:9px;color:#6b7280;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px">${l}</div>
-            <div style="font-size:20px;font-weight:800;color:${c}">${v}</div>
-          </div>`).join('')}
+      <!-- 4 KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px">
+        ${[['VGV Bruto',fmt(R.vgvBruto),'#1d4ed8'],['TIR (a.a.)',R.tirAa.toFixed(1)+'%','#059669'],['Lucro Líquido',fmt(R.lucroLiq),'#d97706'],['Margem',R.margemLiq.toFixed(1)+'%','#7c3aed']].map(([l,v,c])=>`
+        <div style="border:1px solid #e5e7eb;border-top:3px solid ${c};border-radius:8px;padding:12px">
+          <div style="font-size:8px;color:#9ca3af;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px">${l}</div>
+          <div style="font-size:22px;font-weight:800;color:${c};line-height:1">${v}</div>
+        </div>`).join('')}
+      </div>
+      <!-- 4 KPIs secundários -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        ${[['VPL',fmt(R.vpl),'#374151'],['Break-even',R.breakevenMes?'Mês '+R.breakevenMes:'—','#374151'],['ROI',R.roi.toFixed(1)+'%','#374151'],['Exposição',fmt(Math.abs(R.expMax)),'#dc2626']].map(([l,v,c])=>`
+        <div style="background:#f9fafb;border-radius:8px;padding:10px">
+          <div style="font-size:8px;color:#9ca3af;letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px">${l}</div>
+          <div style="font-size:14px;font-weight:700;color:${c}">${v}</div>
+        </div>`).join('')}
       </div>
     </div>
-    <div style="border-top:1px solid #e5e7eb;padding-top:16px;display:flex;justify-content:space-between;align-items:center">
-      <div style="font-size:10px;color:#9ca3af">${data} · ${confLabel[conf]}</div>
-      <div style="font-size:10px;color:#9ca3af">Preparado por ${autor}</div>
+    <!-- Rodapé da capa -->
+    <div style="border-top:1px solid #e5e7eb;padding-top:12px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:9px;color:#9ca3af">${data} · ${confLabel[conf]}</div>
+      <div style="font-size:9px;color:#9ca3af">Preparado por ${autor}</div>
     </div>
   </div>` : ''}
 
   ${secResumo ? `
-  <!-- RESUMO EXECUTIVO -->
-  <div style="break-before:${secCapa?'page':'auto'};padding-top:${secCapa?'0':'0'}px">
-    <h2 style="font-size:20px;font-weight:800;color:#111827;margin-bottom:4px">Resumo Executivo</h2>
-    <div style="font-size:11px;color:#6b7280;margin-bottom:24px">${nome} · ${cidade} · ${data}</div>
+  <!-- ══ RESUMO EXECUTIVO ══ -->
+  <div class="${secCapa?'page-break':''}">
+    <h2>Resumo Executivo</h2>
+    <div style="font-size:10px;color:#9ca3af;margin-bottom:16px;margin-top:-10px">${nome}${cidade?' · '+cidade:''} · ${data}</div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+    <!-- Indicadores + Produto em grid 3 cols -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:14px" class="avoid-break">
       <!-- Indicadores financeiros -->
       <div>
-        <h3 style="font-size:12px;font-weight:700;color:#d97706;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">Indicadores Financeiros</h3>
-        ${[
-          ['VGV Bruto', fmt(R.vgvBruto)],
-          ['Lucro Líquido', fmt(R.lucroLiq)],
-          ['Margem Líquida', R.margemLiq.toFixed(1)+'%'],
-          ['TIR (a.a.)', R.tirAa.toFixed(1)+'%'],
-          ['VPL', fmt(R.vpl)],
-          ['ROI', R.roi.toFixed(1)+'%'],
-          ['Break-even', R.breakevenMes?'Mês '+R.breakevenMes:'—'],
-          ['Exposição Máx.', fmt(Math.abs(R.expMax))],
-        ].map(([l,v])=>`
-          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6">
-            <span style="color:#6b7280">${l}</span>
-            <span style="font-weight:600">${v}</span>
-          </div>`).join('')}
+        <h3>Indicadores Financeiros</h3>
+        <table>
+          ${[['VGV Bruto',fmt(R.vgvBruto)],['Lucro Líquido',fmt(R.lucroLiq)],['Margem',R.margemLiq.toFixed(1)+'%'],['TIR (a.a.)',R.tirAa.toFixed(1)+'%'],['VPL',fmt(R.vpl)],['ROI',R.roi.toFixed(1)+'%']].map(([l,v])=>tr(l,v)).join('')}
+        </table>
       </div>
-      <!-- Premissas do produto -->
+      <!-- Dados do produto -->
       <div>
-        <h3 style="font-size:12px;font-weight:700;color:#d97706;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">Dados do Produto</h3>
-        ${[
-          ['Área Total', (+$('areaTotal').value||0).toLocaleString('pt-BR')+' m²'],
-          ['Eficiência', $('efSlider').value+'%'],
-          ['Qtd. Lotes', R.qtdLotes.toLocaleString('pt-BR')],
-          ['Tamanho médio', (+$('tamLote').value||0)+' m²'],
-          ['Preço/m²', 'R$ '+$('precoM2').value],
-          ['Preço médio lote', fmt(R.precoLote)],
-          ['Custo Infra/m²', 'R$ '+$('custoInfraM2').value],
-          ['Regime Tributário', {ret:'RET 4%',lp:'Lucro Presumido',lu:'Lucro Real'}[$('regime').value]],
-        ].map(([l,v])=>`
-          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6">
-            <span style="color:#6b7280">${l}</span>
-            <span style="font-weight:600">${v}</span>
-          </div>`).join('')}
+        <h3>Dados do Produto</h3>
+        <table>
+          ${[['Área Total',(+$('areaTotal').value||0).toLocaleString('pt-BR')+' m²'],['Eficiência',$('efSlider').value+'%'],['Qtd. Lotes',R.qtdLotes.toLocaleString('pt-BR')],['Tam. médio',(+$('tamLote').value||0)+' m²'],['Preço/m²','R$ '+$('precoM2').value],['Custo Infra','R$ '+$('custoInfraM2').value]].map(([l,v])=>tr(l,v)).join('')}
+        </table>
+      </div>
+      <!-- Indicadores operacionais -->
+      <div>
+        <h3>Indicadores Operacionais</h3>
+        <table>
+          ${[['Break-even',R.breakevenMes?'Mês '+R.breakevenMes:'—'],['Exposição Máx.',fmt(Math.abs(R.expMax))],['Mês da Exposição','Mês '+R.expMes],['Horizonte',Math.round(R.totalMeses/12*10)/10+' anos'],['Regime',{ret:'RET 4%',lp:'Luc. Presumido',lu:'Lucro Real'}[$('regime').value]],['Preço médio lote',fmt(R.precoLote)]].map(([l,v])=>tr(l,v)).join('')}
+        </table>
       </div>
     </div>
 
     <!-- Avaliação -->
-    <div style="background:${R.tirAa>=20&&R.margemLiq>=15?'#ecfdf5':R.tirAa>=12?'#fef9c3':'#fef2f2'};border:1px solid ${R.tirAa>=20&&R.margemLiq>=15?'#a7f3d0':R.tirAa>=12?'#fde68a':'#fecaca'};border-radius:10px;padding:14px;margin-bottom:16px">
+    <div style="background:${R.tirAa>=20&&R.margemLiq>=15?'#ecfdf5':R.tirAa>=12?'#fef9c3':'#fef2f2'};border-left:4px solid ${R.tirAa>=20&&R.margemLiq>=15?'#10b981':R.tirAa>=12?'#f59e0b':'#ef4444'};padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:14px" class="avoid-break">
       <div style="font-size:11px;font-weight:700;color:${R.tirAa>=20&&R.margemLiq>=15?'#065f46':R.tirAa>=12?'#78350f':'#991b1b'}">
         ${R.tirAa>=20&&R.margemLiq>=15?'✓ PROJETO VIÁVEL — Alta Rentabilidade':R.tirAa>=12&&R.margemLiq>=8?'◈ PROJETO VIÁVEL — Rentabilidade Moderada':'✕ PROJETO REQUER REVISÃO DE PREMISSAS'}
       </div>
-      <div style="font-size:10px;color:#6b7280;margin-top:4px">TIR de ${R.tirAa.toFixed(1)}% a.a. com margem de ${R.margemLiq.toFixed(1)}% · ${R.qtdLotes} lotes · Horizonte ${Math.round(R.totalMeses/12*10)/10} anos</div>
+      <div style="font-size:9px;color:#6b7280;margin-top:3px">TIR de ${R.tirAa.toFixed(1)}% a.a. · Margem ${R.margemLiq.toFixed(1)}% · ${R.qtdLotes} lotes · Horizonte ${Math.round(R.totalMeses/12*10)/10} anos</div>
     </div>
 
-    <!-- Fases de venda -->
     ${secPremissas?`
-    <h3 style="font-size:12px;font-weight:700;color:#d97706;letter-spacing:.5px;text-transform:uppercase;margin:16px 0 8px">Fases de Venda</h3>
-    <table style="width:100%;border-collapse:collapse;font-size:11px">
-      <thead><tr style="background:#f9fafb">
-        <th style="padding:6px 10px;text-align:left;color:#6b7280;font-weight:600">Fase</th>
-        <th style="padding:6px 10px;text-align:center;color:#6b7280;font-weight:600">% VGV</th>
-        <th style="padding:6px 10px;text-align:center;color:#6b7280;font-weight:600">Início</th>
-        <th style="padding:6px 10px;text-align:center;color:#6b7280;font-weight:600">Duração</th>
-        <th style="padding:6px 10px;text-align:right;color:#6b7280;font-weight:600">Lotes</th>
-        <th style="padding:6px 10px;text-align:right;color:#6b7280;font-weight:600">VSO/mês</th>
-      </thead>
-      <tbody>
-        ${phasesData.map(ph=>{
-          const lotes = Math.round(R.qtdLotes*ph.pct/100);
-          return `<tr style="border-bottom:1px solid #e5e7eb">
-            <td style="padding:6px 10px">${ph.nome}</td>
-            <td style="padding:6px 10px;text-align:center">${ph.pct}%</td>
-            <td style="padding:6px 10px;text-align:center">Mês ${ph.ini}</td>
-            <td style="padding:6px 10px;text-align:center">${ph.dur} meses</td>
-            <td style="padding:6px 10px;text-align:right">${lotes}</td>
-            <td style="padding:6px 10px;text-align:right">${(ph.pct/ph.dur).toFixed(1)}%</td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>`:''}
+    <!-- Fases de venda -->
+    <div class="avoid-break">
+      <h3>Fases de Venda</h3>
+      <table>
+        <thead><tr style="background:#f9fafb">
+          ${['Fase','% VGV','Início','Duração','Lotes','VSO/mês'].map(h=>`<th style="padding:5px 8px;text-align:${h==='Fase'?'left':'center'};font-size:9px;color:#9ca3af;font-weight:600;letter-spacing:.5px;text-transform:uppercase">${h}</th>`).join('')}
+        </tr></thead>
+        <tbody>
+          ${phasesData.map(ph=>{
+            const lotes=Math.round(R.qtdLotes*ph.pct/100);
+            return `<tr style="border-bottom:1px solid #f3f4f6">
+              <td style="padding:5px 8px;font-size:11px">${ph.nome}</td>
+              <td style="padding:5px 8px;text-align:center;font-size:11px">${ph.pct}%</td>
+              <td style="padding:5px 8px;text-align:center;font-size:11px">Mês ${ph.ini}</td>
+              <td style="padding:5px 8px;text-align:center;font-size:11px">${ph.dur} meses</td>
+              <td style="padding:5px 8px;text-align:center;font-weight:600;font-size:11px">${lotes}</td>
+              <td style="padding:5px 8px;text-align:center;font-size:11px">${(ph.pct/ph.dur).toFixed(1)}%</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`:''}
   </div>` : ''}
 
   ${secGraficos && (imgFluxo||imgFases||imgPie||imgCurvaS) ? `
-  <!-- GRÁFICOS -->
-  <div style="break-before:page">
-    <h2 style="font-size:20px;font-weight:800;margin-bottom:20px;border-bottom:2px solid #e5e7eb;padding-bottom:8px">Gráficos e Análises</h2>
+  <!-- ══ GRÁFICOS ══ -->
+  <div class="${secResumo?'page-break':''}">
+    <h2>Gráficos e Análises</h2>
+
     ${imgFluxo?`
-    <div style="margin-bottom:24px">
-      <h3 style="font-size:12px;font-weight:700;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">Fluxo de Caixa Acumulado</h3>
-      <img src="${imgFluxo}" style="width:100%;border:1px solid #e5e7eb;border-radius:8px">
+    <div style="margin-bottom:16px" class="avoid-break">
+      <h3>Fluxo de Caixa Acumulado</h3>
+      <img src="${imgFluxo}" style="width:100%;border:1px solid #e5e7eb;border-radius:6px;display:block">
     </div>`:''}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
-      ${imgPie?`
-      <div>
-        <h3 style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">Composição do VGV</h3>
-        <img src="${imgPie}" style="width:100%;border:1px solid #e5e7eb;border-radius:8px">
-      </div>`:''}
-      ${imgCurvaS?`
-      <div>
-        <h3 style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">Curva S — Desembolso de Obra</h3>
-        <img src="${imgCurvaS}" style="width:100%;border:1px solid #e5e7eb;border-radius:8px">
-      </div>`:''}
-    </div>
+
+    ${(imgPie||imgCurvaS)?`
+    <div style="display:grid;grid-template-columns:${imgPie&&imgCurvaS?'1fr 1fr':'1fr'};gap:14px;margin-bottom:16px" class="avoid-break">
+      ${imgPie?`<div><h3>Composição do VGV</h3><img src="${imgPie}" style="width:100%;border:1px solid #e5e7eb;border-radius:6px;display:block"></div>`:''}
+      ${imgCurvaS?`<div><h3>Curva S — Desembolso de Obra</h3><img src="${imgCurvaS}" style="width:100%;border:1px solid #e5e7eb;border-radius:6px;display:block"></div>`:''}
+    </div>`:''}
+
     ${imgFases?`
-    <div>
-      <h3 style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">Receita Mensal por Fase de Venda</h3>
-      <img src="${imgFases}" style="width:100%;border:1px solid #e5e7eb;border-radius:8px">
+    <div class="avoid-break">
+      <h3>Receita Mensal por Fase de Venda</h3>
+      <img src="${imgFases}" style="width:100%;border:1px solid #e5e7eb;border-radius:6px;display:block">
     </div>`:''}
   </div>` : ''}
 
   ${sensibHtml}
   ${fluxoTableHtml}
 
-  <!-- RODAPÉ -->
-  <div style="margin-top:40px;border-top:1px solid #e5e7eb;padding-top:12px;display:flex;justify-content:space-between;font-size:9px;color:#9ca3af">
-    <span>${nome} · ${cidade}</span>
+  <!-- RODAPÉ FINAL -->
+  <div style="margin-top:32px;border-top:1px solid #e5e7eb;padding-top:10px;display:flex;justify-content:space-between;font-size:9px;color:#9ca3af">
+    <span>${nome}${cidade?' · '+cidade:''}</span>
     <span>${confLabel[conf]} · Gerado por ExpandhVia PRO · ${autor}</span>
     <span>${data}</span>
   </div>
@@ -5800,6 +5832,42 @@ function bootApp() {
   updateBaldes();
   captureBase();
   updateUI();
+
+  // Attach modal listeners
+  const pdfM = $('pdfModal');
+  if(pdfM) pdfM.addEventListener('click', e => { if(e.target===pdfM) closePDFModal(); });
+  const helpM = $('helpOverlay');
+  if(helpM) helpM.addEventListener('click', e => { if(e.target===helpM) closeHelp(); });
+
+  // Fetch BCB inflation
+  setTimeout(fetchBCBInflation, 1500);
+
+  // Auto-load Supabase config and sync projects from cloud
+  const savedSB = localStorage.getItem('lotevia_supabase');
+  if(savedSB) {
+    try {
+      supabaseConfig = JSON.parse(savedSB);
+      const indicator = $('sync-indicator');
+      if(indicator) indicator.style.display = 'flex';
+      setSyncStatus('syncing', 'Conectando ao Supabase...');
+      // Background sync — load latest projects from cloud
+      setTimeout(async () => {
+        const rows = await sbGetAll();
+        if(rows !== null) {
+          // Merge cloud into local cache
+          for(const r of rows) {
+            try { await dbSave(r.dados || r); } catch(e) {}
+          }
+          setSyncStatus('ok', 'Sincronizado — '+rows.length+' projeto(s) na nuvem');
+          console.log('[Supabase] Loaded', rows.length, 'projects from cloud');
+        } else {
+          setSyncStatus('offline', 'Offline — usando dados locais');
+        }
+      }, 900);
+    } catch(e) { console.warn('[Supabase] Config error:', e); }
+  } else {
+    setSyncStatus('offline', 'Salvo localmente — configure Supabase para sincronizar');
+  }
 }
 </script>
 
@@ -6838,71 +6906,160 @@ async function importProjectJSON(event) {
 }
 
 // ═══════════════════════════════════════════════════════
-// SAVE PROJECT
+// PROJECT DATA LAYER — Supabase-first, IndexedDB fallback
 // ═══════════════════════════════════════════════════════
+
 let currentProjectName = '';
 let currentProjectId   = null;
 
+// ── Supabase helpers ──────────────────────────────────
+function sbHeaders() {
+  if(!supabaseConfig) return null;
+  return {
+    'apikey':        supabaseConfig.key,
+    'Authorization': 'Bearer ' + supabaseConfig.key,
+    'Content-Type':  'application/json',
+    'Prefer':        'resolution=merge-duplicates',
+  };
+}
+
+function sbUrl(path) {
+  return supabaseConfig.url + '/rest/v1/' + path;
+}
+
+async function sbGetAll() {
+  const h = sbHeaders();
+  if(!h) return null;
+  try {
+    const res = await fetch(sbUrl('lotevia_projects?order=updated_at.desc'), { headers: h });
+    if(!res.ok) { console.warn('[SB] getAll', res.status); return null; }
+    return await res.json();
+  } catch(e) { console.warn('[SB] getAll error', e.message); return null; }
+}
+
+async function sbSave(proj) {
+  const h = sbHeaders();
+  if(!h) return false;
+  try {
+    const res = await fetch(sbUrl('lotevia_projects'), {
+      method:  'POST',
+      headers: h,
+      body:    JSON.stringify({
+        id:         proj.id,
+        nome:       proj.nome,
+        dados:      proj,
+        updated_at: proj.updatedAt,
+      }),
+    });
+    if(!res.ok) { console.warn('[SB] save', res.status, await res.text()); return false; }
+    return true;
+  } catch(e) { console.warn('[SB] save error', e.message); return false; }
+}
+
+async function sbDelete(id) {
+  const h = sbHeaders();
+  if(!h) return false;
+  try {
+    const res = await fetch(sbUrl(`lotevia_projects?id=eq.${id}`), {
+      method: 'DELETE', headers: h,
+    });
+    return res.ok;
+  } catch(e) { return false; }
+}
+
+// ── Status badge ──────────────────────────────────────
+function setSyncStatus(state, msg) {
+  // state: 'ok' | 'syncing' | 'offline' | 'error'
+  const icons = { ok:'✅', syncing:'⏳', offline:'💾', error:'⚠' };
+  const colors = { ok:'var(--grn)', syncing:'var(--acc)', offline:'var(--mut)', error:'var(--red)' };
+  const el = $('supabase-status-label');
+  if(el) { el.textContent = (icons[state]||'') + ' ' + msg; el.style.color = colors[state]||''; }
+}
+
+// ── Save ─────────────────────────────────────────────
 async function saveProject() {
-  const name = document.getElementById('save-name').value.trim();
+  const name = $('save-name').value.trim();
   if (!name) { showToast('⚠ Digite um nome para o projeto', 'err'); return; }
 
-  const R = calcular();
+  const R  = calcular();
   const id = currentProjectId || ('proj_' + Date.now());
 
-  const projeto = {
-    id,
-    nome:     name,
-    cidade:   document.getElementById('save-cidade').value.trim(),
-    tipo:     document.getElementById('save-tipo').value,
-    obs:      document.getElementById('save-obs').value.trim(),
-    createdAt: currentProjectId ? undefined : new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    snapshot:  captureSnapshot(),
-    resultados: {
-      vgvBruto:     R.vgvBruto,
-      tirAa:        R.tirAa,
-      lucroLiq:     R.lucroLiq,
-      margemLiq:    R.margemLiq,
-      expMax:       R.expMax,
-      vpl:          R.vpl,
-      qtdLotes:     R.qtdLotes,
-      breakevenMes: R.breakevenMes,
-    }
-  };
-  if (!projeto.createdAt) {
-    const existing = await dbGetAll();
+  // Preserve createdAt if updating
+  let createdAt = new Date().toISOString();
+  if(currentProjectId) {
+    const existing = await getAllProjects();
     const found = existing.find(p => p.id === id);
-    projeto.createdAt = found?.createdAt || new Date().toISOString();
+    createdAt = found?.createdAt || createdAt;
   }
 
+  const projeto = {
+    id, nome: name,
+    cidade:    $('save-cidade').value.trim(),
+    tipo:      $('save-tipo').value,
+    obs:       $('save-obs').value.trim(),
+    createdAt, updatedAt: new Date().toISOString(),
+    snapshot:  captureSnapshot(),
+    resultados: {
+      vgvBruto: R.vgvBruto, tirAa: R.tirAa, lucroLiq: R.lucroLiq,
+      margemLiq: R.margemLiq, expMax: R.expMax, vpl: R.vpl,
+      qtdLotes: R.qtdLotes, breakevenMes: R.breakevenMes,
+    }
+  };
+
+  // 1. Save locally always
   await dbSave(projeto);
   currentProjectName = name;
   currentProjectId   = id;
-
-  // Update header
-  const hdrel = document.getElementById('hdr-proj-name');
+  const hdrel = $('hdr-proj-name');
   if(hdrel) hdrel.textContent = name;
 
+  // 2. Auto-sync to Supabase if configured
+  if(supabaseConfig) {
+    setSyncStatus('syncing', 'Salvando na nuvem...');
+    const ok = await sbSave(projeto);
+    setSyncStatus(ok ? 'ok' : 'error', ok ? 'Salvo na nuvem ✓' : 'Salvo localmente (nuvem indisponível)');
+  }
+
   loadProjectsList();
-  showToast('✅ Projeto "'+name+'" salvo!', 'ok');
+  showToast(supabaseConfig ? '✅ "'+name+'" salvo e sincronizado!' : '✅ "'+name+'" salvo!', 'ok');
 }
 
-// ═══════════════════════════════════════════════════════
-// LOAD PROJECTS LIST
-// ═══════════════════════════════════════════════════════
+// ── Get all — Supabase first, local fallback ──────────
+async function getAllProjects() {
+  if(supabaseConfig) {
+    const rows = await sbGetAll();
+    if(rows) {
+      // Parse dados column and merge into local cache
+      const projects = rows.map(r => r.dados || r).filter(Boolean);
+      // Update local cache silently
+      for(const p of projects) { try { await dbSave(p); } catch(e){} }
+      return projects;
+    }
+  }
+  // Fallback to local
+  return await dbGetAll();
+}
+
+// ── Load list ─────────────────────────────────────────
 async function loadProjectsList() {
-  const list = document.getElementById('projList');
-  const projetos = await dbGetAll();
+  const list = $('projList');
+  if(!list) return;
+  list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--mut);font-size:12px">⏳ Carregando projetos...</div>';
+
+  const projetos = await getAllProjects();
 
   if (!projetos.length) {
     list.innerHTML = `
       <div class="proj-empty">
         <div class="proj-empty-icon">🏗</div>
-        <div class="proj-empty-text">Nenhuma análise salva ainda.<br>Preencha as premissas acima e clique em Salvar.</div>
+        <div class="proj-empty-text">Nenhuma análise salva ainda.<br>Preencha as premissas e clique em Salvar.</div>
       </div>`;
+    setSyncStatus(supabaseConfig ? 'ok' : 'offline', supabaseConfig ? 'Conectado — banco vazio' : 'Salvo localmente');
     return;
   }
+
+  setSyncStatus(supabaseConfig ? 'ok' : 'offline',
+    supabaseConfig ? 'Conectado — '+projetos.length+' projeto(s)' : projetos.length+' projeto(s) local');
 
   const tipoIcon = { otimista:'▴', realista:'◈', pessimista:'▾' };
   const tipoCor  = { otimista:'var(--grn)', realista:'var(--acc)', pessimista:'var(--red)' };
@@ -6912,11 +7069,12 @@ async function loadProjectsList() {
     const d = new Date(p.updatedAt);
     const dataStr = d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     const isCurrent = p.id === currentProjectId;
+    const nomeSafe = (p.nome||'').replace(/'/g,'').replace(/"/g,'');
     return `
     <div class="proj-item" style="${isCurrent?'border-color:var(--acc)':''}" onclick="loadProject('${p.id}')">
       <div class="proj-icon">🏘</div>
       <div class="proj-info">
-        <div class="proj-name">${p.nome} ${isCurrent?'<span style="font-size:10px;color:var(--acc)">● atual</span>':''}</div>
+        <div class="proj-name">${p.nome||'—'} ${isCurrent?'<span style="font-size:10px;color:var(--acc)">● atual</span>':''}</div>
         <div class="proj-meta">
           <span style="color:${tipoCor[p.tipo]||'var(--mut)'}">
             ${tipoIcon[p.tipo]||'◈'} ${p.tipo||'realista'}
@@ -6925,31 +7083,16 @@ async function loadProjectsList() {
           ${p.obs?'<br><span style="font-style:italic">'+p.obs+'</span>':''}
         </div>
         <div class="proj-kpis">
-          <div class="proj-kpi">
-            <span class="proj-kpi-l">VGV</span>
-            <span class="proj-kpi-v" style="color:var(--blu)">${fmtKpi(r.vgvBruto)}</span>
-          </div>
-          <div class="proj-kpi">
-            <span class="proj-kpi-l">TIR a.a.</span>
-            <span class="proj-kpi-v" style="color:var(--grn)">${r.tirAa!=null?r.tirAa.toFixed(1)+'%':'—'}</span>
-          </div>
-          <div class="proj-kpi">
-            <span class="proj-kpi-l">Lucro Líq.</span>
-            <span class="proj-kpi-v" style="color:var(--acc)">${fmtKpi(r.lucroLiq)}</span>
-          </div>
-          <div class="proj-kpi">
-            <span class="proj-kpi-l">Margem</span>
-            <span class="proj-kpi-v">${r.margemLiq!=null?r.margemLiq.toFixed(1)+'%':'—'}</span>
-          </div>
-          <div class="proj-kpi">
-            <span class="proj-kpi-l">Lotes</span>
-            <span class="proj-kpi-v">${r.qtdLotes||'—'}</span>
-          </div>
+          <div class="proj-kpi"><span class="proj-kpi-l">VGV</span><span class="proj-kpi-v" style="color:var(--blu)">${fmtKpi(r.vgvBruto)}</span></div>
+          <div class="proj-kpi"><span class="proj-kpi-l">TIR a.a.</span><span class="proj-kpi-v" style="color:var(--grn)">${r.tirAa!=null?r.tirAa.toFixed(1)+'%':'—'}</span></div>
+          <div class="proj-kpi"><span class="proj-kpi-l">Lucro Líq.</span><span class="proj-kpi-v" style="color:var(--acc)">${fmtKpi(r.lucroLiq)}</span></div>
+          <div class="proj-kpi"><span class="proj-kpi-l">Margem</span><span class="proj-kpi-v">${r.margemLiq!=null?r.margemLiq.toFixed(1)+'%':'—'}</span></div>
+          <div class="proj-kpi"><span class="proj-kpi-l">Lotes</span><span class="proj-kpi-v">${r.qtdLotes||'—'}</span></div>
         </div>
       </div>
       <div class="proj-actions" onclick="event.stopPropagation()">
         <button class="proj-btn load" onclick="loadProject('${p.id}')">📂 Carregar</button>
-        <button class="proj-btn del"  onclick="deleteProject('${p.id}','${p.nome.replace(/'/g,'')}')">🗑</button>
+        <button class="proj-btn del"  onclick="deleteProject('${p.id}','${nomeSafe}')">🗑</button>
       </div>
     </div>`;
   }).join('');
@@ -6957,54 +7100,68 @@ async function loadProjectsList() {
 
 function fmtKpi(v) {
   if(v==null) return '—';
-  const s = v<0?'-':'';
-  const a = Math.abs(v);
+  const s=v<0?'-':''; const a=Math.abs(v);
   if(a>=1e6) return s+'R$'+(a/1e6).toFixed(1)+'M';
   if(a>=1e3) return s+'R$'+(a/1e3).toFixed(0)+'K';
   return s+'R$'+a.toFixed(0);
 }
 
-// ═══════════════════════════════════════════════════════
-// LOAD / DELETE PROJECT
-// ═══════════════════════════════════════════════════════
+// ── Load project ──────────────────────────────────────
 async function loadProject(id) {
-  const projetos = await dbGetAll();
-  const p = projetos.find(x => x.id === id);
-  if (!p) return;
+  // Try Supabase first, then local
+  let p = null;
+  if(supabaseConfig) {
+    try {
+      const h = sbHeaders();
+      const res = await fetch(sbUrl(`lotevia_projects?id=eq.${id}`), { headers: h });
+      if(res.ok) {
+        const rows = await res.json();
+        if(rows[0]) p = rows[0].dados || rows[0];
+      }
+    } catch(e) {}
+  }
+  if(!p) {
+    const local = await dbGetAll();
+    p = local.find(x => x.id === id);
+  }
+  if(!p) { showToast('⚠ Projeto não encontrado', 'err'); return; }
 
   restoreSnapshot(p.snapshot);
   currentProjectName = p.nome;
   currentProjectId   = id;
 
-  // Update header
-  const hdrel = document.getElementById('hdr-proj-name');
+  const hdrel = $('hdr-proj-name');
   if(hdrel) hdrel.textContent = p.nome;
 
-  // Pre-fill save form for quick re-save
-  const nameEl = document.getElementById('save-name');
-  const cidEl  = document.getElementById('save-cidade');
-  const tipoEl = document.getElementById('save-tipo');
-  const obsEl  = document.getElementById('save-obs');
-  if(nameEl) nameEl.value = p.nome;
-  if(cidEl)  cidEl.value  = p.cidade || '';
-  if(tipoEl) tipoEl.value = p.tipo   || 'realista';
-  if(obsEl)  obsEl.value  = p.obs    || '';
+  const fills = [['save-name',p.nome],['save-cidade',p.cidade||''],['save-tipo',p.tipo||'realista'],['save-obs',p.obs||'']];
+  fills.forEach(([id,v])=>{ const el=$(id); if(el) el.value=v; });
 
   closeProjects();
-  showToast('📂 Projeto "'+p.nome+'" carregado!', 'ok');
+  showToast('📂 "'+p.nome+'" carregado!', 'ok');
 }
 
+// ── Delete ────────────────────────────────────────────
 async function deleteProject(id, nome) {
-  if (!confirm('Deletar "'+nome+'"? Esta ação não pode ser desfeita.')) return;
+  if(!confirm('Deletar "'+nome+'"? Isso removerá do banco compartilhado para TODOS os usuários.')) return;
+
+  // Delete from Supabase first
+  if(supabaseConfig) {
+    setSyncStatus('syncing', 'Deletando...');
+    const ok = await sbDelete(id);
+    setSyncStatus(ok ? 'ok' : 'error', ok ? 'Deletado da nuvem' : 'Erro ao deletar da nuvem');
+  }
+
+  // Delete locally
   await dbDelete(id);
-  if (currentProjectId === id) {
+
+  if(currentProjectId === id) {
     currentProjectId   = null;
     currentProjectName = '';
-    const hdrel = document.getElementById('hdr-proj-name');
+    const hdrel = $('hdr-proj-name');
     if(hdrel) hdrel.textContent = 'Meus Projetos';
   }
   loadProjectsList();
-  showToast('🗑 Projeto deletado', 'err');
+  showToast('🗑 Projeto "'+nome+'" deletado', 'err');
 }
 
 // ═══════════════════════════════════════════════════════
