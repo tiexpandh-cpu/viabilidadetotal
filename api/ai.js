@@ -12,7 +12,7 @@ module.exports = async function handler(req, res) {
     const apiKey = process.env.GEMINI_API_KEY;
     return res.status(200).json({
       status: 'online',
-      provider: 'Google Gemini',
+      provider: 'Google Gemini 2.0 Flash',
       key_configured: !!apiKey,
       key_prefix: apiKey ? apiKey.substring(0, 8) + '...' : null,
     });
@@ -21,9 +21,7 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
-  }
+  if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
 
   let body = req.body;
   if (typeof body === 'string') {
@@ -35,17 +33,18 @@ module.exports = async function handler(req, res) {
 
   const prompt = body.messages?.[0]?.content || '';
 
-  try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  // gemini-2.0-flash: modelo não-reasoning, resposta completa e rápida
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
+  try {
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 3000,
+          temperature: 0.5,
+          maxOutputTokens: 2048,
           responseMimeType: 'application/json',
         }
       }),
@@ -54,10 +53,19 @@ module.exports = async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(response.status).json({ error: data?.error?.message || 'Erro na API Gemini' });
+      const msg = data?.error?.message || `Erro Gemini status ${response.status}`;
+      console.error('[proxy/ai] Gemini error:', msg);
+      return res.status(response.status).json({ error: msg });
     }
 
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    if (!text) {
+      const reason = data?.candidates?.[0]?.finishReason || 'unknown';
+      console.error('[proxy/ai] Empty response, finishReason:', reason);
+      return res.status(500).json({ error: `Resposta vazia do Gemini (finishReason: ${reason})` });
+    }
+
     return res.status(200).json({
       content: [{ type: 'text', text }]
     });
