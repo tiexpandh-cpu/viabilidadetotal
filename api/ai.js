@@ -1,7 +1,6 @@
 // api/ai.js — Vercel Serverless Function
 // Proxy para Google Gemini API. Resolve CORS.
 //
-
 // SETUP:
 //   1. Acesse: https://aistudio.google.com/app/apikey
 //   2. Clique em "Create API Key" (gratuito, sem cartão)
@@ -48,7 +47,7 @@ module.exports = async function handler(req, res) {
   const prompt = body.messages?.[0]?.content || '';
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
     const response = await fetch(url, {
       method: 'POST',
