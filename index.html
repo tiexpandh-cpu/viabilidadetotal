@@ -2849,6 +2849,228 @@ input[type=range]::-webkit-slider-thumb{
   </div>
 </div>
 
+
+<!-- ══════════════════════════════════════════════════
+     TOAST
+══════════════════════════════════════════════════ -->
+<div id="toast" class="toast"></div>
+
+<!-- ══════════════════════════════════════════════════
+     PWA BANNER
+══════════════════════════════════════════════════ -->
+<div id="pwaBanner" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000;background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:420px;width:90%">
+  <div style="font-size:28px">📲</div>
+  <div style="flex:1">
+    <div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--tex)">Instalar ExpandhVia PRO</div>
+    <div style="font-size:11px;color:var(--mut);margin-top:2px">Acesse offline como app nativo</div>
+  </div>
+  <button id="pwaInstallBtn2" onclick="installPWA()" style="padding:7px 14px;background:var(--acc);color:#09090f;border:none;border-radius:8px;font-family:var(--ff);font-size:12px;font-weight:700;cursor:pointer">Instalar</button>
+  <button onclick="dismissBanner()" style="padding:6px 10px;background:transparent;color:var(--mut);border:1px solid var(--brd);border-radius:8px;font-size:11px;cursor:pointer">✕</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     PROJECTS MODAL
+══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="projectsModal">
+  <div class="modal" style="max-width:720px;width:96vw;max-height:88vh;display:flex;flex-direction:column">
+    <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:var(--ff);font-size:15px;font-weight:800">📁 Meus Projetos</div>
+      <button class="modal-close" onclick="closeProjects()">✕</button>
+    </div>
+    <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;overflow-y:auto">
+
+      <!-- Left: Save form -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="font-family:var(--ff);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut);padding-bottom:8px;border-bottom:1px solid var(--brd)">Salvar projeto atual</div>
+        <div class="field"><label>Nome do projeto</label><input type="text" id="save-name" placeholder="Ex: Loteamento Boa Vista"></div>
+        <div class="field"><label>Cidade / Região</label><input type="text" id="save-cidade" placeholder="Ex: Campinas, SP"></div>
+        <div class="field"><label>Tipo de cenário</label>
+          <select id="save-tipo">
+            <option value="realista">Realista</option>
+            <option value="otimista">Otimista</option>
+            <option value="pessimista">Pessimista</option>
+          </select>
+        </div>
+        <div class="field"><label>Observações</label><input type="text" id="save-obs" placeholder="Notas opcionais"></div>
+        <button onclick="saveProject()" style="padding:11px;background:var(--acc);color:#09090f;border:none;border-radius:9px;font-family:var(--ff);font-size:13px;font-weight:800;cursor:pointer;transition:all .18s;letter-spacing:.3px">💾 Salvar projeto</button>
+        <button onclick="newProject()" style="padding:9px;background:transparent;color:var(--mut);border:1px solid var(--brd);border-radius:9px;font-family:var(--fb);font-size:12px;cursor:pointer;transition:all .18s">✨ Novo projeto em branco</button>
+
+        <!-- Export / Import -->
+        <div style="border-top:1px solid var(--brd);padding-top:12px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:10px;color:var(--mut);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px">Exportar / Importar</div>
+          <button onclick="exportProjectJSON()" style="padding:8px;background:var(--bg3);color:var(--tex);border:1px solid var(--brd);border-radius:8px;font-size:12px;cursor:pointer;font-family:var(--fb)">📤 Exportar JSON</button>
+          <button onclick="triggerImportJSON()" style="padding:8px;background:var(--bg3);color:var(--tex);border:1px solid var(--brd);border-radius:8px;font-size:12px;cursor:pointer;font-family:var(--fb)">📥 Importar JSON</button>
+          <input type="file" id="importJSONInput" accept=".json" style="display:none" onchange="importProjectJSON(event)">
+        </div>
+
+        <!-- Supabase -->
+        <div style="border-top:1px solid var(--brd);padding-top:12px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:10px;color:var(--mut);letter-spacing:.8px;text-transform:uppercase">☁ Supabase (nuvem)</div>
+            <button onclick="toggleSupabaseConfig()" style="font-size:10px;color:var(--mut);background:none;border:none;cursor:pointer;padding:2px 6px">⚙ Config</button>
+          </div>
+          <div id="supabaseConfigPanel" style="display:none;flex-direction:column;gap:6px">
+            <input type="text" id="supabase-url" placeholder="https://xxx.supabase.co" style="background:var(--bg3);border:1px solid var(--brd);border-radius:7px;color:var(--tex);font-family:var(--fm);font-size:11px;padding:7px 9px;outline:none;width:100%">
+            <input type="text" id="supabase-key" placeholder="anon key..." style="background:var(--bg3);border:1px solid var(--brd);border-radius:7px;color:var(--tex);font-family:var(--fm);font-size:11px;padding:7px 9px;outline:none;width:100%">
+            <div style="display:flex;gap:6px">
+              <button onclick="saveSupabaseConfig()" style="flex:1;padding:7px;background:var(--grn);color:#09090f;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer">Salvar</button>
+              <button onclick="testSupabaseConnection()" style="flex:1;padding:7px;background:var(--bg3);color:var(--tex);border:1px solid var(--brd);border-radius:7px;font-size:11px;cursor:pointer">Testar</button>
+            </div>
+          </div>
+          <div id="supabase-status-label" style="font-size:11px;color:var(--mut)">💾 Salvo localmente</div>
+          <button id="supabase-sync-btn" onclick="loadFromSupabase()" style="display:none;padding:8px;background:rgba(45,212,160,.1);color:var(--grn);border:1px solid rgba(45,212,160,.3);border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">☁ Sincronizar da nuvem</button>
+        </div>
+      </div>
+
+      <!-- Right: Projects list -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font-family:var(--ff);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut);padding-bottom:8px;border-bottom:1px solid var(--brd)">Projetos salvos</div>
+        <div class="proj-list" id="projectsList" style="flex:1;overflow-y:auto;max-height:380px">
+          <div style="text-align:center;color:var(--mut);font-size:12px;padding:24px">Nenhum projeto salvo ainda.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     PDF MODAL
+══════════════════════════════════════════════════ -->
+<div class="pdf-modal-overlay" id="pdfModal">
+  <div class="pdf-modal-box">
+    <div class="pdf-modal-header">
+      <div class="pdf-modal-title">📄 Gerar Relatório PDF</div>
+      <button onclick="closePDFModal()" style="background:none;border:none;color:var(--mut);font-size:18px;cursor:pointer;padding:4px 8px">✕</button>
+    </div>
+    <div class="pdf-modal-body">
+      <div class="field"><label>Nome da empresa / incorporadora</label><input type="text" id="pdf-nome-emp" placeholder="Ex: Incorporadora Boa Vista"></div>
+      <div class="field"><label>Nome do projeto</label><input type="text" id="pdf-nome-proj" placeholder="Ex: Loteamento Boa Vista"></div>
+      <div class="field"><label>Data do relatório</label><input type="text" id="pdf-data" placeholder="Ex: Janeiro 2025"></div>
+      <div class="field"><label>Responsável técnico</label><input type="text" id="pdf-resp" placeholder="Ex: João Silva, CRECI 12345"></div>
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button onclick="generatePDF()" style="flex:1;padding:13px;background:var(--acc);color:#09090f;border:none;border-radius:10px;font-family:var(--ff);font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.4px">🖨 Gerar PDF</button>
+        <button onclick="closePDFModal()" style="padding:13px 18px;background:var(--bg3);color:var(--mut);border:1px solid var(--brd);border-radius:10px;font-size:13px;cursor:pointer">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     HELP OVERLAY
+══════════════════════════════════════════════════ -->
+<div class="help-overlay" id="helpOverlay">
+  <div class="help-modal">
+    <div class="help-header">
+      <div class="help-header-left">
+        <div class="help-logo">L</div>
+        <div>
+          <div class="help-title">Manual ExpandhVia PRO</div>
+        </div>
+        <span class="help-version">v2.0</span>
+      </div>
+      <button class="help-close" onclick="closeHelp()">✕</button>
+    </div>
+    <div class="help-body">
+      <div class="help-nav">
+        <div class="help-nav-group">Início</div>
+        <div class="help-nav-item active" onclick="showHelpSection('intro')"><span class="nav-icon">🏠</span> Introdução</div>
+        <div class="help-nav-group">Módulos</div>
+        <div class="help-nav-item" onclick="showHelpSection('premissas')"><span class="nav-icon">⚙</span> Premissas</div>
+        <div class="help-nav-item" onclick="showHelpSection('fases')"><span class="nav-icon">📈</span> Fases de Venda</div>
+        <div class="help-nav-item" onclick="showHelpSection('obra')"><span class="nav-icon">🏗</span> Obra</div>
+        <div class="help-nav-item" onclick="showHelpSection('financ')"><span class="nav-icon">💰</span> Recebimento</div>
+        <div class="help-nav-item" onclick="showHelpSection('sensib')"><span class="nav-icon">📊</span> Sensibilidade</div>
+        <div class="help-nav-item" onclick="showHelpSection('indicadores')"><span class="nav-icon">🎯</span> Indicadores</div>
+        <div class="help-nav-group">Avançado</div>
+        <div class="help-nav-item" onclick="showHelpSection('cenarios')"><span class="nav-icon">🔀</span> Cenários</div>
+        <div class="help-nav-item" onclick="showHelpSection('projetos')"><span class="nav-icon">📁</span> Projetos</div>
+        <div class="help-nav-item" onclick="showHelpSection('ia')"><span class="nav-icon">✦</span> Diagnóstico IA</div>
+      </div>
+      <div class="help-content" id="helpContent">
+        <div class="help-section active" id="hs-intro">
+          <h1>Bem-vindo ao ExpandhVia PRO</h1>
+          <p>Ferramenta completa de <strong>viabilidade financeira para loteamentos</strong>. Calcule TIR, VPL, margem líquida, fluxo de caixa e exposição de capital com precisão profissional.</p>
+          <h2>Como começar</h2>
+          <p>Preencha as <strong>Premissas</strong> (área, preço, custos), configure as <strong>Fases de Venda</strong> e o <strong>Cronograma de Obras</strong>, depois clique em <strong>⟳ Recalcular</strong> ou use <kbd>Ctrl+Enter</kbd>.</p>
+          <div class="help-box tip">💡 Use os cenários <strong>Pessimista / Realista / Otimista</strong> no cabeçalho para testar diferentes projeções rapidamente.</div>
+          <h2>Atalhos de teclado</h2>
+          <table class="help-kv"><tr><th>Ação</th><th>Atalho</th></tr>
+            <tr><td>Recalcular</td><td><kbd>Ctrl+Enter</kbd></td></tr>
+            <tr><td>Desfazer</td><td><kbd>Ctrl+Z</kbd></td></tr>
+            <tr><td>Refazer</td><td><kbd>Ctrl+Y</kbd></td></tr>
+            <tr><td>Salvar projeto</td><td><kbd>Ctrl+S</kbd></td></tr>
+          </table>
+        </div>
+        <div class="help-section" id="hs-premissas">
+          <h1>Premissas do Projeto</h1>
+          <p>Configure os parâmetros fundamentais que alimentam todos os cálculos.</p>
+          <h2>Área e Produto</h2>
+          <p><strong>Área Total</strong> é a área bruta do terreno em m². A <strong>Eficiência</strong> define quanto dessa área vira lote vendável (típico: 45–60%). O <strong>Tamanho do Lote</strong> determina a quantidade total de lotes.</p>
+          <h2>Preços e Custos</h2>
+          <p><strong>Preço/m²</strong> é o preço de venda do lote. <strong>Custo Infra/m²</strong> cobre terraplanagem, drenagem, pavimentação, água, esgoto e energia — calculado sobre a área total. <strong>Custo Terreno</strong> é o valor de aquisição.</p>
+          <h2>Regime Fiscal</h2>
+          <p><strong>Lucro Presumido Simples</strong>: 4% sobre receita. <strong>Lucro Presumido</strong>: 6,73%. <strong>Lucro Real</strong>: 34% sobre lucro apurado (simplificado).</p>
+          <div class="help-box warn">⚠ O Lucro Real nesta ferramenta é uma estimativa simplificada. Consulte sempre um contador.</div>
+        </div>
+        <div class="help-section" id="hs-fases">
+          <h1>Fases de Venda</h1>
+          <p>Distribua o VSO (Velocidade de Saída de Obra) ao longo do tempo em fases. A soma deve ser <strong>100%</strong>.</p>
+          <p>Cada fase tem: <strong>% do total de lotes</strong>, <strong>mês de início</strong> e <strong>duração em meses</strong>. O VSO/mês é calculado automaticamente.</p>
+          <div class="help-box info">ℹ A velocidade de vendas impacta diretamente o fluxo de caixa e a TIR. Fases mais curtas no início melhoram o breakeven.</div>
+        </div>
+        <div class="help-section" id="hs-obra">
+          <h1>Cronograma de Obras</h1>
+          <p>Configure quando cada etapa da obra será executada e como o custo se distribui.</p>
+          <p>Distribuições disponíveis: <strong>Curva S</strong> (concentrado no meio), <strong>Linear</strong> (igual por mês) e <strong>Final</strong> (concentrado no último mês, para medições).</p>
+        </div>
+        <div class="help-section" id="hs-financ">
+          <h1>Estrutura de Recebimento</h1>
+          <p>Defina como os compradores pagarão — os <strong>3 baldes</strong> representam modalidades de pagamento.</p>
+          <p><strong>Balde 1 — À Vista</strong>: pagamento único com desconto. <strong>Balde 2 — Curto Prazo</strong>: entrada + parcelas de até 36 meses. <strong>Balde 3 — Longo Prazo</strong>: entrada + parcelas de até 120 meses com correção monetária.</p>
+          <div class="help-box tip">💡 Aumentar o balde à vista reduz a exposição máxima de capital e antecipa o breakeven.</div>
+        </div>
+        <div class="help-section" id="hs-sensib">
+          <h1>Análise de Sensibilidade</h1>
+          <p>Teste como variações no VSO e no preço de venda impactam os indicadores.</p>
+          <p>Use os <strong>sliders</strong> para ver o efeito em tempo real, ou gere a <strong>Matriz 2D</strong> para visualizar todas as combinações possíveis de uma vez.</p>
+        </div>
+        <div class="help-section" id="hs-indicadores">
+          <h1>Indicadores Financeiros</h1>
+          <table class="help-kv">
+            <tr><th>Indicador</th><th>Descrição</th></tr>
+            <tr><td><strong>TIR</strong></td><td>Taxa Interna de Retorno anualizada. Compara com o custo de oportunidade (TMA).</td></tr>
+            <tr><td><strong>VPL</strong></td><td>Valor Presente Líquido. Positivo = projeto cria valor acima da TMA.</td></tr>
+            <tr><td><strong>Margem Líquida</strong></td><td>Lucro líquido / VGV bruto. Referência: acima de 15% é saudável.</td></tr>
+            <tr><td><strong>Exposição Máxima</strong></td><td>Maior saldo negativo acumulado — capital necessário para o projeto.</td></tr>
+            <tr><td><strong>Breakeven</strong></td><td>Mês em que o fluxo acumulado cruza zero.</td></tr>
+            <tr><td><strong>ROI</strong></td><td>Retorno sobre o investimento total (custos).</td></tr>
+          </table>
+        </div>
+        <div class="help-section" id="hs-cenarios">
+          <h1>Cenários</h1>
+          <p>Os botões <strong>Pessimista / Realista / Otimista</strong> aplicam multiplicadores sobre as premissas base.</p>
+          <p>O cenário <strong>Otimista</strong> aumenta 10% no preço, reduz 5% no custo de infra e acelera 30% as fases de venda. O <strong>Pessimista</strong> faz o inverso.</p>
+          <div class="help-box warn">⚠ Editar campos enquanto um cenário está ativo reseta para Realista antes de capturar os novos valores.</div>
+        </div>
+        <div class="help-section" id="hs-projetos">
+          <h1>Gerenciamento de Projetos</h1>
+          <p>Salve múltiplos projetos localmente com <strong>IndexedDB</strong> no navegador, ou sincronize com <strong>Supabase</strong> para acesso em qualquer dispositivo.</p>
+          <p>Use <strong>Exportar JSON</strong> para fazer backup ou compartilhar um projeto. <strong>Importar JSON</strong> restaura qualquer arquivo exportado anteriormente.</p>
+          <div class="help-box info">ℹ O Comparador de Cenários permite carregar até 3 projetos salvos lado a lado para análise comparativa.</div>
+        </div>
+        <div class="help-section" id="hs-ia">
+          <h1>Diagnóstico IA</h1>
+          <p>O módulo <strong>✦ Diagnóstico IA</strong> envia todos os indicadores calculados para o Claude (API Anthropic) e retorna um parecer estruturado em linguagem natural.</p>
+          <p>O diagnóstico inclui: <strong>veredicto geral</strong>, pontos fortes, alertas de atenção, riscos críticos e sugestões concretas de otimização.</p>
+          <div class="help-box tip">💡 Use o botão "Incluir no PDF" para anexar o diagnóstico ao relatório gerado.</div>
+          <div class="help-box warn">⚠ Requer conexão com a internet e uma chave de API Anthropic configurada no servidor.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════════════
 // UTILITIES
@@ -5142,7 +5364,7 @@ async function saveProject(){
 }
 
 async function loadProjectsList(){
-  const list=$('projList'); if(!list)return;
+  const list=$('projectsList'); if(!list)return;
   list.innerHTML='<div style="text-align:center;padding:20px;color:var(--mut);font-size:12px">⏳ Carregando...</div>';
   const projs=await getAllProjects();
   if(!projs.length){list.innerHTML='<div class="proj-empty"><div class="proj-empty-icon">🏗</div><div class="proj-empty-text">Nenhuma análise salva ainda.</div></div>';return;}
