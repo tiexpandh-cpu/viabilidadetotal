@@ -5781,7 +5781,7 @@ Responda APENAS com JSON válido, sem markdown, sem texto fora do JSON:
 Cada item: 1-2 frases. Use <strong> apenas no início para destacar o tema. Seja direto e técnico. Responda em português.`;
 }
 
-async function runIADiagnostico() {
+async function runIADiagnostico(retryCount = 0) {
   const R = calcular();
 
   // UI states
@@ -5821,7 +5821,23 @@ async function runIADiagnostico() {
 
     if(!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err?.error?.message || 'API retornou status ' + res.status);
+      // Rate limit — retry automático com countdown
+      if(res.status === 429 && retryCount < 3) {
+        clearInterval(msgInterval);
+        const waitSecs = [15, 30, 60][retryCount];
+        let remaining = waitSecs;
+        const countdownInterval = setInterval(() => {
+          if(lt) lt.textContent = `Limite de requisições atingido. Tentando novamente em ${remaining}s...`;
+          remaining--;
+          if(remaining < 0) clearInterval(countdownInterval);
+        }, 1000);
+        setTimeout(() => {
+          clearInterval(countdownInterval);
+          runIADiagnostico(retryCount + 1);
+        }, waitSecs * 1000);
+        return;
+      }
+      throw new Error(err?.error || 'API retornou status ' + res.status);
     }
 
     const data = await res.json();
