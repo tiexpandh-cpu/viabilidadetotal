@@ -1,3 +1,12 @@
+// api/ai.js — Vercel Serverless Function
+// Proxy para Google Gemini API. Resolve CORS.
+//
+// SETUP:
+//   1. Acesse: https://aistudio.google.com/app/apikey
+//   2. Clique em "Create API Key" (gratuito, sem cartão)
+//   3. Vercel → Settings → Environment Variables → adicione:
+//      GEMINI_API_KEY = AIza...
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
@@ -5,20 +14,25 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
+  // GET → diagnóstico de configuração
   if (req.method === 'GET') {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     return res.status(200).json({
       status: 'online',
+      provider: 'Google Gemini',
       key_configured: !!apiKey,
-      key_prefix: apiKey ? apiKey.substring(0, 14) + '...' : null,
+      key_prefix: apiKey ? apiKey.substring(0, 8) + '...' : null,
     });
   }
 
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada.' });
+    return res.status(500).json({
+      error: 'GEMINI_API_KEY não configurada.',
+      fix: 'Vercel → Settings → Environment Variables → adicione GEMINI_API_KEY'
+    });
   }
 
   let body = req.body;
@@ -27,20 +41,40 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Body JSON inválido' });
     }
   }
+  if (!body) return res.status(400).json({ error: 'Body vazio' });
+
+  // Converte formato Anthropic → Gemini
+  const prompt = body.messages?.[0]?.content || '';
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1500,
+        }
+      }),
     });
+
     const data = await response.json();
-    return res.status(response.status).json(data);
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: data?.error?.message || 'Erro na API Gemini' });
+    }
+
+    // Converte resposta Gemini → formato Anthropic (compatível com o frontend)
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    return res.status(200).json({
+      content: [{ type: 'text', text }]
+    });
+
   } catch (err) {
+    console.error('[proxy/ai]', err.message);
     return res.status(500).json({ error: err.message });
   }
 };
