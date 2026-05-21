@@ -2836,6 +2836,10 @@ input[type=range]::-webkit-slider-thumb{
   </div>
 </div>
 
+<!-- PDF extras (visíveis apenas no print) -->
+<div id="pdf-header-info" style="display:none"></div>
+<div id="ia-pdf-section" style="display:none"></div>
+
 <!-- Comp picker modal -->
 <div class="modal-overlay" id="compPickerModal">
   <div class="modal" style="max-width:500px">
@@ -5288,6 +5292,59 @@ function exportCSV() {
   showToast('📄 CSV exportado!','ok');
 }
 function exportPDF() { showToast('🖨 Abrindo impressão...','ok',2000); setTimeout(()=>window.print(),400); }
+
+function generatePDF() {
+  closePDFModal();
+
+  // Injeta dados do formulário no relatório
+  const emp  = $('pdf-nome-emp')?.value  || '';
+  const proj = $('pdf-nome-proj')?.value || currentProjectName || '';
+  const data = $('pdf-data')?.value      || '';
+  const resp = $('pdf-resp')?.value      || '';
+
+  // Injeta cabeçalho do relatório se tiver campos
+  const headerEl = $('pdf-header-info');
+  if (headerEl) {
+    headerEl.innerHTML =
+      `<div style="margin-bottom:8px;font-size:13px;color:var(--mut)">
+        ${emp ? '<strong>' + emp + '</strong> · ' : ''}
+        ${proj || ''}
+        ${data ? ' · ' + data : ''}
+        ${resp ? '<br><span style="font-size:11px">' + resp + '</span>' : ''}
+      </div>`;
+  }
+
+  // Inclui diagnóstico IA no PDF se disponível
+  const iaSection = $('ia-pdf-section');
+  if (iaSection) {
+    if (window._iaResultForPDF && iaLastResult) {
+      const d = iaLastResult;
+      const strip = s => s.replace(/<[^>]+>/g, '');
+      iaSection.style.display = 'block';
+      iaSection.innerHTML = `
+        <div style="page-break-before:always;padding:24px 0">
+          <h2 style="font-family:var(--ff);font-size:16px;font-weight:800;margin-bottom:16px;color:var(--tex)">✦ Diagnóstico IA</h2>
+          <p style="font-size:12px;color:var(--tex);line-height:1.8;margin-bottom:16px">${d.veredicto || ''}</p>
+          ${[
+            { label: 'Pontos Fortes', key: 'pontos_fortes', color: '#1D9E75' },
+            { label: 'Atenção',       key: 'atencao',       color: '#854F0B' },
+            { label: 'Riscos',        key: 'riscos',        color: '#A32D2D' },
+            { label: 'Sugestões',     key: 'sugestoes',     color: '#185FA5' },
+          ].map(sec => `
+            <div style="margin-bottom:12px">
+              <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${sec.color};margin-bottom:6px">${sec.label}</div>
+              ${(d[sec.key]||[]).map(i => `<div style="font-size:11px;color:var(--tex);line-height:1.6;padding:4px 0;border-bottom:1px solid var(--brd)">• ${strip(i)}</div>`).join('')}
+            </div>
+          `).join('')}
+        </div>`;
+    } else {
+      iaSection.style.display = 'none';
+    }
+  }
+
+  showToast('🖨 Preparando PDF...', 'ok', 2000);
+  setTimeout(() => window.print(), 600);
+}
 function exportJSON() {
   const R=calcular();
   const data={meta:{app:'LoteVia PRO',versao:'2.0',projeto:projectLabel(),exportadoEm:new Date().toISOString()},premissas:captureSnapshot(),resultados:{vgvBruto:R.vgvBruto,qtdLotes:R.qtdLotes,lucroLiq:R.lucroLiq,margemLiq:R.margemLiq,tirAa:R.tirAa,vpl:R.vpl,expMax:R.expMax,expMes:R.expMes,breakevenMes:R.breakevenMes,roi:R.roi,custoTot:R.custoTot},fluxo:Array.from({length:R.totalMeses},(_,i)=>{const m=i+1,rec=R.rec[m];const rb=rec.av+rec.cp+rec.lp;return{mes:m,fase:rec.fase,lotes:rec.lotes,receitaBruta:+rb.toFixed(2),custoObra:+(R.obra[m]||0).toFixed(2),fluxoMensal:+R.fluxos[m].toFixed(2),fluxoAcumulado:+R.fluxoAcum[m].toFixed(2)};})};
