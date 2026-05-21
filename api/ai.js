@@ -1,6 +1,4 @@
-// api/ai.js — Vercel Serverless Function
-// Proxy para Google Gemini API com retry automático em caso de rate limit.
-
+// api/ai.js — Vercel Serverless Function (sem retry — timeout no plano free é 10s)
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
@@ -11,8 +9,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'GET') {
     const apiKey = process.env.GEMINI_API_KEY;
     return res.status(200).json({
-      status: 'online',
-      provider: 'Google Gemini 2.0 Flash',
+      status: 'online', provider: 'Google Gemini 2.0 Flash',
       key_configured: !!apiKey,
       key_prefix: apiKey ? apiKey.substring(0, 8) + '...' : null,
     });
@@ -25,69 +22,31 @@ module.exports = async function handler(req, res) {
 
   let body = req.body;
   if (typeof body === 'string') {
-    try { body = JSON.parse(body); } catch (e) {
-      return res.status(400).json({ error: 'Body JSON inválido' });
-    }
+    try { body = JSON.parse(body); } catch(e) { return res.status(400).json({ error: 'Body inválido' }); }
   }
-  if (!body) return res.status(400).json({ error: 'Body vazio' });
 
-  const prompt = body.messages?.[0]?.content || '';
+  const prompt = body?.messages?.[0]?.content || '';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
-  const MAX_RETRIES = 4;
-  const RETRY_DELAYS = [5000, 10000, 20000, 30000]; // 5s, 10s, 20s, 30s
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.5, maxOutputTokens: 2048, responseMimeType: 'application/json' }
+      }),
+    });
 
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.5,
-            maxOutputTokens: 2048,
-            responseMimeType: 'application/json',
-          }
-        }),
-      });
+    const data = await response.json();
+    if (!response.ok) return res.status(response.status).json({ error: data?.error?.message || 'Erro Gemini', code: response.status });
 
-      // Rate limit — espera e tenta de novo
-      if (response.status === 429) {
-        if (attempt < MAX_RETRIES) {
-          const wait = RETRY_DELAYS[attempt];
-          console.log(`[proxy/ai] 429 rate limit, aguardando ${wait/1000}s (tentativa ${attempt+1}/${MAX_RETRIES})`);
-          await sleep(wait);
-          continue;
-        }
-        return res.status(429).json({
-          error: 'Limite de requisições do Gemini atingido. Aguarde 1 minuto e tente novamente.'
-        });
-      }
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if (!text) return res.status(500).json({ error: `Resposta vazia (finishReason: ${data?.candidates?.[0]?.finishReason})` });
 
-      const data = await response.json();
+    return res.status(200).json({ content: [{ type: 'text', text }] });
 
-      if (!response.ok) {
-        const msg = data?.error?.message || `Erro Gemini status ${response.status}`;
-        return res.status(response.status).json({ error: msg });
-      }
-
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      if (!text) {
-        const reason = data?.candidates?.[0]?.finishReason || 'unknown';
-        return res.status(500).json({ error: `Resposta vazia do Gemini (finishReason: ${reason})` });
-      }
-
-      return res.status(200).json({ content: [{ type: 'text', text }] });
-
-    } catch (err) {
-      if (attempt < MAX_RETRIES) {
-        await sleep(RETRY_DELAYS[attempt]);
-        continue;
-      }
-      console.error('[proxy/ai]', err.message);
-      return res.status(500).json({ error: err.message });
-    }
+  } catch(err) {
+    return res.status(500).json({ error: err.message });
   }
 };
