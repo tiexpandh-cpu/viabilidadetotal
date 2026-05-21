@@ -5775,16 +5775,10 @@ Breakeven: Mês ${R.breakevenMes || 'não atingido'}
 Exposição máxima de capital: ${fmt2(Math.abs(R.expMax))} (Mês ${R.expMes})
 Horizonte total: ${R.totalMeses} meses
 
-=== INSTRUÇÃO DE RESPOSTA ===
-Responda APENAS em JSON válido, sem markdown, sem texto fora do JSON. Use exatamente esta estrutura:
-{
-  "veredicto": "parágrafo único de 3-4 frases com avaliação geral do projeto, mencionando os indicadores mais relevantes",
-  "pontos_fortes": ["item 1 com <strong>destaque</strong> no início", "item 2", "item 3"],
-  "atencao": ["item 1 com <strong>destaque</strong>", "item 2", "item 3"],
-  "riscos": ["item 1 com <strong>destaque</strong>", "item 2"],
-  "sugestoes": ["sugestão concreta 1", "sugestão concreta 2", "sugestão concreta 3"]
-}
-Cada item dos arrays deve ter entre 1 e 2 frases. Use tags HTML <strong> apenas no início de cada item para destacar o tema. Seja direto e técnico.`;
+=== INSTRUÇÃO ===
+Responda APENAS com JSON válido, sem markdown, sem texto fora do JSON:
+{"veredicto":"3-4 frases avaliando o projeto com os indicadores principais","pontos_fortes":["<strong>Tema</strong> explicação","...","..."],"atencao":["<strong>Tema</strong> explicação","...","..."],"riscos":["<strong>Tema</strong> explicação","..."],"sugestoes":["sugestão concreta 1","sugestão concreta 2","sugestão concreta 3"]}
+Cada item: 1-2 frases. Use <strong> apenas no início para destacar o tema. Seja direto e técnico. Responda em português.`;
 }
 
 async function runIADiagnostico() {
@@ -5833,9 +5827,14 @@ async function runIADiagnostico() {
     const data = await res.json();
     const raw  = data.content?.find(b => b.type === 'text')?.text || '';
 
-    // Strip possible markdown fences
-    const clean = raw.replace(/^```json\s*/,'').replace(/```\s*$/,'').trim();
-    const parsed = JSON.parse(clean);
+    // Strip markdown fences
+    const clean = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
+
+    // Robust parse: extrai campos mesmo de JSON incompleto
+    const parsed = _safeParseIA(clean);
+    if (!parsed.veredicto && !parsed.pontos_fortes?.length) {
+      throw new Error('Resposta da IA inválida ou vazia. Tente novamente.');
+    }
     iaLastResult = parsed;
     _renderIAResult(parsed, R);
 
@@ -5848,6 +5847,38 @@ async function runIADiagnostico() {
     $('ia-error-msg').textContent = e.message || 'Erro desconhecido ao chamar a API.';
     console.error('[IA Diagnóstico]', e);
   }
+}
+
+function _safeParseIA(raw) {
+  // 1. Tenta parse normal primeiro
+  try { return JSON.parse(raw); } catch(_) {}
+
+  // 2. Tenta completar JSON truncado adicionando fechamentos
+  const closings = ['"}]}}', '"]}', ']}', '}'];
+  for (const c of closings) {
+    try { return JSON.parse(raw + c); } catch(_) {}
+  }
+
+  // 3. Extrai campos individualmente via regex (fallback robusto)
+  const result = { veredicto:'', pontos_fortes:[], atencao:[], riscos:[], sugestoes:[] };
+
+  const extractStr = (key) => {
+    const m = raw.match(new RegExp('"' + key + '"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)'));
+    return m ? m[1].replace(/\\n/g,' ').replace(/\\"/g,'"') : '';
+  };
+  const extractArr = (key) => {
+    const m = raw.match(new RegExp('"' + key + '"\\s*:\\s*\\[(.*?)(?:\\]|$)', 's'));
+    if (!m) return [];
+    return [...m[1].matchAll(/"((?:[^"\\]|\\.)*)"/g)].map(x => x[1].replace(/\\n/g,' ').replace(/\\"/g,'"')).filter(Boolean);
+  };
+
+  result.veredicto     = extractStr('veredicto');
+  result.pontos_fortes = extractArr('pontos_fortes');
+  result.atencao       = extractArr('atencao');
+  result.riscos        = extractArr('riscos');
+  result.sugestoes     = extractArr('sugestoes');
+
+  return result;
 }
 
 function _renderIAResult(d, R) {
