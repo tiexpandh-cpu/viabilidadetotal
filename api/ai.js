@@ -1,11 +1,5 @@
 // api/ai.js — Vercel Serverless Function
 // Proxy para Google Gemini API. Resolve CORS.
-//
-// SETUP:
-//   1. Acesse: https://aistudio.google.com/app/apikey
-//   2. Clique em "Create API Key" (gratuito, sem cartão)
-//   3. Vercel → Settings → Environment Variables → adicione:
-//      GEMINI_API_KEY = AIza...
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,7 +8,6 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // GET → diagnóstico de configuração
   if (req.method === 'GET') {
     const apiKey = process.env.GEMINI_API_KEY;
     return res.status(200).json({
@@ -29,10 +22,7 @@ module.exports = async function handler(req, res) {
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({
-      error: 'GEMINI_API_KEY não configurada.',
-      fix: 'Vercel → Settings → Environment Variables → adicione GEMINI_API_KEY'
-    });
+    return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
   }
 
   let body = req.body;
@@ -43,12 +33,11 @@ module.exports = async function handler(req, res) {
   }
   if (!body) return res.status(400).json({ error: 'Body vazio' });
 
-  // Converte formato Anthropic → Gemini
   const prompt = body.messages?.[0]?.content || '';
 
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    
+
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -56,7 +45,8 @@ module.exports = async function handler(req, res) {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 1500,
+          maxOutputTokens: 3000,
+          responseMimeType: 'application/json',
         }
       }),
     });
@@ -67,7 +57,6 @@ module.exports = async function handler(req, res) {
       return res.status(response.status).json({ error: data?.error?.message || 'Erro na API Gemini' });
     }
 
-    // Converte resposta Gemini → formato Anthropic (compatível com o frontend)
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
     return res.status(200).json({
       content: [{ type: 'text', text }]
