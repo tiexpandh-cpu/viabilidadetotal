@@ -6015,6 +6015,347 @@ function includeIAInPDF() {
   showToast('✦ Diagnóstico IA incluído no relatório','ok');
 }
 
+// ═══════════════════════════════════════════════════════
+// FUNÇÕES FALTANTES
+// ═══════════════════════════════════════════════════════
+
+// ── Utilidade ────────────────────────────────────────
+function stopPropagation(e){ e && e.stopPropagation(); }
+
+// ── Matriz de Sensibilidade ───────────────────────────
+let matrixMetric = 'tirAa';
+
+function setMatrixMetric(metric, btn) {
+  matrixMetric = metric;
+  document.querySelectorAll('.matrix-metric-btn').forEach(b => b.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  buildMatrix();
+}
+
+function buildMatrix() {
+  const wrap = $('matrixWrap');
+  const legend = $('matrixLegend');
+  if (!wrap) return;
+
+  const R0 = calcular();
+  const snap = captureSnapshot();
+
+  // Ranges: VSO ±40%, Preço ±30%
+  const vsoRange   = [-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4];
+  const precoRange = [-0.3,-0.2,-0.1,0,0.1,0.2,0.3];
+
+  const fmt = (v, metric) => {
+    if (v == null || isNaN(v)) return '—';
+    if (metric === 'tirAa' || metric === 'margemLiq') return v.toFixed(1) + '%';
+    if (metric === 'lucroLiq' || metric === 'vpl' || metric === 'expMax')
+      return v >= 1e6 ? 'R$' + (v/1e6).toFixed(1) + 'M' : 'R$' + (v/1e3).toFixed(0) + 'K';
+    if (metric === 'breakevenMes') return v ? 'M' + v : '—';
+    return v.toFixed(1);
+  };
+
+  const colorClass = (v, metric) => {
+    const base = R0[metric];
+    if (v == null || isNaN(v)) return '';
+    const ratio = base !== 0 ? v / base : 1;
+    if (ratio >= 1.15) return 'matrix-cell-high';
+    if (ratio >= 0.85) return 'matrix-cell-mid';
+    return 'matrix-cell-low';
+  };
+
+  let html = '<table class="matrix-table"><thead><tr><th>VSO \\ Preço</th>';
+  precoRange.forEach(p => { html += `<th>${p >= 0 ? '+' : ''}${(p*100).toFixed(0)}%</th>`; });
+  html += '</tr></thead><tbody>';
+
+  vsoRange.forEach(v => {
+    html += `<tr><td><strong>${v >= 0 ? '+' : ''}${(v*100).toFixed(0)}%</strong></td>`;
+    precoRange.forEach(p => {
+      // Temporarily modify snap and recalculate
+      const origPreco = snap.precoM2;
+      const origVso   = snap.vsoMensal;
+      snap.precoM2    = (origPreco || 0) * (1 + p);
+      if (snap.phasesData) snap.phasesData = snap.phasesData.map(f => ({...f, vso: (f.vso||0)*(1+v)}));
+      restoreSnapshot(snap);
+      const R = calcular();
+      snap.precoM2  = origPreco;
+      if (snap.phasesData) snap.phasesData = snap.phasesData.map(f => ({...f, vso: (f.vso||0)/(1+v)}));
+      restoreSnapshot(snap);
+
+      const val = R[matrixMetric];
+      const cls = colorClass(val, matrixMetric);
+      const center = v === 0 && p === 0 ? ' matrix-cell-center' : '';
+      html += `<td class="matrix-cell ${cls}${center}" title="VSO ${v>=0?'+':''}${(v*100).toFixed(0)}% / Preço ${p>=0?'+':''}${(p*100).toFixed(0)}%">${fmt(val, matrixMetric)}</td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+  if (legend) legend.style.display = 'flex';
+
+  // Restore original
+  restoreSnapshot(snap);
+  showToast('✓ Matriz atualizada', 'ok', 1500);
+}
+
+function exportMatrixExcel() {
+  showToast('📊 Exportando matriz...', 'ok', 1500);
+  // Gera CSV da matriz atual
+  const table = $('matrixWrap')?.querySelector('table');
+  if (!table) { showToast('⚠ Gere a matriz primeiro', 'err'); return; }
+  const rows = [...table.querySelectorAll('tr')].map(r =>
+    [...r.querySelectorAll('th,td')].map(c => '"' + c.textContent.trim() + '"').join(',')
+  );
+  const csv = rows.join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = 'matriz_sensibilidade.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Permuta ───────────────────────────────────────────
+let permLotes = [];
+let permLotesMista = [];
+
+function showPermutaTab() { showTab('permuta'); }
+
+function addPermLote(tipo) {
+  const isMista = tipo === 'mista';
+  const grid = $(isMista ? 'permLoteGridMista' : 'permLoteGrid');
+  if (!grid) return;
+  const arr  = isMista ? permLotesMista : permLotes;
+  const idx  = arr.length;
+  arr.push({ area: 200, qtd: 1 });
+  const row = document.createElement('div');
+  row.className = 'perm-lote-row';
+  row.style = 'display:flex;gap:8px;align-items:center;margin-bottom:6px';
+  row.innerHTML = `
+    <input type="number" value="200" min="50" placeholder="Área m²"
+      style="flex:1;background:var(--bg3);border:1px solid var(--brd);border-radius:7px;color:var(--tex);font-family:var(--fm);font-size:12px;padding:6px 8px;outline:none"
+      oninput="permLotes${isMista?'Mista':''}[${idx}].area=+this.value">
+    <input type="number" value="1" min="1" placeholder="Qtd"
+      style="width:60px;background:var(--bg3);border:1px solid var(--brd);border-radius:7px;color:var(--tex);font-family:var(--fm);font-size:12px;padding:6px 8px;outline:none"
+      oninput="permLotes${isMista?'Mista':''}[${idx}].qtd=+this.value">
+    <button onclick="this.parentElement.remove();${isMista?'permLotesMista':'permLotes'}.splice(${idx},1)"
+      style="padding:4px 8px;background:rgba(240,82,79,.1);border:1px solid rgba(240,82,79,.3);color:var(--red);border-radius:6px;font-size:12px;cursor:pointer">✕</button>`;
+  grid.appendChild(row);
+}
+
+function calcPermuta() {
+  const modalidade = $('perm-modalidade')?.value || 'fisica';
+  const areaRef    = +($('perm-area-ref')?.value || 0);
+  const valorTerr  = +($('perm-valor-terreno')?.value || 0);
+  const R          = calcular();
+
+  let pctVgv = 0, descricao = '';
+
+  if (modalidade === 'fisica') {
+    const totalLotesPermuta = permLotes.reduce((s, l) => s + (l.qtd || 1), 0);
+    pctVgv = R.qtdLotes > 0 ? (totalLotesPermuta / R.qtdLotes) * 100 : 0;
+    descricao = `${totalLotesPermuta} lote(s) físico(s)`;
+  } else if (modalidade === 'financeira') {
+    pctVgv = +($('perm-pct-vgv')?.value || 0);
+    descricao = `${pctVgv.toFixed(1)}% do VGV em dinheiro`;
+  } else {
+    const pctLotes = +($('perm-pct-lotes-mista')?.value || 60);
+    const pctDin   = +($('perm-pct-mista-total')?.value || 25);
+    pctVgv = pctDin;
+    descricao = `Mista: ${pctLotes}% lotes + ${pctDin.toFixed(1)}% VGV dinheiro`;
+  }
+
+  const valorPermuta = (R.vgvBruto || 0) * (pctVgv / 100);
+  const diferenca    = valorPermuta - valorTerr;
+
+  const card = $('permSummaryCard');
+  if (card) {
+    card.style.display = 'block';
+    card.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px">
+        <div style="text-align:center">
+          <div style="font-size:11px;color:var(--mut);margin-bottom:4px">Valor da Permuta</div>
+          <div style="font-size:20px;font-weight:700;color:var(--pur);font-family:var(--ff)">
+            ${valorPermuta >= 1e6 ? 'R$'+(valorPermuta/1e6).toFixed(2)+'M' : 'R$'+(valorPermuta/1e3).toFixed(0)+'K'}
+          </div>
+          <div style="font-size:10px;color:var(--mut);margin-top:2px">${descricao}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;color:var(--mut);margin-bottom:4px">Valor do Terreno</div>
+          <div style="font-size:20px;font-weight:700;color:var(--tex);font-family:var(--ff)">
+            ${valorTerr >= 1e6 ? 'R$'+(valorTerr/1e6).toFixed(2)+'M' : 'R$'+(valorTerr/1e3).toFixed(0)+'K'}
+          </div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;color:var(--mut);margin-bottom:4px">Diferença</div>
+          <div style="font-size:20px;font-weight:700;font-family:var(--ff);color:${diferenca>=0?'var(--grn)':'var(--red)'}">
+            ${diferenca >= 0 ? '+' : ''}${diferenca >= 1e6 ? 'R$'+(diferenca/1e6).toFixed(2)+'M' : 'R$'+(diferenca/1e3).toFixed(0)+'K'}
+          </div>
+          <div style="font-size:10px;color:var(--mut);margin-top:2px">${diferenca >= 0 ? 'Favorável ao incorporador' : 'Favorável ao proprietário'}</div>
+        </div>
+      </div>`;
+  }
+
+  if ($('perm-pct-display')) $('perm-pct-display').textContent = pctVgv.toFixed(1) + '%';
+  if ($('perm-meter-fill')) $('perm-meter-fill').style.width = Math.min(100, pctVgv) + '%';
+  showToast('✓ Permuta calculada', 'ok', 1500);
+}
+
+function exportPermutaExcel() {
+  const R = calcular();
+  const nome = $('perm-nome')?.value || 'Proprietário';
+  const rows = [
+    ['Campo', 'Valor'],
+    ['Proprietário', nome],
+    ['Modalidade', $('perm-modalidade')?.value || '—'],
+    ['Valor do Terreno', $('perm-valor-terreno')?.value || 0],
+    ['VGV Bruto', R.vgvBruto?.toFixed(2) || 0],
+    ['Qtd Lotes Total', R.qtdLotes || 0],
+  ];
+  const csv = rows.map(r => r.map(c => '"' + c + '"').join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'permuta_' + nome.replace(/\s+/g,'_') + '.csv';
+  a.click();
+}
+
+// ── SFO (Simulação Financeira de Obra) ────────────────
+function toggleSFO() {
+  const cb  = $('sfoToggle');
+  const sec = $('sfoSec') || document.querySelector('.sfo-content');
+  if (!sec) return;
+  const on = cb ? cb.checked : (sec.style.display === 'none');
+  sec.style.display = on ? 'block' : 'none';
+  if (cb) cb.checked = on;
+}
+
+function calcSFO() {
+  const txa   = +($('sfo-taxa')?.value   || 1.2) / 100;
+  const prazo = +($('sfo-prazo')?.value  || 24);
+  const pct   = +($('sfo-pct')?.value    || 80) / 100;
+  const R     = calcular();
+  const valorFinanciado = (R.custoInfra || 0) * pct;
+  const parcela = valorFinanciado * (txa * Math.pow(1+txa, prazo)) / (Math.pow(1+txa, prazo) - 1);
+  const totalPago = parcela * prazo;
+  const juros = totalPago - valorFinanciado;
+
+  const res = $('sfoResult') || document.querySelector('.sfo-result');
+  if (res) {
+    res.style.display = 'block';
+    res.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px">
+        <div style="text-align:center">
+          <div style="font-size:10px;color:var(--mut)">Valor Financiado</div>
+          <div style="font-size:18px;font-weight:700;color:var(--blu);font-family:var(--ff)">
+            ${valorFinanciado>=1e6?'R$'+(valorFinanciado/1e6).toFixed(2)+'M':'R$'+(valorFinanciado/1e3).toFixed(0)+'K'}
+          </div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:10px;color:var(--mut)">Parcela Mensal</div>
+          <div style="font-size:18px;font-weight:700;color:var(--acc);font-family:var(--ff)">
+            ${parcela>=1e3?'R$'+(parcela/1e3).toFixed(1)+'K':'R$'+parcela.toFixed(0)}
+          </div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:10px;color:var(--mut)">Juros Totais</div>
+          <div style="font-size:18px;font-weight:700;color:var(--red);font-family:var(--ff)">
+            ${juros>=1e6?'R$'+(juros/1e6).toFixed(2)+'M':'R$'+(juros/1e3).toFixed(0)+'K'}
+          </div>
+        </div>
+      </div>`;
+  }
+  showToast('✓ SFO calculado', 'ok', 1500);
+}
+
+function exportSFOExcel() {
+  const R = calcular();
+  const txa   = +($('sfo-taxa')?.value  || 1.2) / 100;
+  const prazo = +($('sfo-prazo')?.value || 24);
+  const pct   = +($('sfo-pct')?.value   || 80) / 100;
+  const vf    = (R.custoInfra || 0) * pct;
+  const parc  = vf * (txa * Math.pow(1+txa,prazo)) / (Math.pow(1+txa,prazo)-1);
+  const rows  = [
+    ['Simulação Financeira de Obra'],
+    ['Valor Financiado', vf.toFixed(2)],
+    ['Taxa Mensal (%)', (txa*100).toFixed(2)],
+    ['Prazo (meses)', prazo],
+    ['Parcela Mensal', parc.toFixed(2)],
+    ['Total Pago', (parc*prazo).toFixed(2)],
+    ['Juros Totais', (parc*prazo - vf).toFixed(2)],
+  ];
+  const csv = rows.map(r => r.map(c => '"'+c+'"').join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'sfo.csv'; a.click();
+}
+
+// ── Cálculo Reverso ───────────────────────────────────
+function calcReverse() {
+  const tirMeta   = +($('rev-tir')?.value   || 20) / 100;
+  const margemMeta = +($('rev-margem')?.value || 20) / 100;
+  const R = calcular();
+
+  const precoAtual = +(document.getElementById('precoM2')?.value || 0);
+  const precoNecTIR = precoAtual * (1 + (tirMeta - R.tirAa/100));
+  const precoNecMargem = R.custoTot > 0
+    ? (R.custoTot / ((R.qtdLotes||1) * +(document.getElementById('tamLote')?.value||200))) / (1 - margemMeta)
+    : 0;
+
+  const out = $('reverseOutput') || document.querySelector('.rev-output');
+  if (out) {
+    out.style.display = 'block';
+    const fmtPreco = v => v > 0 ? 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}) : '—';
+    out.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px">
+        <div style="background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:10px;color:var(--mut);margin-bottom:4px">Preço/m² p/ TIR ${(tirMeta*100).toFixed(0)}%</div>
+          <div style="font-size:20px;font-weight:700;color:var(--grn);font-family:var(--ff)">${fmtPreco(precoNecTIR)}</div>
+          <div style="font-size:10px;color:var(--mut);margin-top:4px">Atual: ${fmtPreco(precoAtual)}</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:10px;color:var(--mut);margin-bottom:4px">Preço/m² p/ Margem ${(margemMeta*100).toFixed(0)}%</div>
+          <div style="font-size:20px;font-weight:700;color:var(--acc);font-family:var(--ff)">${fmtPreco(precoNecMargem)}</div>
+          <div style="font-size:10px;color:var(--mut);margin-top:4px">Atual: ${fmtPreco(precoAtual)}</div>
+        </div>
+      </div>`;
+  }
+  showToast('✓ Cálculo reverso concluído', 'ok', 1500);
+}
+
+// ── Export JSON ───────────────────────────────────────
+function exportProjectJSON() {
+  const snap = captureSnapshot();
+  const nome = currentProjectName || 'projeto';
+  const blob = new Blob([JSON.stringify(snap, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = nome.replace(/\s+/g,'_') + '_' + Date.now() + '.json';
+  a.click();
+  showToast('📤 JSON exportado', 'ok', 1500);
+}
+
+function triggerImportJSON() {
+  $('importJSONInput')?.click();
+}
+
+function importProjectJSON(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const snap = JSON.parse(e.target.result);
+      restoreSnapshot(snap);
+      renderPhases(); renderObra(); updateBaldes(); captureBase(); updateUI();
+      showToast('📥 Projeto importado com sucesso', 'ok', 2000);
+      closeProjects();
+    } catch(err) {
+      showToast('⚠ Arquivo JSON inválido', 'err', 2000);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
 // SW REGISTRATION
 if('serviceWorker' in navigator){window.addEventListener('load',async()=>{const isLocalFile=location.protocol==='file:';const isClaudeHost=location.hostname.includes('claudeusercontent.com');if(isLocalFile||isClaudeHost)return;try{const reg=await navigator.serviceWorker.register('/service-worker.js');console.log('[SW] Registrado:',reg.scope);reg.addEventListener('updatefound',()=>{const w=reg.installing;w?.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)showToast('🔄 Nova versão disponível','ok',5000);});});}catch(e){}});}
 
