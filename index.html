@@ -5811,7 +5811,9 @@ async function runIADiagnostico() {
 
   try {
     const prompt = _buildIAPrompt(R);
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    // Em produção usa o proxy Vercel (/api/ai) para contornar o CORS.
+    const endpoint = '/api/ai';
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

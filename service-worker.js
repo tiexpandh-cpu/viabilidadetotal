@@ -1,91 +1,68 @@
-// LoteVia PRO — Service Worker v1.2
-// Estratégia: Cache-First para assets estáticos, Network-First para dados
+// ExpandhVia PRO — Service Worker v2.1
+// Fix: skip all cross-origin requests (Supabase, Anthropic, BCB, etc.)
 
-const CACHE_NAME = 'lotevia-v1.2';
-const STATIC_ASSETS = [
+const CACHE_NAME = 'expandhvia-v2';
+const CACHE_ASSETS = [
   '/',
   '/index.html',
-  '/manifest.json',
-  // Chart.js e fontes são cacheados na primeira visita
+  'https://cdn.jsdelivr.net/npm/chart.js',
+  'https://unpkg.com/html2canvas',
+  'https://unpkg.com/jspdf',
 ];
 
-// ── INSTALL: pré-cacheia os assets principais ──────────────
+// ── Install: pre-cache local assets only ──────────────────────────────────────
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      console.log('[SW] Cacheando assets iniciais');
-      return cache.addAll(STATIC_ASSETS);
+      return Promise.allSettled(
+        CACHE_ASSETS.map(url =>
+          cache.add(url).catch(() => {/* ignore individual failures */})
+        )
+      );
     }).then(() => self.skipWaiting())
   );
 });
 
-// ── ACTIVATE: limpa caches antigos ────────────────────────
+// ── Activate: remove old caches ───────────────────────────────────────────────
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => {
-          console.log('[SW] Removendo cache antigo:', k);
-          return caches.delete(k);
-        })
-      )
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
 
-// ── FETCH: Cache-First para assets, Network-First para resto ──
+// ── Fetch: ONLY intercept same-origin requests ─────────────────────────────────
 self.addEventListener('fetch', event => {
-  const { request } = event;
-  const url = new URL(request.url);
+  const url = new URL(event.request.url);
 
-  // Ignora extensões do Chrome e requests não-HTTP
-  if (!request.url.startsWith('http')) return;
-
-  // CDN assets (Chart.js, fontes Google) → Cache-First
-  if (
-    url.hostname.includes('cdnjs.cloudflare.com') ||
-    url.hostname.includes('fonts.googleapis.com') ||
-    url.hostname.includes('fonts.gstatic.com')
-  ) {
-    event.respondWith(
-      caches.match(request).then(cached => {
-        if (cached) return cached;
-        return fetch(request).then(response => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
-          return response;
-        });
-      })
-    );
-    return;
+  // 🔑 KEY FIX: pass through ALL cross-origin requests untouched
+  // This includes: Supabase, Anthropic API, BCB, CDNs, etc.
+  if (url.origin !== self.location.origin) {
+    return; // do NOT call event.respondWith() — let browser handle normally
   }
 
-  // App HTML → Network-First (sempre tenta buscar versão mais nova)
-  if (request.mode === 'navigate' || request.destination === 'document') {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
-          return response;
-        })
-        .catch(() => caches.match(request).then(c => c || caches.match('/')))
-    );
-    return;
-  }
+  // Only cache GET requests for same-origin assets
+  if (event.request.method !== 'GET') return;
 
-  // Demais recursos → Cache-First com fallback de rede
   event.respondWith(
-    caches.match(request).then(cached => cached || fetch(request))
-  );
-});
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
 
-// ── MENSAGENS do app ──────────────────────────────────────
-self.addEventListener('message', event => {
-  if (event.data === 'SKIP_WAITING') self.skipWaiting();
-  if (event.data === 'CLEAR_CACHE') {
-    caches.delete(CACHE_NAME).then(() => {
-      event.ports[0].postMessage({ ok: true });
-    });
-  }
+      return fetch(event.request).then(response => {
+        // Only cache valid same-origin responses
+        if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
+        }
+        const toCache = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, toCache));
+        return response;
+      }).catch(() => {
+        // Offline fallback for navigation requests
+        if (event.request.mode === 'navigate') {
+          return caches.match('/') || caches.match('/index.html');
+        }
+      });
+    })
+  );
 });
