@@ -446,19 +446,31 @@ input[type=range]::-webkit-slider-thumb{
 .exp-sep{width:1px;height:22px;background:var(--brd)}
 
 /* Print styles */
+@page{size:A4 landscape;margin:12mm 14mm}
 @media print{
   #loginScreen,header,.tabs-bar,
-  .export-bar,.exp-btn,.pwa-banner,
+  .export-bar,.exp-btn,
+  #pwaBanner,.pwa-banner,
+  #toast,.toast,
   #projectsModal,.modal-overlay,
+  #pdfModal,.pdf-modal-overlay,
+  #helpOverlay,.help-overlay,
+  .ia-trigger-card,.ia-run-btn,
+  .ia-rerun-btn,.ia-result-footer,
   .tab-pane:not(.on){display:none!important}
-  body{background:#fff!important;color:#000!important}
+  body{background:#fff!important;color:#000!important;font-size:11px}
   .tab-pane.on{display:block!important}
-  .ftbl th,.ftbl td{border:1px solid #ccc!important;color:#000!important;font-size:10px!important}
+  .ftbl th,.ftbl td{border:1px solid #ccc!important;color:#000!important;font-size:9px!important}
   .ftbl thead tr{background:#f0f0f0!important}
-  .card{border:1px solid #ddd!important;background:#fff!important}
+  .card{border:1px solid #ddd!important;background:#fff!important;break-inside:avoid}
   .kpi{border:1px solid #ddd!important;background:#f9f9f9!important}
   .kpi-v{color:#000!important}
-  canvas{max-width:100%}
+  .dash-kpi-grid{grid-template-columns:repeat(4,1fr)!important}
+  .chart-grid,.charts-row{grid-template-columns:repeat(3,1fr)!important}
+  canvas{max-width:100%!important;height:auto!important}
+  .ia-verdict,.ia-sec{border:1px solid #ddd!important;background:#f9f9f9!important;color:#000!important}
+  .ia-sec-label{color:#333!important}
+  .ia-sec-item,.ia-verdict{color:#000!important}
 }
 
 /* ══════════════════════════════════════════════════
