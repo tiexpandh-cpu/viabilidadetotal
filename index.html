@@ -455,25 +455,43 @@ input[type=range]::-webkit-slider-thumb{
   .export-bar,.exp-btn,
   #pwaBanner,#toast,
   #projectsModal,#pdfModal,#helpOverlay,
+  #shareModal,
   .modal-overlay,.pdf-modal-overlay,.help-overlay,
   .ia-trigger-card,.ia-run-btn,.ia-rerun-btn,
   .ia-result-footer,.dash-export-btns,
-  .tab-pane:not(.on){display:none!important}
+  .tab-pane:not(.on),
+  [id="pwaBanner"],[id="toast"]{
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
 
   /* Base */
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   body{background:#0d0f1a!important;color:#e2e4f0!important;font-size:10px;margin:0;padding:0}
   .tab-pane.on{display:block!important;padding:0!important}
 
-  /* KPI grid — 4 colunas, valores não cortam */
+  /* KPI grid — sem overflow, valores não cortam */
   .dash-kpi-grid{grid-template-columns:repeat(4,1fr)!important;gap:8px!important;margin-bottom:12px!important}
-  .dash-kpi-card{padding:12px 14px!important;border-radius:10px!important;overflow:visible!important;break-inside:avoid}
+  .dash-kpi-card{
+    padding:12px 14px!important;border-radius:10px!important;
+    overflow:visible!important;break-inside:avoid;
+    min-height:0!important;
+  }
   .dash-kpi-card--sm{padding:10px 12px!important;border-radius:8px!important}
-  .dk-value{font-size:20px!important;white-space:normal!important;word-break:break-word!important;letter-spacing:-.5px!important}
-  .dk-value--sm{font-size:14px!important}
-  .dk-label{font-size:9px!important;letter-spacing:.8px!important}
-  .dk-sub{font-size:9px!important}
-  .dk-icon{font-size:18px!important}
+  .dk-value{
+    font-size:18px!important;
+    white-space:normal!important;
+    word-break:break-word!important;
+    letter-spacing:-.5px!important;
+    overflow:visible!important;
+  }
+  .dk-value--sm{font-size:13px!important;white-space:normal!important}
+  .dk-label{font-size:8px!important;letter-spacing:.8px!important}
+  .dk-sub{font-size:8px!important}
+  .dk-icon{font-size:16px!important}
+  .dk-body{overflow:visible!important;min-width:0!important}
 
   /* Gráficos — 3 colunas */
   .chart-grid,.charts-row,.g3{grid-template-columns:repeat(3,1fr)!important;gap:8px!important}
@@ -5426,19 +5444,30 @@ function generatePDF() {
     }
   }
 
-  // Esconde banner PWA e toast inline antes de imprimir
+  // Esconde banner PWA e toast — múltiplas estratégias para garantir
   const toHide = ['pwaBanner','toast'];
   const hidden = [];
   toHide.forEach(id => {
     const el = $(id);
-    if(el){ el.style.setProperty('display','none','important'); hidden.push(el); }
+    if(el){
+      el.style.setProperty('display','none','important');
+      el.style.setProperty('visibility','hidden','important');
+      el.style.setProperty('opacity','0','important');
+      el.setAttribute('data-print-hide','1');
+      hidden.push(el);
+    }
   });
 
   showToast('🖨 Abrindo impressão...','ok',1500);
   setTimeout(() => {
     window.print();
     setTimeout(() => {
-      hidden.forEach(el => el.style.removeProperty('display'));
+      hidden.forEach(el => {
+        el.style.removeProperty('display');
+        el.style.removeProperty('visibility');
+        el.style.removeProperty('opacity');
+        el.removeAttribute('data-print-hide');
+      });
       if(iaSection) iaSection.style.display = 'none';
       window._iaResultForPDF = null;
     }, 800);
