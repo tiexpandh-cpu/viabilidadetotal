@@ -19,6 +19,8 @@
 <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root {
   --bg:    #09090f;
@@ -446,31 +448,53 @@ input[type=range]::-webkit-slider-thumb{
 .exp-sep{width:1px;height:22px;background:var(--brd)}
 
 /* Print styles */
-@page{size:A4 landscape;margin:12mm 14mm}
+@page{size:A4 landscape;margin:10mm 12mm}
 @media print{
+  /* Ocultar elementos de UI */
   #loginScreen,header,.tabs-bar,
   .export-bar,.exp-btn,
-  #pwaBanner,.pwa-banner,
-  #toast,.toast,
-  #projectsModal,.modal-overlay,
-  #pdfModal,.pdf-modal-overlay,
-  #helpOverlay,.help-overlay,
-  .ia-trigger-card,.ia-run-btn,
-  .ia-rerun-btn,.ia-result-footer,
+  #pwaBanner,#toast,
+  #projectsModal,#pdfModal,#helpOverlay,
+  .modal-overlay,.pdf-modal-overlay,.help-overlay,
+  .ia-trigger-card,.ia-run-btn,.ia-rerun-btn,
+  .ia-result-footer,.dash-export-btns,
   .tab-pane:not(.on){display:none!important}
-  body{background:#fff!important;color:#000!important;font-size:11px}
-  .tab-pane.on{display:block!important}
-  .ftbl th,.ftbl td{border:1px solid #ccc!important;color:#000!important;font-size:9px!important}
-  .ftbl thead tr{background:#f0f0f0!important}
-  .card{border:1px solid #ddd!important;background:#fff!important;break-inside:avoid}
-  .kpi{border:1px solid #ddd!important;background:#f9f9f9!important}
-  .kpi-v{color:#000!important}
-  .dash-kpi-grid{grid-template-columns:repeat(4,1fr)!important}
-  .chart-grid,.charts-row{grid-template-columns:repeat(3,1fr)!important}
-  canvas{max-width:100%!important;height:auto!important}
-  .ia-verdict,.ia-sec{border:1px solid #ddd!important;background:#f9f9f9!important;color:#000!important}
-  .ia-sec-label{color:#333!important}
-  .ia-sec-item,.ia-verdict{color:#000!important}
+
+  /* Base */
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  body{background:#0d0f1a!important;color:#e2e4f0!important;font-size:10px;margin:0;padding:0}
+  .tab-pane.on{display:block!important;padding:0!important}
+
+  /* KPI grid — 4 colunas, valores não cortam */
+  .dash-kpi-grid{grid-template-columns:repeat(4,1fr)!important;gap:8px!important;margin-bottom:12px!important}
+  .dash-kpi-card{padding:12px 14px!important;border-radius:10px!important;overflow:visible!important;break-inside:avoid}
+  .dash-kpi-card--sm{padding:10px 12px!important;border-radius:8px!important}
+  .dk-value{font-size:20px!important;white-space:normal!important;word-break:break-word!important;letter-spacing:-.5px!important}
+  .dk-value--sm{font-size:14px!important}
+  .dk-label{font-size:9px!important;letter-spacing:.8px!important}
+  .dk-sub{font-size:9px!important}
+  .dk-icon{font-size:18px!important}
+
+  /* Gráficos — 3 colunas */
+  .chart-grid,.charts-row,.g3{grid-template-columns:repeat(3,1fr)!important;gap:8px!important}
+  .g2{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
+  .card,.chart-card{border-radius:8px!important;padding:10px!important;break-inside:avoid;border:1px solid #2a2d3e!important}
+  .card-title{font-size:10px!important}
+  .card-sub{font-size:8px!important}
+  canvas{max-width:100%!important;height:180px!important}
+
+  /* Tabelas */
+  .ftbl th,.ftbl td{border:1px solid #2a2d3e!important;font-size:8px!important;padding:3px 5px!important}
+  .ftbl thead tr{background:#1a1d2e!important}
+
+  /* Avaliação topbar */
+  .dash-topbar{margin-bottom:10px!important}
+  .dash-aval{font-size:11px!important}
+
+  /* IA no PDF */
+  .ia-result-card{break-before:page;border:1px solid #2a2d3e!important}
+  .ia-verdict,.ia-sec{break-inside:avoid}
+  .ia-sections{grid-template-columns:repeat(2,1fr)!important}
 }
 
 /* ══════════════════════════════════════════════════
@@ -1526,6 +1550,11 @@ input[type=range]::-webkit-slider-thumb{
         style="padding:7px 11px;background:var(--bg3);color:var(--mut);border:1px solid var(--brd);border-radius:8px;font-family:var(--fb);font-size:13px;cursor:pointer;transition:all .18s;opacity:.4"
         onmouseover="if(!this.disabled){this.style.borderColor='var(--acc)';this.style.color='var(--acc)'}" onmouseout="this.style.borderColor='var(--brd)';this.style.color='var(--mut)'">↪</button>
     </div>
+    <button onclick="shareProject()" title="Compartilhar projeto por link"
+      style="padding:7px 13px;background:var(--bg3);color:var(--mut);border:1px solid var(--brd);border-radius:8px;font-family:var(--fb);font-size:13px;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:6px"
+      onmouseover="this.style.borderColor='var(--pur)';this.style.color='var(--pur)'" onmouseout="this.style.borderColor='var(--brd)';this.style.color='var(--mut)'">
+      ⬆ Compartilhar
+    </button>
     <button class="calc-hdr" onclick="pushHistory();updateUI()">⟳ Recalcular</button>
   </div>
 </header>
@@ -2966,6 +2995,7 @@ input[type=range]::-webkit-slider-thumb{
       <div class="field"><label>Responsável técnico</label><input type="text" id="pdf-resp" placeholder="Ex: João Silva, CRECI 12345"></div>
       <div style="display:flex;gap:10px;margin-top:6px">
         <button onclick="generatePDF()" style="flex:1;padding:13px;background:var(--acc);color:#09090f;border:none;border-radius:10px;font-family:var(--ff);font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.4px">🖨 Gerar PDF</button>
+        <button onclick="generatePDFReal()" style="flex:1;padding:13px;background:var(--pur);color:#fff;border:none;border-radius:10px;font-family:var(--ff);font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.4px" title="PDF real com layout controlado — não depende das configurações do browser">✦ PDF Profissional</button>
         <button onclick="closePDFModal()" style="padding:13px 18px;background:var(--bg3);color:var(--mut);border:1px solid var(--brd);border-radius:10px;font-size:13px;cursor:pointer">Cancelar</button>
       </div>
     </div>
@@ -3083,6 +3113,66 @@ input[type=range]::-webkit-slider-thumb{
           <div class="help-box warn">⚠ Requer conexão com a internet e uma chave de API Anthropic configurada no servidor.</div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SHARE MODAL
+══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="shareModal" onclick="if(event.target===this)closeShare()">
+  <div class="modal" style="max-width:520px;width:96vw">
+    <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:var(--ff);font-size:15px;font-weight:800">⬆ Compartilhar Projeto</div>
+      <button class="modal-close" onclick="closeShare()">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:16px">
+
+      <div style="font-size:13px;color:var(--mut);line-height:1.6">
+        Gera um link com todos os dados do projeto codificados na URL. Quem abrir carrega o projeto automaticamente — sem precisar de conta ou arquivo.
+      </div>
+
+      <!-- Link box -->
+      <div id="shareLinkBox" style="display:none;flex-direction:column;gap:8px">
+        <div style="font-size:11px;color:var(--mut);letter-spacing:.5px;text-transform:uppercase">Link gerado</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="shareLinkInput" type="text" readonly
+            style="flex:1;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--tex);font-family:var(--fm);font-size:11px;padding:9px 12px;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          <button onclick="copyShareLink()"
+            style="padding:9px 16px;background:var(--pur);color:#fff;border:none;border-radius:8px;font-family:var(--ff);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .18s"
+            onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter=''">
+            ⎘ Copiar
+          </button>
+        </div>
+        <div id="shareLinkSize" style="font-size:10px;color:var(--mut)"></div>
+      </div>
+
+      <!-- WhatsApp / actions -->
+      <div id="shareActions" style="display:none;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onclick="shareWhatsApp()"
+            style="flex:1;padding:10px;background:rgba(37,211,102,.12);color:#25d366;border:1px solid rgba(37,211,102,.3);border-radius:9px;font-family:var(--ff);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s"
+            onmouseover="this.style.background='rgba(37,211,102,.2)'" onmouseout="this.style.background='rgba(37,211,102,.12)'">
+            WhatsApp
+          </button>
+          <button onclick="shareEmail()"
+            style="flex:1;padding:10px;background:var(--bg3);color:var(--tex);border:1px solid var(--brd);border-radius:9px;font-family:var(--ff);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s"
+            onmouseover="this.style.borderColor='var(--acc)'" onmouseout="this.style.borderColor='var(--brd)'">
+            ✉ E-mail
+          </button>
+        </div>
+        <div style="font-size:10px;color:var(--mut);text-align:center">
+          ⚠ Links longos podem ser cortados por alguns apps. Prefira copiar e colar.
+        </div>
+      </div>
+
+      <!-- Generate button -->
+      <button id="shareGenBtn" onclick="generateShareLink()"
+        style="padding:13px;background:var(--pur);color:#fff;border:none;border-radius:10px;font-family:var(--ff);font-size:14px;font-weight:800;cursor:pointer;transition:all .2s;letter-spacing:.3px"
+        onmouseover="this.style.filter='brightness(1.15)'" onmouseout="this.style.filter=''">
+        ✦ Gerar link de compartilhamento
+      </button>
+
     </div>
   </div>
 </div>
@@ -5308,54 +5398,51 @@ function exportPDF() { showToast('🖨 Abrindo impressão...','ok',2000); setTim
 function generatePDF() {
   closePDFModal();
 
-  // Injeta dados do formulário no relatório
   const emp  = $('pdf-nome-emp')?.value  || '';
   const proj = $('pdf-nome-proj')?.value || currentProjectName || '';
   const data = $('pdf-data')?.value      || '';
   const resp = $('pdf-resp')?.value      || '';
 
-  // Injeta cabeçalho do relatório se tiver campos
-  const headerEl = $('pdf-header-info');
-  if (headerEl) {
-    headerEl.innerHTML =
-      `<div style="margin-bottom:8px;font-size:13px;color:var(--mut)">
-        ${emp ? '<strong>' + emp + '</strong> · ' : ''}
-        ${proj || ''}
-        ${data ? ' · ' + data : ''}
-        ${resp ? '<br><span style="font-size:11px">' + resp + '</span>' : ''}
-      </div>`;
-  }
+  const hi = $('pdf-header-info');
+  if(hi) hi.innerHTML = emp||proj
+    ? `<div style="margin-bottom:6px;font-size:12px;color:var(--mut)">${emp?'<strong style="color:var(--tex)">'+emp+'</strong> · ':''}${proj}${data?' · '+data:''}${resp?'<br><span style="font-size:10px">'+resp+'</span>':''}</div>`
+    : '';
 
-  // Inclui diagnóstico IA no PDF se disponível
   const iaSection = $('ia-pdf-section');
-  if (iaSection) {
-    if (window._iaResultForPDF && iaLastResult) {
-      const d = iaLastResult;
-      const strip = s => s.replace(/<[^>]+>/g, '');
-      iaSection.style.display = 'block';
-      iaSection.innerHTML = `
-        <div style="page-break-before:always;padding:24px 0">
-          <h2 style="font-family:var(--ff);font-size:16px;font-weight:800;margin-bottom:16px;color:var(--tex)">✦ Diagnóstico IA</h2>
-          <p style="font-size:12px;color:var(--tex);line-height:1.8;margin-bottom:16px">${d.veredicto || ''}</p>
-          ${[
-            { label: 'Pontos Fortes', key: 'pontos_fortes', color: '#1D9E75' },
-            { label: 'Atenção',       key: 'atencao',       color: '#854F0B' },
-            { label: 'Riscos',        key: 'riscos',        color: '#A32D2D' },
-            { label: 'Sugestões',     key: 'sugestoes',     color: '#185FA5' },
-          ].map(sec => `
-            <div style="margin-bottom:12px">
-              <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${sec.color};margin-bottom:6px">${sec.label}</div>
-              ${(d[sec.key]||[]).map(i => `<div style="font-size:11px;color:var(--tex);line-height:1.6;padding:4px 0;border-bottom:1px solid var(--brd)">• ${strip(i)}</div>`).join('')}
-            </div>
-          `).join('')}
-        </div>`;
+  if(iaSection){
+    if(window._iaResultForPDF && iaLastResult){
+      const d=iaLastResult;
+      const strip=s=>s.replace(/<[^>]+>/g,'');
+      iaSection.style.display='block';
+      iaSection.innerHTML=`<div style="padding:16px 0">
+        <h2 style="font-family:var(--ff);font-size:14px;font-weight:800;margin-bottom:12px;color:var(--tex)">✦ Diagnóstico IA</h2>
+        <p style="font-size:11px;color:var(--tex);line-height:1.8;margin-bottom:14px">${d.veredicto||''}</p>
+        ${[{l:'Pontos Fortes',k:'pontos_fortes',c:'var(--grn)'},{l:'Atenção',k:'atencao',c:'var(--acc)'},{l:'Riscos',k:'riscos',c:'var(--red)'},{l:'Sugestões',k:'sugestoes',c:'var(--blu)'}]
+          .map(s=>`<div style="margin-bottom:10px"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:${s.c};margin-bottom:5px;letter-spacing:1px">${s.l}</div>
+          ${(d[s.k]||[]).map(i=>`<div style="font-size:10px;color:var(--tex);padding:4px 0;border-bottom:1px solid var(--brd)">• ${strip(i)}</div>`).join('')}</div>`).join('')}
+      </div>`;
     } else {
-      iaSection.style.display = 'none';
+      iaSection.style.display='none';
     }
   }
 
-  showToast('🖨 Preparando PDF...', 'ok', 2000);
-  setTimeout(() => window.print(), 600);
+  // Esconde banner PWA e toast inline antes de imprimir
+  const toHide = ['pwaBanner','toast'];
+  const hidden = [];
+  toHide.forEach(id => {
+    const el = $(id);
+    if(el){ el.style.setProperty('display','none','important'); hidden.push(el); }
+  });
+
+  showToast('🖨 Abrindo impressão...','ok',1500);
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => {
+      hidden.forEach(el => el.style.removeProperty('display'));
+      if(iaSection) iaSection.style.display = 'none';
+      window._iaResultForPDF = null;
+    }, 800);
+  }, 400);
 }
 function exportJSON() {
   const R=calcular();
@@ -5398,9 +5485,21 @@ let supabaseConfig=JSON.parse(localStorage.getItem('lotevia_supabase')||'null');
 function _clearBrokenSupabase(){supabaseConfig=null;localStorage.removeItem('lotevia_supabase');setSyncStatus('offline','Supabase indisponível — usando dados locais');}
 function sbHeaders(){if(!supabaseConfig)return null;return{'apikey':supabaseConfig.key,'Authorization':'Bearer '+supabaseConfig.key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'};}
 function sbUrl(path){return supabaseConfig.url+'/rest/v1/'+path;}
-async function sbGetAll(){const h=sbHeaders();if(!h)return null;try{const r=await fetch(sbUrl('lotevia_projects?order=updated_at.desc'),{headers:h});if(!r.ok){if(r.status===0||r.status>=500)_clearBrokenSupabase();return null;}return await r.json();}catch(e){_clearBrokenSupabase();return null;}}
-async function sbSave(proj){const h=sbHeaders();if(!h)return false;try{const r=await fetch(sbUrl('lotevia_projects'),{method:'POST',headers:h,body:JSON.stringify({id:proj.id,nome:proj.nome,dados:proj,updated_at:proj.updatedAt})});return r.ok;}catch(e){return false;}}
-async function sbDelete(id){const h=sbHeaders();if(!h)return false;try{const r=await fetch(sbUrl(`lotevia_projects?id=eq.${id}`),{method:'DELETE',headers:h});return r.ok;}catch(e){return false;}}
+async function _sbFetch(url,opts={}){
+  // Wrapper silencioso — nunca lança erro no console
+  try{
+    const r=await fetch(url,{...opts,signal:AbortSignal.timeout(8000)});
+    if(!r.ok&&(r.status===0||r.status>=500)){_clearBrokenSupabase();return null;}
+    return r;
+  }catch(e){
+    // Erro de rede/DNS — limpa supabase e falha silenciosamente
+    _clearBrokenSupabase();
+    return null;
+  }
+}
+async function sbGetAll(){const h=sbHeaders();if(!h)return null;const r=await _sbFetch(sbUrl('lotevia_projects?order=updated_at.desc'),{headers:h});if(!r)return null;return r.json().catch(()=>null);}
+async function sbSave(proj){const h=sbHeaders();if(!h)return false;const r=await _sbFetch(sbUrl('lotevia_projects'),{method:'POST',headers:h,body:JSON.stringify({id:proj.id,nome:proj.nome,dados:proj,updated_at:proj.updatedAt})});return r?.ok||false;}
+async function sbDelete(id){const h=sbHeaders();if(!h)return false;const r=await _sbFetch(sbUrl(`lotevia_projects?id=eq.${id}`),{method:'DELETE',headers:h});return r?.ok||false;}
 function setSyncStatus(state,msg){const icons={ok:'✅',syncing:'⏳',offline:'💾',error:'⚠'};const colors={ok:'var(--grn)',syncing:'var(--acc)',offline:'var(--mut)',error:'var(--red)'};const el=$('supabase-status-label');if(el){el.textContent=(icons[state]||'')+' '+msg;el.style.color=colors[state]||'';}}
 function initSupabaseUI(){if(supabaseConfig){$('supabase-url').value=supabaseConfig.url||'';$('supabase-key').value=supabaseConfig.key||'';$('supabase-status-label').textContent='✅ Configurado — '+(supabaseConfig.url||'').replace('https://','').split('.')[0];const b=$('supabase-sync-btn');if(b)b.style.display='';const lb=$('supabase-load-btn');if(lb)lb.style.display='';}}
 function toggleSupabaseConfig(){const p=$('supabaseConfigPanel');p.style.display=p.style.display==='flex'?'none':'flex';if(supabaseConfig){$('supabase-url').value=supabaseConfig.url||'';$('supabase-key').value=supabaseConfig.key||'';}}
@@ -5598,13 +5697,35 @@ function toggleLoginVis(){const input=$('loginInput'),eye=$('loginEye');if(input
 function bootApp(){
   renderPhases();renderObra();updateBaldes();captureBase();updateUI();
   _attachValidation();
-  // Seed initial history state so first Ctrl+Z restores boot state
+  _checkShareLink();
   setTimeout(pushHistory, 500);
   const pdfM=$('pdfModal');if(pdfM)pdfM.addEventListener('click',e=>{if(e.target===pdfM)closePDFModal();});
   const helpM=$('helpOverlay');if(helpM)helpM.addEventListener('click',e=>{if(e.target===helpM)closeHelp();});
   setTimeout(fetchBCBInflation,1500);
   const savedSB=localStorage.getItem('lotevia_supabase');
-  if(savedSB){try{supabaseConfig=JSON.parse(savedSB);const ind=$('sync-indicator');if(ind)ind.style.display='flex';setSyncStatus('syncing','Conectando...');setTimeout(async()=>{const rows=await sbGetAll();if(rows!==null){for(const r of rows){try{await dbSave(r.dados||r);}catch(e){}}setSyncStatus('ok','Sincronizado — '+rows.length+' projeto(s)');}else setSyncStatus('offline','Offline — dados locais');},900);}catch(e){}}
+  if(savedSB){try{
+    const cfg=JSON.parse(savedSB);
+    // Testa conexão antes de ativar — sem spammar console
+    const testUrl=cfg.url+'/rest/v1/lotevia_projects?limit=1';
+    const testHeaders={'apikey':cfg.key,'Authorization':'Bearer '+cfg.key};
+    fetch(testUrl,{headers:testHeaders,signal:AbortSignal.timeout(5000)})
+      .then(r=>{
+        if(r.ok||r.status===406){
+          // Conexão OK — ativa Supabase
+          supabaseConfig=cfg;
+          const ind=$('sync-indicator');if(ind)ind.style.display='flex';
+          setSyncStatus('ok','Supabase conectado');
+          localStorage.setItem('lotevia_supabase',JSON.stringify(cfg));
+        } else {
+          // Resposta de erro — limpa config silenciosamente
+          _clearBrokenSupabase();
+        }
+      })
+      .catch(()=>{
+        // Falha de rede/DNS — limpa config silenciosamente
+        _clearBrokenSupabase();
+      });
+  }catch(e){localStorage.removeItem('lotevia_supabase');}}
   else setSyncStatus('offline','Salvo localmente');
 }
 
@@ -6367,6 +6488,337 @@ function importProjectJSON(event) {
   };
   reader.readAsText(file);
   event.target.value = '';
+}
+
+// ═══════════════════════════════════════════════════════
+// COMPARTILHAMENTO POR LINK
+// ═══════════════════════════════════════════════════════
+let _shareUrl = '';
+
+function shareProject() {
+  $('shareLinkBox').style.display = 'none';
+  $('shareActions').style.display = 'none';
+  $('shareGenBtn').style.display  = 'block';
+  $('shareModal').classList.add('open');
+}
+
+function closeShare() {
+  $('shareModal').classList.remove('open');
+}
+
+function generateShareLink() {
+  const snap = captureSnapshot();
+  const nome = currentProjectName || 'Projeto';
+
+  try {
+    // Serializa e comprime via btoa
+    const json    = JSON.stringify({ nome, snap });
+    const encoded = btoa(unescape(encodeURIComponent(json)));
+
+    // Verifica tamanho — URLs acima de ~8KB podem falhar em alguns apps
+    const url    = location.origin + location.pathname + '?p=' + encoded;
+    const kbSize = (encoded.length / 1024).toFixed(1);
+
+    _shareUrl = url;
+
+    $('shareLinkInput').value = url;
+    $('shareLinkSize').textContent = `Tamanho do link: ${kbSize} KB${+kbSize > 8 ? ' — ⚠ link longo, prefira copiar e colar' : ' — ✓ ok'}`;
+    $('shareLinkBox').style.display   = 'flex';
+    $('shareActions').style.display   = 'flex';
+    $('shareGenBtn').textContent      = '↺ Regenerar link';
+
+  } catch(e) {
+    showToast('⚠ Erro ao gerar link: ' + e.message, 'err', 3000);
+  }
+}
+
+function copyShareLink() {
+  if(!_shareUrl) return;
+  navigator.clipboard.writeText(_shareUrl)
+    .then(() => showToast('⎘ Link copiado!', 'ok', 2000))
+    .catch(() => {
+      // Fallback para browsers sem clipboard API
+      $('shareLinkInput').select();
+      document.execCommand('copy');
+      showToast('⎘ Link copiado!', 'ok', 2000);
+    });
+}
+
+function shareWhatsApp() {
+  if(!_shareUrl) return;
+  const nome = currentProjectName || 'Projeto';
+  const txt  = encodeURIComponent(`*ExpandhVia PRO* — ${nome}\nAbra o link para ver a análise de viabilidade:\n${_shareUrl}`);
+  window.open('https://wa.me/?text=' + txt, '_blank');
+}
+
+function shareEmail() {
+  if(!_shareUrl) return;
+  const nome    = currentProjectName || 'Projeto';
+  const subject = encodeURIComponent(`Análise de Viabilidade — ${nome}`);
+  const body    = encodeURIComponent(`Olá,\n\nSegue o link da análise de viabilidade do projeto "${nome}" gerada no ExpandhVia PRO:\n\n${_shareUrl}\n\nAbra o link para carregar todos os dados automaticamente.`);
+  window.open(`mailto:?subject=${subject}&body=${body}`);
+}
+
+// Ao carregar a página, verifica se tem projeto na URL
+function _checkShareLink() {
+  try {
+    const params  = new URLSearchParams(location.search);
+    const encoded = params.get('p');
+    if(!encoded) return;
+
+    const json = decodeURIComponent(escape(atob(encoded)));
+    const obj  = JSON.parse(json);
+    if(!obj?.snap) return;
+
+    restoreSnapshot(obj.snap);
+    if(obj.nome) { currentProjectName = obj.nome; const h = $('hdr-proj-name'); if(h) h.textContent = obj.nome; }
+    renderPhases(); renderObra(); updateBaldes(); captureBase(); updateUI();
+
+    // Limpa o parâmetro da URL sem recarregar
+    const cleanUrl = location.origin + location.pathname;
+    history.replaceState({}, '', cleanUrl);
+
+    showToast('📂 Projeto carregado via link!', 'ok', 3000);
+  } catch(e) {
+    console.warn('[share] Erro ao carregar projeto do link:', e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// PDF PROFISSIONAL — jsPDF + html2canvas
+// ═══════════════════════════════════════════════════════
+async function generatePDFReal() {
+  closePDFModal();
+
+  const emp  = $('pdf-nome-emp')?.value  || '';
+  const proj = $('pdf-nome-proj')?.value || currentProjectName || 'Projeto';
+  const data = $('pdf-data')?.value      || new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const resp = $('pdf-resp')?.value      || '';
+
+  showToast('⏳ Gerando PDF profissional...', 'ok', 8000);
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+    const PW = 297, PH = 210; // A4 landscape mm
+    const MARGIN = 12;
+    const CONTENT_W = PW - MARGIN * 2;
+
+    // Paleta dark
+    const C = {
+      bg:     '#09090f', card:   '#191b27', brd:    '#23263a',
+      acc:    '#e8c547', grn:    '#2dd4a0', red:    '#f0524f',
+      pur:    '#a78bfa', blu:    '#60a5fa', mut:    '#6b7280',
+      tex:    '#e2e4f0',
+    };
+
+    const R = calcular();
+
+    // ── Helpers ──────────────────────────────────────────
+    const hex2rgb = h => { const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return [r,g,b]; };
+    const setFill  = c => { pdf.setFillColor(...hex2rgb(c)); };
+    const setStroke= c => { pdf.setDrawColor(...hex2rgb(c)); };
+    const setTxt   = c => { pdf.setTextColor(...hex2rgb(c)); };
+    const rect     = (x,y,w,h,c,r=2) => { setFill(c); pdf.roundedRect(x,y,w,h,r,r,'F'); };
+    const line     = (x1,y1,x2,y2,c,lw=0.3) => { setStroke(c); pdf.setLineWidth(lw); pdf.line(x1,y1,x2,y2); };
+
+    const fmt = (v,t='currency') => {
+      if(v==null||isNaN(v)) return '—';
+      if(t==='currency') return v>=1e6?'R$'+(v/1e6).toFixed(2)+'M':v>=1e3?'R$'+(v/1e3).toFixed(0)+'K':'R$'+v.toFixed(0);
+      if(t==='pct') return v.toFixed(1)+'%';
+      if(t==='int') return Math.round(v).toString();
+      return String(v);
+    };
+
+    const addHeader = (pageNum, total) => {
+      // Fundo do header
+      rect(0, 0, PW, 14, C.bg);
+      line(0, 14, PW, 14, C.brd, 0.5);
+      // Logo / nome
+      setFill(C.acc); pdf.roundedRect(MARGIN, 3, 8, 8, 1, 1, 'F');
+      setTxt('#09090f'); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
+      pdf.text('EV', MARGIN+4, 8.5, {align:'center'});
+      setTxt(C.tex); pdf.setFontSize(8); pdf.setFont('helvetica','bold');
+      pdf.text('ExpandhVia PRO', MARGIN+11, 8);
+      if(emp||proj){ setTxt(C.mut); pdf.setFontSize(7); pdf.setFont('helvetica','normal'); pdf.text((emp?emp+' · ':'')+proj, MARGIN+11, 12); }
+      // Data + paginação
+      setTxt(C.mut); pdf.setFontSize(7);
+      pdf.text(data, PW-MARGIN, 8, {align:'right'});
+      pdf.text(`Página ${pageNum} / ${total}`, PW-MARGIN, 12, {align:'right'});
+    };
+
+    const addFooter = () => {
+      line(0, PH-10, PW, PH-10, C.brd, 0.3);
+      setTxt(C.mut); pdf.setFontSize(6); pdf.setFont('helvetica','normal');
+      pdf.text('Gerado por ExpandhVia PRO · Análise financeira para loteamentos · Os valores são projeções e não constituem garantia de resultado.', PW/2, PH-5, {align:'center'});
+      if(resp){ pdf.text('Responsável: '+resp, MARGIN, PH-5); }
+    };
+
+    // ── PÁGINA 1 — KPIs + Gráficos ──────────────────────
+    rect(0, 0, PW, PH, C.bg);
+    addHeader(1, 3);
+    addFooter();
+
+    const kpis = [
+      { label:'VGV BRUTO',      value:fmt(R.vgvBruto),      sub:R.qtdLotes+' lotes',          color:C.acc },
+      { label:'TIR A.A.',       value:fmt(R.tirAa,'pct'),    sub:fmt(R.tirMes*100,'pct')+' a.m.', color:C.grn },
+      { label:'LUCRO LÍQUIDO',  value:fmt(R.lucroLiq),       sub:'Margem '+fmt(R.margemLiq,'pct'), color:C.grn },
+      { label:'VPL',            value:fmt(R.vpl),            sub:'TMA '+($('tma')?.value||'1')+'%/mês', color:R.vpl>=0?C.grn:C.red },
+      { label:'EXPOSIÇÃO MÁX.', value:fmt(Math.abs(R.expMax)),sub:'Mês '+R.expMes,             color:C.red },
+      { label:'BREAK-EVEN',     value:'Mês '+R.breakevenMes, sub:'do projeto',                  color:C.acc },
+      { label:'ROI',            value:fmt(R.roi,'pct'),       sub:'sobre custo total',           color:C.grn },
+      { label:'CUSTO TOTAL',    value:fmt(R.custoTot),        sub:'infra+terreno',               color:C.mut },
+    ];
+
+    const kpiW = CONTENT_W/4 - 2, kpiH = 22, kpiY = 17;
+    kpis.forEach((k, i) => {
+      const col = i % 4, row = Math.floor(i/4);
+      const x = MARGIN + col*(kpiW+2.5), y = kpiY + row*(kpiH+3);
+      rect(x, y, kpiW, kpiH, C.card, 2);
+      // Barra colorida no topo
+      setFill(k.color); pdf.roundedRect(x, y, kpiW, 1.5, 0.5, 0.5, 'F');
+      setTxt(C.mut); pdf.setFontSize(5.5); pdf.setFont('helvetica','bold');
+      pdf.text(k.label, x+4, y+6);
+      setTxt(k.color); pdf.setFontSize(11); pdf.setFont('helvetica','bold');
+      pdf.text(k.value, x+4, y+14);
+      setTxt(C.mut); pdf.setFontSize(5.5); pdf.setFont('helvetica','normal');
+      pdf.text(k.sub||'', x+4, y+19);
+    });
+
+    // Captura gráfico de fluxo de caixa
+    const chartY = kpiY + 2*(kpiH+3) + 4;
+    const chartH = PH - chartY - 14;
+    const charts = [
+      { id:'fluxoChart',    label:'Fluxo de Caixa Acumulado' },
+      { id:'receitaChart',  label:'Receita Mensal por Fase'  },
+      { id:'vgvChart',      label:'Composição do VGV'        },
+    ];
+
+    const chartW = (CONTENT_W - 8) / 3;
+    for(let i=0; i<charts.length; i++){
+      const cv = document.getElementById(charts[i].id);
+      const x  = MARGIN + i*(chartW+4);
+      rect(x, chartY, chartW, chartH, C.card, 2);
+      setTxt(C.mut); pdf.setFontSize(6); pdf.setFont('helvetica','bold');
+      pdf.text(charts[i].label, x+4, chartY+5);
+      if(cv){
+        try{
+          const img = await html2canvas(cv,{backgroundColor:null,scale:2,logging:false});
+          pdf.addImage(img.toDataURL('image/png'), 'PNG', x+2, chartY+7, chartW-4, chartH-10);
+        }catch(_){}
+      }
+    }
+
+    // ── PÁGINA 2 — Tabela de Fluxo de Caixa ─────────────
+    pdf.addPage();
+    rect(0, 0, PW, PH, C.bg);
+    addHeader(2, 3);
+    addFooter();
+
+    setTxt(C.tex); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+    pdf.text('Fluxo de Caixa Mensal', MARGIN, 22);
+
+    const cols = ['Mês','Receita Bruta','Custo Obra','Fluxo Mensal','Fluxo Acumulado','Fase'];
+    const colW = [14, 38, 38, 38, 44, 30];
+    let tx = MARGIN, ty = 27;
+    const rowH = 5.5, fontSize = 6;
+
+    // Header da tabela
+    rect(tx, ty, CONTENT_W, rowH, C.card, 1);
+    pdf.setFontSize(fontSize); pdf.setFont('helvetica','bold');
+    let cx = tx+2;
+    cols.forEach((c,i) => { setTxt(C.acc); pdf.text(c, cx, ty+3.8); cx+=colW[i]; });
+    ty += rowH;
+
+    const maxRows = Math.floor((PH - ty - 14) / rowH);
+    const totalMeses = Math.min(R.totalMeses||60, 120);
+
+    for(let m=1; m<=totalMeses; m++){
+      if(ty+rowH > PH-14) break;
+      const rec = R.rec?.[m]; if(!rec) continue;
+      const rb  = rec.av+rec.cp+rec.lp;
+      const obra= R.obra?.[m]||0;
+      const fl  = R.fluxos?.[m]||0;
+      const ac  = R.fluxoAcum?.[m]||0;
+
+      if(m%2===0) rect(tx, ty, CONTENT_W, rowH, '#12141e', 0.5);
+      cx = tx+2;
+      pdf.setFontSize(fontSize); pdf.setFont('helvetica','normal');
+      const row = [
+        'M'+m,
+        fmt(rb), fmt(obra),
+        fl>=0?'+'+fmt(fl):fmt(fl),
+        ac>=0?'+'+fmt(ac):fmt(ac),
+        rec.fase||'—'
+      ];
+      row.forEach((v,i) => {
+        const color = i===3?(fl>=0?C.grn:C.red):i===4?(ac>=0?C.grn:C.red):C.tex;
+        setTxt(color); pdf.text(v, cx, ty+3.8); cx+=colW[i];
+      });
+      line(tx, ty+rowH, tx+CONTENT_W, ty+rowH, C.brd, 0.15);
+      ty += rowH;
+    }
+
+    // ── PÁGINA 3 — Diagnóstico IA (se disponível) ────────
+    pdf.addPage();
+    rect(0, 0, PW, PH, C.bg);
+    addHeader(3, 3);
+    addFooter();
+
+    setTxt(C.tex); pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+    pdf.text('✦ Diagnóstico IA', MARGIN, 22);
+
+    if(iaLastResult){
+      const d = iaLastResult;
+      const strip = s => s.replace(/<[^>]+>/g,'');
+      let iy = 28;
+
+      // Veredicto
+      rect(MARGIN, iy, CONTENT_W, 18, C.card, 2);
+      setFill(C.pur); pdf.roundedRect(MARGIN, iy, CONTENT_W, 1.5, 0.5,0.5,'F');
+      setTxt(C.tex); pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+      const vLines = pdf.splitTextToSize(strip(d.veredicto||''), CONTENT_W-8);
+      pdf.text(vLines.slice(0,4), MARGIN+4, iy+7);
+      iy += 22;
+
+      const secs = [
+        { key:'pontos_fortes', label:'PONTOS FORTES', color:C.grn },
+        { key:'atencao',       label:'ATENÇÃO',       color:C.acc },
+        { key:'riscos',        label:'RISCOS',        color:C.red },
+        { key:'sugestoes',     label:'SUGESTÕES',     color:C.blu },
+      ];
+
+      const secW = (CONTENT_W-6)/2;
+      secs.forEach((s, si) => {
+        const sx = MARGIN + (si%2)*(secW+6);
+        const sy = iy + Math.floor(si/2)*42;
+        rect(sx, sy, secW, 38, C.card, 2);
+        setFill(s.color); pdf.roundedRect(sx, sy, secW, 1.5, 0.5,0.5,'F');
+        setTxt(s.color); pdf.setFontSize(5.5); pdf.setFont('helvetica','bold');
+        pdf.text(s.label, sx+4, sy+6);
+        setTxt(C.tex); pdf.setFontSize(6); pdf.setFont('helvetica','normal');
+        let itemY = sy+11;
+        (d[s.key]||[]).slice(0,4).forEach(item => {
+          const lines = pdf.splitTextToSize('• '+strip(item), secW-8);
+          pdf.text(lines.slice(0,2), sx+4, itemY);
+          itemY += lines.length<=1?6:10;
+        });
+      });
+    } else {
+      setTxt(C.mut); pdf.setFontSize(9); pdf.setFont('helvetica','normal');
+      pdf.text('Diagnóstico IA não gerado. Acesse a aba "✦ Diagnóstico IA" para gerar a análise.', PW/2, 50, {align:'center'});
+    }
+
+    // Download
+    const nomeArq = (proj||'projeto').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+    pdf.save(`ExpandhVia_${nomeArq}_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.pdf`);
+    showToast('✅ PDF profissional gerado!', 'ok', 3000);
+
+  } catch(e) {
+    console.error('[generatePDFReal]', e);
+    showToast('⚠ Erro ao gerar PDF: ' + e.message, 'err', 4000);
+  }
 }
 
 // SW REGISTRATION

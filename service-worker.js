@@ -1,7 +1,7 @@
 // ExpandhVia PRO — Service Worker v2.1
 // Fix: skip all cross-origin requests (Supabase, Anthropic, BCB, etc.)
 
-const CACHE_NAME = 'expandhvia-v2';
+const CACHE_NAME = 'expandhvia-v4';
 const CACHE_ASSETS = [
   '/',
   '/index.html',
