@@ -6661,27 +6661,24 @@ async function generatePDFReal() {
     };
 
     const addHeader = (pageNum, total) => {
-      // Fundo do header
       rect(0, 0, PW, 14, C.bg);
       line(0, 14, PW, 14, C.brd, 0.5);
-      // Logo / nome
       setFill(C.acc); pdf.roundedRect(MARGIN, 3, 8, 8, 1, 1, 'F');
       setTxt('#09090f'); pdf.setFontSize(7); pdf.setFont('helvetica','bold');
       pdf.text('EV', MARGIN+4, 8.5, {align:'center'});
       setTxt(C.tex); pdf.setFontSize(8); pdf.setFont('helvetica','bold');
       pdf.text('ExpandhVia PRO', MARGIN+11, 8);
-      if(emp||proj){ setTxt(C.mut); pdf.setFontSize(7); pdf.setFont('helvetica','normal'); pdf.text((emp?emp+' · ':'')+proj, MARGIN+11, 12); }
-      // Data + paginação
+      if(emp||proj){ setTxt(C.mut); pdf.setFontSize(7); pdf.setFont('helvetica','normal'); pdf.text(safeStr((emp?emp+' - ':'')+proj), MARGIN+11, 12); }
       setTxt(C.mut); pdf.setFontSize(7);
-      pdf.text(data, PW-MARGIN, 8, {align:'right'});
-      pdf.text(`Página ${pageNum} / ${total}`, PW-MARGIN, 12, {align:'right'});
+      pdf.text(safeStr(data||''), PW-MARGIN, 8, {align:'right'});
+      pdf.text(safeStr('Pagina '+pageNum+' / '+total), PW-MARGIN, 12, {align:'right'});
     };
 
     const addFooter = () => {
       line(0, PH-10, PW, PH-10, C.brd, 0.3);
       setTxt(C.mut); pdf.setFontSize(6); pdf.setFont('helvetica','normal');
-      pdf.text('Gerado por ExpandhVia PRO · Análise financeira para loteamentos · Os valores são projeções e não constituem garantia de resultado.', PW/2, PH-5, {align:'center'});
-      if(resp){ pdf.text('Responsável: '+resp, MARGIN, PH-5); }
+      pdf.text('Gerado por ExpandhVia PRO - Analise financeira para loteamentos - Os valores sao projecoes e nao constituem garantia de resultado.', PW/2, PH-5, {align:'center'});
+      if(resp){ pdf.text(safeStr('Responsavel: '+resp), MARGIN, PH-5); }
     };
 
     // ── PÁGINA 1 — KPIs + Gráficos ──────────────────────
@@ -6689,15 +6686,18 @@ async function generatePDFReal() {
     addHeader(1, 3);
     addFooter();
 
+    // Helper seguro para o jsPDF — garante que o valor é sempre string não-vazia
+    const safeStr = v => (v == null || v === '' || v === undefined) ? '—' : String(v);
+
     const kpis = [
-      { label:'VGV BRUTO',      value:fmt(R.vgvBruto),      sub:R.qtdLotes+' lotes',          color:C.acc },
-      { label:'TIR A.A.',       value:fmt(R.tirAa,'pct'),    sub:fmt(R.tirMes*100,'pct')+' a.m.', color:C.grn },
-      { label:'LUCRO LÍQUIDO',  value:fmt(R.lucroLiq),       sub:'Margem '+fmt(R.margemLiq,'pct'), color:C.grn },
-      { label:'VPL',            value:fmt(R.vpl),            sub:'TMA '+($('tma')?.value||'1')+'%/mês', color:R.vpl>=0?C.grn:C.red },
-      { label:'EXPOSIÇÃO MÁX.', value:fmt(Math.abs(R.expMax)),sub:'Mês '+R.expMes,             color:C.red },
-      { label:'BREAK-EVEN',     value:'Mês '+R.breakevenMes, sub:'do projeto',                  color:C.acc },
-      { label:'ROI',            value:fmt(R.roi,'pct'),       sub:'sobre custo total',           color:C.grn },
-      { label:'CUSTO TOTAL',    value:fmt(R.custoTot),        sub:'infra+terreno',               color:C.mut },
+      { label:'VGV BRUTO',      value:safeStr(fmt(R.vgvBruto)),       sub:safeStr(R.qtdLotes)+' lotes',              color:C.acc },
+      { label:'TIR A.A.',       value:safeStr(fmt(R.tirAa,'pct')),     sub:safeStr(fmt((R.tirMes||0)*100,'pct'))+' a.m.', color:C.grn },
+      { label:'LUCRO LIQUIDO',  value:safeStr(fmt(R.lucroLiq)),        sub:'Margem '+safeStr(fmt(R.margemLiq,'pct')), color:C.grn },
+      { label:'VPL',            value:safeStr(fmt(R.vpl)),             sub:'TMA '+safeStr($('tma')?.value||'1')+'%/mes', color:(R.vpl||0)>=0?C.grn:C.red },
+      { label:'EXPOSICAO MAX.', value:safeStr(fmt(Math.abs(R.expMax||0))), sub:'Mes '+safeStr(R.expMes||0),          color:C.red },
+      { label:'BREAK-EVEN',     value:'Mes '+safeStr(R.breakevenMes||'—'), sub:'do projeto',                          color:C.acc },
+      { label:'ROI',            value:safeStr(fmt(R.roi,'pct')),       sub:'sobre custo total',                       color:C.grn },
+      { label:'CUSTO TOTAL',    value:safeStr(fmt(R.custoTot)),        sub:'infra+terreno',                           color:C.mut },
     ];
 
     const kpiW = CONTENT_W/4 - 2, kpiH = 22, kpiY = 17;
@@ -6775,11 +6775,12 @@ async function generatePDFReal() {
       cx = tx+2;
       pdf.setFontSize(fontSize); pdf.setFont('helvetica','normal');
       const row = [
-        'M'+m,
-        fmt(rb), fmt(obra),
-        fl>=0?'+'+fmt(fl):fmt(fl),
-        ac>=0?'+'+fmt(ac):fmt(ac),
-        rec.fase||'—'
+        safeStr('M'+m),
+        safeStr(fmt(rb)),
+        safeStr(fmt(obra)),
+        safeStr((fl>=0?'+':'')+fmt(fl)),
+        safeStr((ac>=0?'+':'')+fmt(ac)),
+        safeStr(rec.fase||'—')
       ];
       row.forEach((v,i) => {
         const color = i===3?(fl>=0?C.grn:C.red):i===4?(ac>=0?C.grn:C.red):C.tex;
