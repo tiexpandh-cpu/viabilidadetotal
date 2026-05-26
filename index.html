@@ -6660,6 +6660,9 @@ async function generatePDFReal() {
       return String(v);
     };
 
+    // Helper seguro — garante string válida para pdf.text()
+    const safeStr = v => (v == null || v === '' || v === undefined) ? '-' : String(v);
+
     const addHeader = (pageNum, total) => {
       rect(0, 0, PW, 14, C.bg);
       line(0, 14, PW, 14, C.brd, 0.5);
@@ -6685,9 +6688,6 @@ async function generatePDFReal() {
     rect(0, 0, PW, PH, C.bg);
     addHeader(1, 3);
     addFooter();
-
-    // Helper seguro para o jsPDF — garante que o valor é sempre string não-vazia
-    const safeStr = v => (v == null || v === '' || v === undefined) ? '—' : String(v);
 
     const kpis = [
       { label:'VGV BRUTO',      value:safeStr(fmt(R.vgvBruto)),       sub:safeStr(R.qtdLotes)+' lotes',              color:C.acc },
