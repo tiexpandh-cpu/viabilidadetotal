@@ -6200,10 +6200,8 @@ function buildMatrix() {
   const legend = $('matrixLegend');
   if (!wrap) return;
 
-  const R0 = calcular();
-  const snap = captureSnapshot();
+  const R0 = calcular(1, 1);
 
-  // Ranges: VSO ±40%, Preço ±30%
   const vsoRange   = [-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4];
   const precoRange = [-0.3,-0.2,-0.1,0,0.1,0.2,0.3];
 
@@ -6212,16 +6210,19 @@ function buildMatrix() {
     if (metric === 'tirAa' || metric === 'margemLiq') return v.toFixed(1) + '%';
     if (metric === 'lucroLiq' || metric === 'vpl' || metric === 'expMax')
       return v >= 1e6 ? 'R$' + (v/1e6).toFixed(1) + 'M' : 'R$' + (v/1e3).toFixed(0) + 'K';
-    if (metric === 'breakevenMes') return v ? 'M' + v : '—';
+    if (metric === 'breakevenMes') return v ? 'M' + Math.round(v) : '—';
     return v.toFixed(1);
   };
 
   const colorClass = (v, metric) => {
     const base = R0[metric];
-    if (v == null || isNaN(v)) return '';
-    const ratio = base !== 0 ? v / base : 1;
-    if (ratio >= 1.15) return 'matrix-cell-high';
-    if (ratio >= 0.85) return 'matrix-cell-mid';
+    if (v == null || isNaN(v) || base == null) return '';
+    // Para exposição máxima: menor é melhor
+    const ratio = metric === 'expMax'
+      ? (base !== 0 ? base / v : 1)
+      : (base !== 0 ? v / base : 1);
+    if (ratio >= 1.2) return 'matrix-cell-high';
+    if (ratio >= 0.9) return 'matrix-cell-mid';
     return 'matrix-cell-low';
   };
 
@@ -6232,21 +6233,12 @@ function buildMatrix() {
   vsoRange.forEach(v => {
     html += `<tr><td><strong>${v >= 0 ? '+' : ''}${(v*100).toFixed(0)}%</strong></td>`;
     precoRange.forEach(p => {
-      // Temporarily modify snap and recalculate
-      const origPreco = snap.precoM2;
-      const origVso   = snap.vsoMensal;
-      snap.precoM2    = (origPreco || 0) * (1 + p);
-      if (snap.phasesData) snap.phasesData = snap.phasesData.map(f => ({...f, vso: (f.vso||0)*(1+v)}));
-      restoreSnapshot(snap);
-      const R = calcular();
-      snap.precoM2  = origPreco;
-      if (snap.phasesData) snap.phasesData = snap.phasesData.map(f => ({...f, vso: (f.vso||0)/(1+v)}));
-      restoreSnapshot(snap);
-
+      // Passa multiplicadores direto para calcular — sem tocar no DOM
+      const R   = calcular(1 + v, 1 + p);
       const val = R[matrixMetric];
       const cls = colorClass(val, matrixMetric);
       const center = v === 0 && p === 0 ? ' matrix-cell-center' : '';
-      html += `<td class="matrix-cell ${cls}${center}" title="VSO ${v>=0?'+':''}${(v*100).toFixed(0)}% / Preço ${p>=0?'+':''}${(p*100).toFixed(0)}%">${fmt(val, matrixMetric)}</td>`;
+      html += `<td class="matrix-cell ${cls}${center}">${fmt(val, matrixMetric)}</td>`;
     });
     html += '</tr>';
   });
@@ -6254,9 +6246,6 @@ function buildMatrix() {
   html += '</tbody></table>';
   wrap.innerHTML = html;
   if (legend) legend.style.display = 'flex';
-
-  // Restore original
-  restoreSnapshot(snap);
   showToast('✓ Matriz atualizada', 'ok', 1500);
 }
 
